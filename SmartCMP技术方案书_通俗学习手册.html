@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCMP 技术方案书 · 通俗学习手册</title>
+<style>
+:root{
+  --ink:#222220; --muted:#6F6E68; --line:#E6E4DD; --paper:#FBFAF7; --card:#FFF;
+  --blue:#185FA5; --blue-bg:#E6F1FB;
+  --teal:#0F6E56; --teal-bg:#E1F5EE;
+  --amber:#854F0B; --amber-bg:#FAEEDA;
+  --purple:#534AB7; --purple-bg:#EEEDFE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);line-height:1.8;font-size:15px}
+.page{max-width:760px;margin:0 auto;padding:36px 20px 80px}
+h1{font-size:26px;line-height:1.4;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:13.5px;color:var(--muted);margin-bottom:24px}
+.chain b{color:var(--ink)}
+.tools{display:flex;gap:8px;margin-bottom:24px}
+.tools input{flex:1;padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card)}
+.tools input:focus{outline:none;border-color:var(--blue)}
+.tools button{padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:13px;cursor:pointer}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+summary{padding:15px 18px;cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:#FCFBF8}
+summary .num{font-size:12px;color:var(--muted);background:#F2F0EA;border-radius:5px;padding:1px 7px;flex-shrink:0}
+summary .t{font-weight:600;font-size:15.5px}
+summary .one{font-size:12.5px;color:var(--muted);flex:1;min-width:140px}
+.bd{padding:2px 18px 18px;border-top:1px solid var(--line)}
+.say{margin:14px 0;padding:12px 14px;border-radius:8px;font-size:14px}
+.say.blue{background:var(--blue-bg);color:#0C447C}
+.say b{font-weight:600}
+.pt{margin:10px 0 0;font-size:14px}
+.pt .k{font-weight:600}
+.pt .e{color:var(--muted)}
+.pm{margin-top:14px;padding:10px 14px;background:var(--amber-bg);border-radius:8px;font-size:13.5px;color:#633806}
+.pm b{font-weight:600}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:4px;margin-right:6px;vertical-align:1px}
+.tag.core{background:var(--purple-bg);color:var(--purple)}
+.tag.sale{background:var(--teal-bg);color:var(--teal)}
+.gloss{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:30px}
+.gloss h2{font-size:16px;margin-bottom:10px}
+.gloss table{width:100%;border-collapse:collapse;font-size:13.5px}
+.gloss td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.gloss td:first-child{font-family:Menlo,Consolas,monospace;font-size:12.5px;color:var(--blue);white-space:nowrap;width:170px}
+footer{color:#A6A49C;font-size:12px;margin-top:36px;text-align:center}
+.hide{display:none!important}
+@media print{.tools{display:none}details{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>SmartCMP 技术方案书<br>通俗学习手册</h1>
+<p class="sub">基于《CloudChef CMP Technical Solution Proposal》（英文，11 章 162 页）整理。每章用大白话讲清"这章在卖什么能力"，附 PM 视角提醒和中英术语对照。</p>
+
+<div class="chain">
+<b>一句话读懂整本方案书：</b>SmartCMP 把企业散落在各家云上的资源统一管起来——用<b>组件和蓝图</b>定义"能交付什么"（第2章），对接 <b>20+ 种云</b>把资源接进来（第3章），让用户<b>自助申请、自动审批、自动部署</b>（第4章），再配上 <b>CI/CD 流水线</b>（第5章）、<b>算账分钱</b>（第6章）、<b>安全合规检查</b>（第7章）、<b>对接企业已有系统</b>（第8章），最后讲平台自身的<b>定制能力</b>（第9章）和<b>高可用部署规格</b>（第10章）。
+</div>
+
+<div class="tools">
+<input id="q" type="search" placeholder="搜索关键词，如：蓝图、配额、HA、Terraform…">
+<button onclick="ta(true)">全部展开</button>
+<button onclick="ta(false)">全部收起</button>
+</div>
+
+<details open><summary><span class="num">第1章</span><span class="t">方案总览</span><span class="one">平台是什么、由哪7块能力组成</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>这章是"开场白"——企业又有私有云又有公有云还有容器，各管各的太乱，SmartCMP 就是把它们装进一个统一控制台的平台。</div>
+<p class="pt"><span class="k">7 块核心能力</span>　<span class="e">①云对接 ②IaC 编排 ③自助服务 ④多租户管理 ⑤统一监控告警 ⑥FinOps 成本管理 ⑦开放集成。这 7 块正好对应后面各章——记住这个目录，整本书的骨架就有了。</span></p>
+<p class="pt"><span class="k">关键主张</span>　<span class="e">"cloud agnostic（云无关）"——用户不用关心资源跑在哪朵云上，平台按策略自动选。这是整本方案反复强调的卖点。</span></p>
+<div class="pm"><b>PM 提醒：</b>给客户做汇报时，这 7 块能力就是你的标准话术框架。客户问"你们平台能干嘛"，按这 7 条说，不会漏。</div>
+</div></details>
+
+<details><summary><span class="num">第2章</span><span class="t">编排引擎（IaC）</span><span class="one">组件 + 蓝图 = 平台的发动机</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>组件像乐高积木（一台虚机、一个数据库都是一块积木），蓝图就是拼装图纸（三台虚机 + MySQL 主从拼成一套环境）。客户要什么环境，画好图纸，以后一键复制。</div>
+<p class="pt"><span class="k">组件分 4 类</span>　<span class="e">IaaS 组件（虚机/网络/存储）、PaaS 组件（云上的 RDS、对象存储）、软件组件（MySQL、Redis 等装在机器里的软件）、集成组件（把 ITSM、备份系统也包装成"积木"参与编排）。</span></p>
+<p class="pt"><span class="k">蓝图不绑定云</span>　<span class="e">设计图纸时不指定部署到哪朵云，用户申请时平台按资源池策略自动匹配——这就是"云无关"的具体实现。</span></p>
+<p class="pt"><span class="k">兼容主流编排器</span>　<span class="e">能调用 Terraform、Helm、Heat——客户已有的 TF 脚本和 Helm Chart 可以直接复用，号称"编排器的编排器"。</span></p>
+<p class="pt"><span class="k">集群弹性伸缩</span>　<span class="e">Day0 设计蓝图 → Day1 一键建集群 → Day2 按策略自动扩容/缩容（手动、定时、告警触发三种方式）。</span></p>
+<div class="pm"><b>PM 提醒：</b>客户问"我们已经写了一堆 Terraform，迁过来要重写吗？"——答案是不用，平台可以直接调 TF 脚本。这是打消客户顾虑的关键话术。</div>
+</div></details>
+
+<details><summary><span class="num">第3章</span><span class="t">多云对接</span><span class="one">支持20+种云，篇幅最长但套路统一</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>这章像一本"插座兼容清单"——华为、阿里、AWS、Azure、VMware、K8s……每种云一小节，格式都一样：怎么连（填账号密码/AK SK）+ 支持哪些资源（一张功能清单）。不用背，用到哪查哪。</div>
+<p class="pt"><span class="k">资源池三件套</span>　<span class="e">配额管控（CPU/内存/存储/虚机数都能限）、超分比例（物理资源可以"卖超"，提高利用率）、标签智能调度（给池打标签如 env:production，申请时按标签自动匹配最优池）。</span></p>
+<p class="pt"><span class="k">Cloud Gateway 云网关</span>　<span class="e">客户的网络隔离区（如 DMZ、专属 VPC）平台够不着怎么办？部署一个轻量网关做"中转站"，不用对外开端口。多个网关按标签匹配资源池。这是金融类客户必问的能力。</span></p>
+<p class="pt"><span class="k">跨云 IP 池</span>　<span class="e">多朵云用同一网段容易 IP 冲突，平台统一管 IP 的规划、分配、回收和冲突检测。</span></p>
+<p class="pt"><span class="k">华为系覆盖最全</span>　<span class="e">DCS、FusionCompute、华为云、Huawei Cloud Stack 四种都支持——这和你们 GSB-TKC 项目的华为技术栈直接相关。</span></p>
+<div class="pm"><b>PM 提醒：</b>售前阶段客户最常问"你们支持 XX 云吗，支持到什么程度"。答案都在各小节的 function list 里——回答前先查清单，不要凭印象承诺。</div>
+</div></details>
+
+<details><summary><span class="num">第4章</span><span class="t">多租户与自助服务</span><span class="one">全书最厚，平台的日常使用面</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>这章讲"人怎么用这个平台"——部门是租户、互相隔离，用户在服务目录里像逛淘宝一样下单，审批流自动跑，资源自动交付，之后的运维监控也在这一章。</div>
+<p class="pt"><span class="k">租户两道闸</span>　<span class="e">资源配额（最多用多少 CPU/内存）+ 预算配额（最多花多少钱，花完可以"禁止新申请"或"自动关机"）。一道管量、一道管钱。</span></p>
+<p class="pt"><span class="k">工作流 4 种模式</span>　<span class="e">串行、并行（HR 和 IT 同时审）、条件分支（金额大走严格流程）、状态机（工单从"打开"到"处理中"到"解决"）。拖拽设计，不用写代码。</span></p>
+<p class="pt"><span class="k">工单服务带 AI</span>　<span class="e">服务团队 + 知识库 + LLM 聊天机器人 + SLA 管理——平台自带轻量 ITSM，还有 AI 客服回答常见问题。</span></p>
+<p class="pt"><span class="k">运维与监控</span>　<span class="e">应用栈整体启停、虚机批量操作、租期回收（lease 到期关机 → 保留期过后删除）、健康热力图、告警自愈——和初始化配置手册第 7-8 章是同一套东西的售前版描述。</span></p>
+<div class="pm"><b>PM 提醒：</b>这章和你之前学的《初始化配置手册》第 2、4、6、7、8 章高度重叠——方案书讲"有什么能力"，配置手册讲"怎么配出来"。两份对照看，售前话术和落地操作就都有了。</div>
+</div></details>
+
+<details><summary><span class="num">第5章</span><span class="t">DevOps 与 DevSecOps</span><span class="one">流水线：从发代码到上线全自动</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>开发提交代码 → 自动构建 → 自动测试 → 自动部署，整条流水线在平台里可视化拖拽搭出来。DevSecOps 就是在流水线里加几道"安检门"——代码扫描、漏洞检查不过关就不让上线。</div>
+<p class="pt"><span class="k">流水线能力</span>　<span class="e">可视化低代码设计、串行/并行/条件执行、四种触发方式（手动、定时、Webhook、Jenkins 触发）、统一看板监控执行状态。</span></p>
+<p class="pt"><span class="k">安全左移</span>　<span class="e">SAST（扫源码）、SCA（扫开源依赖）、DAST（扫运行中应用）都可以嵌进流水线；上生产前可以加"安全团队人工审批"这道闸；密钥通过 Vault 等 PAM 系统在运行时取，不落在代码里。</span></p>
+<div class="pm"><b>PM 提醒：</b>这是个加分项而非必选项——大多数 CMP 项目首期不含 DevOps 范围。客户如果聊到这章，先确认是否在 SOW 里，别让"顺便做个流水线"变成隐形范围蔓延。</div>
+</div></details>
+
+<details><summary><span class="num">第6章</span><span class="t">FinOps 计量计费</span><span class="one">算清楚每一分钱花在哪</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>私有云本来没有"账单"，这章给它定价（CPU 每核每小时多少钱），公有云的真实账单也同步进来，最后按部门/项目分摊，谁花了多少一目了然——甚至能让租户像手机话费一样充值付费。</div>
+<p class="pt"><span class="k">三步算账</span>　<span class="e">①定价（私有云按单价模型，公有云同步真实账单）→ ②分摊（多级成本中心，按策略分到部门）→ ③呈现（明细、报表、大屏，支持成本校准和归属调整）。</span></p>
+<p class="pt"><span class="k">成本优化建议</span>　<span class="e">平台内置优化策略（闲置虚机、僵尸存储、漂浮 IP），给出修复建议并支持一键修复。</span></p>
+<p class="pt"><span class="k">真金白银模式</span>　<span class="e">支持预付费（先充值后消费）和后付费（月底出账单结算），可对接支付网关在线充值，支持多币种和税率配置——这已经是"内部云服务商"的玩法了。</span></p>
+<div class="pm"><b>PM 提醒：</b>注意区分客户要的是 showback（只展示，不真扣钱）还是 chargeback（真结算）。后者涉及财务流程和支付对接，复杂度完全不同——需求调研时必须钉死这一点。</div>
+</div></details>
+
+<details><summary><span class="num">第7章</span><span class="t">安全合规治理</span><span class="one">自动巡检 + 一键修复</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>平台像个不知疲倦的安全巡检员——持续扫描有没有违规配置（比如对公网敞开的存储桶、没打补丁的虚机），发现问题告警，能修的一键修，整个过程留痕可审计。</div>
+<p class="pt"><span class="k">五个环节</span>　<span class="e">策略管理（JS 自定义规则）→ 自动扫描 → 实时监控告警 → 修复工作流（自动或引导式）→ 审计报告。内置虚机/RDS/安全组/存储的合规检查策略。</span></p>
+<p class="pt"><span class="k">策略作用域灵活</span>　<span class="e">可以按租户、按 Owner、按云账户、按资源池分别设不同的合规标准。</span></p>
+<div class="pm"><b>PM 提醒：</b>方案提到 GDPR、HIPAA、PCI-DSS——但国内项目客户真正关心的是等保。售前时把平台的密码策略、MFA、审计日志、IP 黑白名单能力对着等保条款讲，比念国际标准名词管用。</div>
+</div></details>
+
+<details><summary><span class="num">第8章</span><span class="t">第三方系统集成</span><span class="one">和客户已有的IT系统打通</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>企业里早就有一堆系统——ITSM 工单、堡垒机、备份、CMDB、监控……CMP 不是要取代它们，而是把它们包装成"集成组件"接进编排流程，形成自动化闭环。比如：申请虚机 → ServiceNow 自动开工单 → 部署完自动注册到堡垒机和备份系统。</div>
+<p class="pt"><span class="k">覆盖的系统类型</span>　<span class="e">ITSM/ServiceNow、第三方监控和日志、备份容灾、堡垒机、安全平台、IPAM、终端管理、Git 版本控制——共 10 类。</span></p>
+<p class="pt"><span class="k">集成原理统一</span>　<span class="e">都走"可扩展集成框架"：把第三方系统封装成服务集成组件，暴露操作和属性，然后就能在蓝图和工作流里编排——和第 2 章的组件机制是同一套。</span></p>
+<div class="pm"><b>PM 提醒：</b>每一项集成都是实打实的工作量。客户说"顺便和我们的堡垒机对接一下"时，要按集成开发评估工时和报价，写进 SOW，不要当成配置项白送。</div>
+</div></details>
+
+<details><summary><span class="num">第9章</span><span class="t">平台自身功能</span><span class="one">换皮、加锁、发通知、看报表</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>这章是平台的"周边配套"：界面换成客户的 Logo 和配色（白标）、登录加 MFA 双因素、操作全程留审计日志、通知走邮件/短信/钉钉/飞书、内置资源和容量分析报表，还有完整的 API/CLI 给客户自己写自动化。</div>
+<p class="pt"><span class="k">多语言</span>　<span class="e">界面支持多语言切换——国际项目（比如 OCBC 这类）的硬需求。</span></p>
+<p class="pt"><span class="k">容量分析</span>　<span class="e">资源池容量趋势分析，提前预警"池快满了"——给管理层看的运营数据。</span></p>
+<div class="pm"><b>PM 提醒：</b>UI 白标是性价比之王——半天工作量，客户感知极强。项目早期就做掉，之后每次演示客户看到的都是"自己的平台"。</div>
+</div></details>
+
+<details><summary><span class="num">第10章</span><span class="t">部署架构</span><span class="one">平台自己怎么装、要多少机器</span></summary><div class="bd">
+<div class="say blue"><b>大白话：</b>前面都在讲平台管别人，这章讲平台自己怎么部署才不宕机。核心思路：CMP 主节点 + 各机房的网关节点，主节点坏了自动切换（HA 高可用）。</div>
+<p class="pt"><span class="k">两档 HA 规格</span>　<span class="e">标准版：3 节点（每台 16C80G/1TB），管 5000 个资源以内；大规模版：10 节点（含独立 MySQL 集群、NFS、监控节点），管 5000–50000 个资源。客户已有 LB 和 RDS 时可以省掉对应节点。</span></p>
+<p class="pt"><span class="k">跨 AZ 容灾</span>　<span class="e">两个可用区 + 一个仲裁节点（arbiter）：某个 AZ 整体挂掉时，仲裁节点帮活着的一边凑成多数派选出新主，避免"脑裂"。前提：要有独立负载均衡（如 F5）和跨 AZ 复制的 NAS。</span></p>
+<p class="pt"><span class="k">网络硬指标</span>　<span class="e">集群间带宽 ≥100G、延迟 ≤5ms——这两个数字是跨 AZ 部署的硬门槛，达不到就别承诺。</span></p>
+<div class="pm"><b>PM 提醒：</b>这章是你做项目资源规划的直接依据：找客户要几台什么规格的虚机、什么网络条件，照着表格开清单就行。GSB 项目的 HA 集群部署就对应这一章。</div>
+</div></details>
+
+<div class="gloss">
+<h2>高频英文术语速查（开会前过一遍）</h2>
+<table>
+<tr><td>CMP</td><td>Cloud Management Platform，云管理平台——产品本体</td></tr>
+<tr><td>IaC</td><td>Infrastructure as Code，基础设施即代码——用代码/模型定义资源，而不是手工点</td></tr>
+<tr><td>TOSCA</td><td>云应用拓扑编排标准——蓝图的底层语言规范</td></tr>
+<tr><td>blueprint / component</td><td>蓝图 / 组件——拼装图纸和乐高积木</td></tr>
+<tr><td>cloud agnostic</td><td>云无关——不绑定特定云厂商，按策略自动选云</td></tr>
+<tr><td>multi-tenancy</td><td>多租户——部门间资源和数据互相隔离</td></tr>
+<tr><td>RBAC</td><td>Role-Based Access Control，基于角色的权限控制</td></tr>
+<tr><td>quota / overcommit</td><td>配额 / 超分——限制用量 / 物理资源"卖超"</td></tr>
+<tr><td>provisioning / Day-2</td><td>资源开通交付 / 交付后的日常运维变更</td></tr>
+<tr><td>lease</td><td>租期——到期自动关机回收</td></tr>
+<tr><td>FinOps / showback / chargeback</td><td>云财务管理 / 成本展示 / 真实结算扣费</td></tr>
+<tr><td>cost center / allocation</td><td>成本中心 / 成本分摊</td></tr>
+<tr><td>SAST / DAST / SCA</td><td>静态代码扫描 / 动态应用扫描 / 开源依赖扫描——DevSecOps 三件套</td></tr>
+<tr><td>shift-left</td><td>安全左移——把安全检查提前到开发阶段</td></tr>
+<tr><td>HA / failover / arbiter</td><td>高可用 / 故障自动切换 / 仲裁节点（防脑裂）</td></tr>
+<tr><td>Quorum</td><td>多数派——集群选主时需要过半数节点投票</td></tr>
+<tr><td>single pane of glass</td><td>"一块玻璃看全部"——统一管理界面的惯用说法</td></tr>
+<tr><td>out of the box</td><td>开箱即用——内置能力，不用额外开发</td></tr>
+</table>
+</div>
+
+<footer>整理自《CloudChef CMP Technical Solution Proposal》（2026-04）· 学习笔记 · 能力描述以官方文档和实际版本为准</footer>
+</div>
+<script>
+function ta(o){document.querySelectorAll('details').forEach(d=>d.open=o)}
+document.getElementById('q').addEventListener('input',function(){
+  const v=this.value.trim().toLowerCase();
+  document.querySelectorAll('details').forEach(d=>{
+    const hit=!v||d.textContent.toLowerCase().includes(v);
+    d.classList.toggle('hide',!hit);
+    if(v&&hit)d.open=true;
+  });
+});
+</script>
+</body>
+</html>

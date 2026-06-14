@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCMP 初始化配置学习手册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1F1E1C; --muted:#6B6A64; --faint:#9C9A92;
+  --paper:#FAFAF7; --card:#FFFFFF; --line:#E5E3DC;
+  --p1:#534AB7; --p1-bg:#EEEDFE; --p1-dk:#3C3489;
+  --p2:#0F6E56; --p2-bg:#E1F5EE; --p2-dk:#085041;
+  --p3:#854F0B; --p3-bg:#FAEEDA; --p3-dk:#633806;
+  --serif:"Noto Serif SC","Songti SC",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.75;font-size:15px}
+.wrap{display:flex;max-width:1200px;margin:0 auto}
+nav{width:248px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;padding:32px 16px 32px 24px;border-right:1px solid var(--line)}
+nav .brand{font-family:var(--serif);font-weight:600;font-size:17px;margin-bottom:4px}
+nav .sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+nav .ph{font-size:11px;letter-spacing:.12em;color:var(--faint);margin:18px 0 6px;display:flex;align-items:center;gap:6px}
+nav .ph::before{content:"";width:8px;height:8px;border-radius:2px;display:inline-block}
+nav .ph.f1::before{background:var(--p1)} nav .ph.f2::before{background:var(--p2)} nav .ph.f3::before{background:var(--p3)}
+nav a{display:block;padding:5px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:13.5px;margin:1px 0}
+nav a:hover{background:#F0EEE7}
+nav a .n{color:var(--faint);font-size:12px;margin-right:6px}
+main{flex:1;min-width:0;padding:40px 40px 80px}
+header.hero{margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:28px}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.4;margin-bottom:10px}
+.hero p{color:var(--muted);max-width:620px}
+.chain{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px;font-size:12.5px}
+.chain span{padding:4px 10px;border-radius:99px;white-space:nowrap}
+.chain .c1{background:var(--p1-bg);color:var(--p1-dk)}
+.chain .c2{background:var(--p2-bg);color:var(--p2-dk)}
+.chain .c3{background:var(--p3-bg);color:var(--p3-dk)}
+.chain .ar{color:var(--faint);padding:4px 0}
+.tools{display:flex;gap:10px;margin:26px 0 30px;flex-wrap:wrap}
+.tools input{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--card)}
+.tools input:focus{outline:none;border-color:var(--p1)}
+.tools button{padding:9px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:13.5px;cursor:pointer;font-family:var(--sans)}
+.tools button:hover{background:#F0EEE7}
+section.mod{margin-bottom:44px}
+.mod-head{padding:16px 20px;border-radius:12px;margin-bottom:14px}
+.mod-head .tag{font-size:11px;letter-spacing:.12em;opacity:.75}
+.mod-head h2{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.5;margin:2px 0 4px}
+.mod-head p{font-size:13.5px;opacity:.85}
+.m1 .mod-head{background:var(--p1-bg);color:var(--p1-dk)}
+.m2 .mod-head{background:var(--p2-bg);color:var(--p2-dk)}
+.m3 .mod-head{background:var(--p3-bg);color:var(--p3-dk)}
+details.item{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+details.item summary{padding:14px 18px;cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px}
+details.item summary::-webkit-details-marker{display:none}
+details.item summary:hover{background:#FCFBF8}
+.item summary .t{font-weight:600;font-size:15px}
+.item summary .d{font-size:12.5px;color:var(--muted);flex:1}
+.item summary .chev{color:var(--faint);font-size:12px;transition:transform .2s}
+details[open] summary .chev{transform:rotate(90deg)}
+.body{padding:4px 18px 18px;border-top:1px solid var(--line)}
+.blk{margin-top:14px}
+.blk .lbl{display:inline-block;font-size:11px;letter-spacing:.1em;padding:2px 9px;border-radius:4px;margin-bottom:6px}
+.lbl.a{background:var(--p1-bg);color:var(--p1-dk)}
+.lbl.b{background:var(--p2-bg);color:var(--p2-dk)}
+.lbl.c{background:var(--p3-bg);color:var(--p3-dk)}
+.blk p{font-size:14px;color:#3A3935}
+.path{font-size:12.5px;color:var(--muted);background:#F4F2EC;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.m2 .lbl.a{background:var(--p2-bg);color:var(--p2-dk)}
+.m3 .lbl.a{background:var(--p3-bg);color:var(--p3-dk)}
+ul.tight{padding-left:20px;font-size:14px;color:#3A3935}
+ul.tight li{margin:3px 0}
+.fig{margin:14px 0 4px;border:1px solid var(--line);border-radius:10px;padding:16px 14px 10px;background:#FCFBF8}
+.fig svg{display:block;width:100%;height:auto;font-family:var(--sans)}
+.figcap{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+footer{color:var(--faint);font-size:12.5px;border-top:1px solid var(--line);padding-top:20px;margin-top:50px}
+@media(max-width:920px){
+  nav{display:none}
+  main{padding:24px 18px 60px}
+  .hero h1{font-size:24px}
+}
+@media print{
+  nav,.tools{display:none} main{padding:0}
+  details.item{break-inside:avoid}
+}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand">SmartCMP 学习手册</div>
+  <div class="sub">初始化配置 · 系统性学习</div>
+  <div class="ph f1">配置阶段</div>
+  <a href="#m2"><span class="n">02</span>设立组织架构</a>
+  <a href="#m3"><span class="n">03</span>对接基础设施</a>
+  <a href="#m4"><span class="n">04</span>设计服务目录</a>
+  <a href="#m5"><span class="n">05</span>计量计费</a>
+  <div class="ph f2">使用阶段</div>
+  <a href="#m6"><span class="n">06</span>资源和服务申请</a>
+  <a href="#m7"><span class="n">07</span>云资源运维变更</a>
+  <a href="#m8"><span class="n">08</span>监控告警可观测</a>
+  <div class="ph f3">治理与系统</div>
+  <a href="#m9"><span class="n">09</span>分析仪表盘报表</a>
+  <a href="#m10"><span class="n">10</span>平台系统配置</a>
+</nav>
+<main>
+<header class="hero">
+  <h1>骞云 SmartCMP 平台<br>初始化配置学习手册</h1>
+  <p>基于《骞云SmartCMP平台初始化配置手册》整理。九大模块、四十余个配置项，每项按「手册要点 → 场景理解 → PM 视角」三层展开，适用于各类 CMP 交付项目的系统性学习与速查。</p>
+  <div class="chain">
+    <span class="c1">组织架构</span><span class="ar">→</span><span class="c1">基础设施</span><span class="ar">→</span><span class="c1">服务目录</span><span class="ar">→</span><span class="c1">计费</span><span class="ar">→</span><span class="c2">申请</span><span class="ar">→</span><span class="c2">运维</span><span class="ar">→</span><span class="c2">监控</span><span class="ar">→</span><span class="c3">分析 · 系统</span>
+  </div>
+</header>
+<div class="tools">
+  <input id="q" type="search" placeholder="搜索配置项，如：审批、IP、LDAP、价格模型…">
+  <button onclick="toggleAll(true)">展开全部</button>
+  <button onclick="toggleAll(false)">收起全部</button>
+</div>
+
+<section class="mod m1" id="m2">
+<div class="mod-head"><div class="tag">配置阶段 · 第 2 章</div><h2>设立组织架构</h2><p>多租户体系的地基。业务组、角色、用户三件套决定"资源归谁、谁能干什么"，是后续一切配置的挂载点。</p></div>
+
+<details class="item"><summary><span class="t">业务组（租户）</span><span class="d">多级组织结构，租户隔离的基本单位</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>业务组是平台的租户单位，支持多级嵌套，可对应子公司、部门、项目组或外部机构。业务组之间天然租户隔离。每个业务组可挂五样东西：命名规范、审批流程、授权配置、资源配额、预算配额，且遵循"业务组级配置覆盖平台级默认"的逻辑。配置入口 <span class="path">组织架构 » 业务组</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>业务组结构要映射客户的真实组织——哪些部门用平台、隔离粒度到哪一级、各业务组管理员是谁，这些只有客户能拍板。它也是后续配置中最难返工的一项：资源池分给谁、审批对谁生效、费用归属到哪，答案全是"按业务组"。地基歪了，上层全要重做。</p></div><div class="fig"><svg viewBox="0 0 640 330" role="img" aria-label="业务组多级层级与租户隔离示意图">
+<rect x="20" y="16" width="600" height="230" rx="14" fill="#F4F2EC" stroke="#D3D1C7"/>
+<text x="320" y="42" text-anchor="middle" font-size="13" font-weight="600" fill="#5F5E5A">SmartCMP 平台（平台管理员：全局默认配置）</text>
+<rect x="50" y="60" width="260" height="160" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="180" y="84" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">一级业务组 A</text>
+<text x="180" y="101" text-anchor="middle" font-size="11" fill="#534AB7">对应子公司 / 大部门</text>
+<rect x="65" y="115" width="110" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="120" y="133" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">子业务组 A1</text>
+<text x="120" y="149" text-anchor="middle" font-size="11" fill="#0F6E56">部门 / 项目组</text>
+<rect x="185" y="115" width="110" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="240" y="133" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">子业务组 A2</text>
+<text x="240" y="149" text-anchor="middle" font-size="11" fill="#0F6E56">部门 / 项目组</text>
+<text x="180" y="192" text-anchor="middle" font-size="11" fill="#9C9A92">支持继续嵌套更多层级…</text>
+<rect x="330" y="60" width="260" height="160" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="460" y="84" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">一级业务组 B</text>
+<text x="460" y="101" text-anchor="middle" font-size="11" fill="#534AB7">对应另一子公司 / 外部机构</text>
+<rect x="345" y="115" width="110" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="400" y="133" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">子业务组 B1</text>
+<text x="400" y="149" text-anchor="middle" font-size="11" fill="#0F6E56">部门 / 项目组</text>
+<rect x="465" y="115" width="110" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="520" y="133" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">子业务组 B2</text>
+<text x="520" y="149" text-anchor="middle" font-size="11" fill="#0F6E56">部门 / 项目组</text>
+<text x="460" y="192" text-anchor="middle" font-size="11" fill="#9C9A92">支持继续嵌套更多层级…</text>
+<line x1="320" y1="66" x2="320" y2="214" stroke="#B4B2A9" stroke-dasharray="4 4"/>
+<line x1="320" y1="246" x2="320" y2="266" stroke="#B4B2A9"/>
+<rect x="20" y="268" width="600" height="48" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.75"/>
+<text x="320" y="288" text-anchor="middle" font-size="12.5" font-weight="600" fill="#633806">每个业务组可单独挂载配置（覆盖全局默认）</text>
+<text x="320" y="305" text-anchor="middle" font-size="11" fill="#854F0B">命名规范 · 审批流程 · 授权配置 · 资源配额 · 预算配额</text>
+</svg><div class="figcap">业务组 A 与 B 之间租户隔离（虚线）：数据、资源、费用互不可见</div></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>需求调研时把组织架构清单列为高优先级输入项。客户信息迟迟不到位时，可推动"最简方案先行"：先建一个一级业务组 + 一个子业务组跑通流程，后续再扩展——业务组可增建，但项目里程碑等不起。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">定义角色</span><span class="d">平台级 / 业务组级 / 应用系统级三层权限</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>角色权限包括功能访问授权和数据授权两类。为支持租户隔离，角色分三个层级：平台级、业务组（租户）级、应用系统级。业务组级角色的用户只能按角色权限访问所在业务组的数据。配置入口 <span class="path">组织架构 » 角色</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>典型分工：平台管理员管全局配置和基础设施，业务组管理员管本租户的用户和审批，普通用户只能申请和管自己的资源。三层结构让"集团 IT 管平台、各部门管自己"成为可能，这是大多数企业客户的真实诉求。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>需求阶段产出一张「角色-权限矩阵」让客户签字确认，UAT 时逐行验证。权限争议（谁能删谁的机器）是验收阶段的高频纠纷点，前置确认能省大量扯皮。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">创建用户</span><span class="d">本地用户 + LDAP / AD / SSO 对接</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>用户可以是本地用户，也可来自 LDAP/AD 或 SSO（OAuth2、OIDC、CAS、SAML2）。LDAP 支持自动同步全部用户或手动导入指定用户；SSO 用户首次登录后自动创建。对接入口 <span class="path">平台管理 » 系统配置 » 用户登录类型</span>，关联角色和业务组在 <span class="path">组织架构 » 用户</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>企业客户几乎都有 AD 域或统一认证平台，"用域账号登录 CMP"基本是默认要求。这通常是项目里第一个真正的系统集成点——需要客户提供 LDAP 地址、绑定账号、网络连通性，任何一项缺失都会卡住。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>把认证方式确认放进需求问卷第一批问题，LDAP/SSO 对接参数列成 checklist 发给客户。这类"等客户给信息"的事项 lead time 长，越早启动越好。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">创建应用系统</span><span class="d">按应用视角管理资源，可选维度</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>应用系统用于管理一个应用下的所有资源，可从属于一个或多个业务组，可关联自己的用户和管理员。它是可选维度：可在 <span class="path">平台管理 » 界面配置 » 服务申请</span> 全局关闭申请页的应用系统选择，也可在单个服务卡片里关闭。配置入口 <span class="path">组织架构 » 应用系统</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>业务组是"组织维度"，应用系统是"应用维度"——同一个电商系统的资源可能横跨多个部门，按应用归集才看得清全貌。运维团队按系统值班、费用按系统分摊的客户会重度依赖这个概念。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>调研时问一句"贵司是按部门管资源还是按系统管资源"。如果客户没有应用维度管理习惯，初期直接关闭该字段，减少用户申请时的困惑，也缩小培训范围。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">定义命名规范</span><span class="d">工单、主机名、IP 等名称自动生成</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>命名规则可引用业务组名/简称、应用系统名/简称、所有者、时间戳、云资源标签等字段，可加后缀保证唯一性。适用对象包括工单标题、应用栈名、云主机显示名、Windows/Linux 主机名、IP 地址等。全局默认在 <span class="path">平台管理 » 系统配置 » 组织架构</span> 配置，业务组可在 <span class="path">业务组 » 规范</span> 覆盖。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>大企业几乎都有主机命名强规范（如「机房-环境-系统-序号」），而且常常是写进运维制度的硬要求。平台自动按规范生成名称，既消灭了手工命名的随意性，也让资源在 CMDB、监控系统里可识别可检索。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>找客户要现行的《命名规范制度》文档，逐字段核对平台能否表达。表达不了的写法（比如特殊流水号规则）尽早暴露为差异项，避免上线后才发现"名字不对"这种观感很差的问题。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">变更授权配置</span><span class="d">运维操作权限模板 + 双因素认证 + 审批</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>授权模板规定资源授权后可执行哪些运维操作、是否启用双因素认证、是否走审批流程。应用栈操作和云资源操作分别配置（云资源可按云平台类型 × 组件 × 操作 × 角色细化）。模板可设为全局默认，也可被特定业务组覆盖。配置入口 <span class="path">组织架构 » 授权配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这是"谁能重启、谁能删机器"的控制点。常见设计：普通用户可启停自己的机器，但删除、调整配置要审批；生产环境的危险操作叠加双因素认证。它和角色是互补关系——角色管功能入口，授权配置管具体资源上的具体动作。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>把「操作 × 角色 × 是否审批」整理成一张矩阵表和客户逐格确认。客户安全部门往往会在这里提出额外要求，提前过一遍能避免上线前的安全评审返工。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">配置云资源回收策略</span><span class="d">租期到期关机、保留期到期删除、回收站</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>三个关键概念：租用时间到期 → 资源自动关机但保留数据；保留时间到期 → 部署被删除；最大可延期次数限制续租。手动回收分两种：卸除（平台和云上都删）、删除管理信息（仅平台侧删，云上保留）。回收站可找回已删资源。配置入口 <span class="path">平台管理 » 系统配置 » 系统参数</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>开发测试环境"申请了就忘"是企业资源浪费的最大来源，租期机制就是治这个的。"先关机再删除"的两段式设计给了用户反悔窗口；"卸除 vs 删除管理信息"的区分则在纳管存量资源时格外重要——别把客户云上的老资源真删了。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>回收策略务必让客户书面确认后再启用，"平台自动删了我的机器"是最容易升级成事故的投诉。保守做法：初期只开租期关机和回收站，自动删除等运行平稳后再放开。</p></div>
+</div></details>
+</section>
+
+<section class="mod m1" id="m3">
+<div class="mod-head"><div class="tag">配置阶段 · 第 3 章</div><h2>对接基础设施和纳管存量资源</h2><p>把客户的多云环境接进平台。云账户是入口，资源池是切割与分配的手段，模板和规格屏蔽多云差异。</p></div>
+
+<details class="item"><summary><span class="t">对接云账户</span><span class="d">连接私有云/公有云，项目第一个技术里程碑</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>添加云平台访问信息：地址、用户名密码或 AK/SK。可设置只读模式（平台侧禁止对该云做增删改操作），可启停云平台监控（通过云 API 采集监控数据）。配置入口 <span class="path">基础设施 » 云账户</span>，具体步骤参考各云平台对接手册。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这是平台从"空壳"到"有料"的转折点，通常也是项目第一个可演示的技术里程碑。它的前置依赖全在客户侧：管理控制台地址、足够权限的账号、平台服务器到云控制器的网络连通。只读模式很适合纳管初期——先看清楚，再放开操作。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>云账户凭证是典型的"客户依赖项阻塞"——列入风险清单、写明需求日期、在周报里持续追踪。凭证到手当天就该完成对接验证，把这个里程碑做成项目早期的确定性进展。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">创建资源池</span><span class="d">切割云资源，分配给业务组并设配额</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>资源池把一个云平台的资源（集群、可用区、计算、存储、网络）映射为一个或多个逻辑池，可自由切割并设配额。一个资源池可分配给一个、多个或全部业务组。配置入口 <span class="path">基础设施 » 资源池</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>资源池是"业务组用哪片资源"的物理答案。常见切法：按环境切（开发池/测试池/生产池），按部门切（某部门独占某集群），或混合。配额则把"部门 A 最多用 200 核"这类管理诉求落到平台上。</p></div><div class="fig"><svg viewBox="0 0 640 250" role="img" aria-label="云平台资源切割为资源池并分配给业务组的映射关系">
+<defs><marker id="arwB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+<text x="105" y="26" text-anchor="middle" font-size="11" fill="#9C9A92">云平台资源</text>
+<text x="325" y="26" text-anchor="middle" font-size="11" fill="#9C9A92">逻辑资源池（可设配额）</text>
+<text x="540" y="26" text-anchor="middle" font-size="11" fill="#9C9A92">分配给业务组</text>
+<rect x="30" y="70" width="150" height="120" rx="10" fill="#F4F2EC" stroke="#B4B2A9"/>
+<text x="105" y="100" text-anchor="middle" font-size="13" font-weight="600" fill="#444441">云平台</text>
+<text x="105" y="122" text-anchor="middle" font-size="11" fill="#5F5E5A">集群 / 可用区</text>
+<text x="105" y="139" text-anchor="middle" font-size="11" fill="#5F5E5A">计算 / 存储 / 网络</text>
+<rect x="250" y="40" width="150" height="44" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="325" y="58" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">资源池 1 · 生产</text>
+<text x="325" y="74" text-anchor="middle" font-size="11" fill="#534AB7">配额：200C / 400G</text>
+<rect x="250" y="104" width="150" height="44" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="325" y="122" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">资源池 2 · 测试</text>
+<text x="325" y="138" text-anchor="middle" font-size="11" fill="#534AB7">配额：100C / 200G</text>
+<rect x="250" y="168" width="150" height="44" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="325" y="186" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">资源池 3 · 开发</text>
+<text x="325" y="202" text-anchor="middle" font-size="11" fill="#534AB7">配额：80C / 160G</text>
+<rect x="470" y="62" width="140" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="540" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">业务组 A</text>
+<text x="540" y="101" text-anchor="middle" font-size="11" fill="#0F6E56">用池 1、池 2</text>
+<rect x="470" y="146" width="140" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="540" y="168" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">业务组 B</text>
+<text x="540" y="185" text-anchor="middle" font-size="11" fill="#0F6E56">用池 2、池 3</text>
+<line x1="180" y1="110" x2="244" y2="62" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="180" y1="130" x2="244" y2="126" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="180" y1="150" x2="244" y2="190" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="400" y1="62" x2="464" y2="84" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="400" y1="126" x2="464" y2="92" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="400" y1="130" x2="464" y2="166" stroke="#888780" marker-end="url(#arwB)"/>
+<line x1="400" y1="190" x2="464" y2="176" stroke="#888780" marker-end="url(#arwB)"/>
+</svg><div class="figcap">一个资源池可分配给多个业务组，一个业务组也可使用多个资源池</div></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>资源池设计是业务组设计的下游——组织架构没定，池就切不准。两者建议在同一轮需求调研里一起确认，画一张「业务组 × 资源池 × 配额」的映射表作为配置依据和验收依据。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">存量资源纳管</span><span class="d">自动发现存量资源，导入并定时同步</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>平台对接云账户后自动发现云上资源，管理员可将资源纳管到指定业务组或应用系统。支持设置定时同步策略，自动把云上资源变化同步进平台，也可手动触发。操作入口 <span class="path">基础设施 » 资源池管理 » 云资源</span> 与 <span class="path">同步策略</span> 标签页。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>几乎没有客户是"从零开始"的——云上早就跑着成百上千台存量机器。纳管的技术动作很简单，难的是业务归属：每台机器属于哪个部门、owner 是谁，这份映射关系只存在于客户的 Excel 或某个老运维的脑子里。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>提前让客户准备「存量资源-归属部门-负责人」对照表，这是纳管工作量的决定因素。归属不清的资源可先统一挂到一个"待认领"业务组，避免纳管工作被无限期阻塞。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">配置 IP 地址管理</span><span class="d">IP 池化、自动分配回收、冲突检测</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>配置 IP 地址段（类型、CIDR、网关、范围），实现 IP 自动分配与回收，支持 IPv4/IPv6、冲突检测、用量趋势和使用日志。IP 池需关联云平台网络后才能在申请时生效（<span class="path">基础设施 » 资源池 » 网络资源</span> 中选择）。注意这是可选功能：用云平台自带分配或 DHCP 则无需配置。入口 <span class="path">基础设施 » IP地址管理</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>传统企业大量存在"Excel 管 IP"的现状——网络组手工记录哪段给哪个系统，错漏冲突常有。平台接管后申请虚机自动拿 IP 并注入 OS，是最能让运维团队直观感到"省事了"的功能之一。前提是客户给的网段信息必须准确。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>先确认客户的 IP 分配现状（DHCP？云平台分配？手工台账？），再决定是否启用。启用的话向网络团队索要 VLAN/网段/网关对照表，并明确"平台接管后原有台账如何处置"，避免双轨并行各记各的。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">配置虚拟机模板</span><span class="d">统一 OS 类型，一个模板对应多云镜像</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>虚拟机模板统一各云的操作系统类型，关联各云镜像及配置（OS 版本、管理员密码、CloudInit）。镜像匹配支持两种模式：基于规则自动选择可用镜像（可加关键词过滤），或管理员指定特定镜像。用户申请时只选 OS 类型和版本，平台按策略匹配实际镜像。入口 <span class="path">基础设施 » 镜像和规格 » 虚拟机模板</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>多云环境里同一个"CentOS 7.9"在不同云上是不同镜像 ID，模板层把这个差异藏掉了。对有标准化镜像（golden image）管理的客户，用"管理员指定镜像"模式更可控；镜像管理松散的客户则适合规则匹配 + 过滤。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>收集客户各云的标准镜像清单和初始密码/密钥策略。CloudInit 是否可用直接影响主机名注入、初始用户创建等自动化能力，镜像里没装 cloud-init 的要提前发现。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">配置计算规格</span><span class="d">统一 CPU/内存规格，屏蔽多云差异</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>与虚机模板同理：平台抽象统一计算规格，关联各云实际规格类型。支持"使用云平台所有可用规格"（可按 CPU/内存条件过滤）或"指定特定云平台规格"两种模式。用户申请时只选通用规格，平台按策略匹配。入口 <span class="path">基础设施 » 镜像和规格 » 计算规格</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>实践中常做成"T 恤码"：小（2C4G）、中（4C8G）、大（8C16G），用户不用理解各云规格族的命名玄学。规格收敛得越少，资源标准化程度越高，计费模型也越好做。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>推动客户定一份「标准规格目录」并控制数量。规格目录同时是后面价格模型的计价对象，两件事一起设计能少走返工。</p></div>
+</div></details>
+</section>
+
+<section class="mod m1" id="m4">
+<div class="mod-head"><div class="tag">配置阶段 · 第 4 章</div><h2>设计服务目录</h2><p>自助服务的核心。IaC 模型定义"能交付什么"，工作流定义"怎么审批和执行"，服务卡片是用户最终看到的产品界面。</p></div>
+
+<details class="item"><summary><span class="t">组件与蓝图（IaC）</span><span class="d">组件是基本单元，蓝图编排完整应用</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>组件是 IaC 的基本单元，采用面向对象设计（支持继承），定义包括基本信息、接口操作、脚本、依赖关系；单组件可发布为云资源服务。蓝图是多资源及依赖关系的完整规范，基于 TOSCA 标准可视化拖拽设计，可发布为云应用服务。平台内置 MySQL、Redis、PostgreSQL、Oracle 等软件蓝图，多基于 Ansible/Shell 实现。入口 <span class="path">模型设计 » 组件 / 蓝图</span>。</p></div><div class="fig"><svg viewBox="0 0 640 160" role="img" aria-label="从组件蓝图到服务卡片再到用户申请的链路">
+<defs><marker id="arwD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+<rect x="20" y="46" width="140" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="90" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">组件</text>
+<text x="90" y="86" text-anchor="middle" font-size="11" fill="#534AB7">IaC 基本单元</text>
+<rect x="175" y="46" width="140" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="245" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">蓝图</text>
+<text x="245" y="86" text-anchor="middle" font-size="11" fill="#534AB7">多组件编排（TOSCA）</text>
+<rect x="330" y="46" width="140" height="56" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.75"/>
+<text x="400" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#633806">服务卡片</text>
+<text x="400" y="86" text-anchor="middle" font-size="11" fill="#854F0B">配置参数并发布</text>
+<rect x="485" y="46" width="135" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="552" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#085041">用户申请</text>
+<text x="552" y="86" text-anchor="middle" font-size="11" fill="#0F6E56">服务目录自助下单</text>
+<line x1="160" y1="74" x2="169" y2="74" stroke="#888780" marker-end="url(#arwD)"/>
+<line x1="315" y1="74" x2="324" y2="74" stroke="#888780" marker-end="url(#arwD)"/>
+<line x1="470" y1="74" x2="479" y2="74" stroke="#888780" marker-end="url(#arwD)"/>
+<path d="M90 102 L90 124 L394 124 L394 108" fill="none" stroke="#888780" stroke-dasharray="4 4" marker-end="url(#arwD)"/>
+<text x="320" y="146" text-anchor="middle" font-size="11" fill="#9C9A92">单组件也可跳过蓝图，直接发布为云资源服务（虚线）</text>
+</svg><div class="figcap">服务目录的完整链路：模型设计 → 服务配置 → 用户消费</div></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>理解层级：组件 ≈ 一种资源类型的定义（云主机、负载均衡），蓝图 ≈ 把多个组件连成一个应用拓扑（三台虚机 + MySQL 主从）。客户要"一键交付一套标准环境"时，做的就是蓝图。内置组件不够用时可复制系统组件改造或自建。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>关键技术前提：蓝图里用 Ansible/Shell 装软件时，平台服务器到目标 VM 必须网络连通。这在网络分区严格的客户环境里是常见暗坑，方案设计阶段就要和客户网络团队确认。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">工作流</span><span class="d">审批子流程、工单流程、云服务部署流程</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>平台内嵌 BPM 工作流引擎，可视化拖拽设计。三类流程：审批子流程（多级/平行/条件审批，可定义按用户或角色审批、审批时可否改配置、每级可改字段，支持第三方系统审批集成）；工单服务流程（人工步骤 + 自动化步骤，支持转派/升级/接单）；云服务申请流程（审批 + 自动化部署步骤）。审批流程可在三个层面配置且优先级递增：系统级 < 业务组级 < 服务目录级。入口 <span class="path">IT服务管理 » 服务设计 » 流程配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>审批是企业交付中谈判最多的功能，没有之一。"申请虚机要不要领导审、审几级、生产环境是不是更严"每个客户答案都不同。三级覆盖机制（服务目录级最优先）让"默认走业务组审批、个别特殊服务单独定义"成为可能。</p></div><div class="fig"><svg viewBox="0 0 640 150" role="img" aria-label="审批流程三级配置覆盖优先级">
+<defs><marker id="arwC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+<text x="320" y="28" text-anchor="middle" font-size="11" fill="#9C9A92">生效优先级从左到右递增，右侧配置覆盖左侧</text>
+<rect x="30" y="48" width="170" height="64" rx="8" fill="#F4F2EC" stroke="#B4B2A9"/>
+<text x="115" y="74" text-anchor="middle" font-size="12.5" font-weight="600" fill="#444441">系统级审批</text>
+<text x="115" y="92" text-anchor="middle" font-size="11" fill="#5F5E5A">全平台默认兜底</text>
+<rect x="245" y="48" width="170" height="64" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="330" y="74" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3C3489">业务组级审批</text>
+<text x="330" y="92" text-anchor="middle" font-size="11" fill="#534AB7">覆盖系统级配置</text>
+<rect x="460" y="48" width="160" height="64" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.75"/>
+<text x="540" y="74" text-anchor="middle" font-size="12.5" font-weight="600" fill="#633806">服务目录级审批</text>
+<text x="540" y="92" text-anchor="middle" font-size="11" fill="#854F0B">优先级最高</text>
+<line x1="200" y1="80" x2="239" y2="80" stroke="#888780" marker-end="url(#arwC)"/>
+<line x1="415" y1="80" x2="454" y2="80" stroke="#888780" marker-end="url(#arwC)"/>
+</svg><div class="figcap">实践模式：系统级设默认 → 特殊业务组单独覆盖 → 个别特殊服务再单独定义</div></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>把审批矩阵（服务类型 × 业务组 × 审批级数 × 审批人）做成文档让客户签字。审批规则的口头需求极易反复，签字版是后期变更谈判的基线。第三方审批集成（如对接客户 OA）属于集成开发，注意识别为范围项。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">表单配置</span><span class="d">视图模式拖拽设计 / 专家模式 JS 开发</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>表单是用户与系统交互的界面，两种设计方式：视图模式（可视化拖拽，输入型 + 布局型组件，部分组件可用平台数据做下拉数据源）和专家模式（JavaScript 开发复杂交互）。三大使用场景：服务申请时收集参数、流程步骤中收集信息、为平台对象配置扩展属性。入口 <span class="path">平台管理 » 表单配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>典型用途是在申请时收集业务信息：成本中心、项目编号、用途说明——这些字段后续流入审批展示和费用归集。视图模式覆盖八成需求；剩下两成（字段联动、调外部接口校验）才需要专家模式写 JS。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>表单字段清单本质上是需求采集的一部分，和审批矩阵一起确认。注意专家模式 = 定制开发工作量，评估工时时单独列项，别被一句"加个联动而已"模糊掉。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">服务配置和发布</span><span class="d">云资源 / 云应用 / 工单三类服务卡片</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>三类服务：云资源服务（单组件，如云主机、对象存储、RDS）、云应用服务（蓝图，完整应用环境）、工单服务（人工 + 可选自动化）。服务卡片配置含九个标签页：概况（图标/授权/SLA/租期）、组件/节点配置（参数默认值、可见性、可改性——调整服务卡片的关键步骤）、输入输出、表单、流程、审批、服务条款、申请字段、JS 扩展脚本。服务必须发布后才能被申请；预置卡片可取消发布。目录配置和服务分组用于分类展示。入口 <span class="path">IT服务管理 » 服务设计 » 服务配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>服务卡片是用户唯一直接接触的"产品界面"——平台底层配置得再好，用户的体验完全由卡片设计决定。节点配置标签页里"哪些参数给默认值、哪些隐藏、哪些可改"的取舍，就是在做产品设计。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>把「首批上线服务清单」（通常 5-10 个卡片）作为正式交付物管理：每个卡片的参数设计、审批、表单逐一过需求。上线后的演示和培训也围绕这批卡片展开。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">简化服务申请参数</span><span class="d">管理员预设，用户少填，审批可补全</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>为让研发等非运维用户无需理解存储、网络等系统参数，管理员可在服务配置时预设资源环境（按标签自动选池或限定可选范围）、存储（直选类型或标签自动匹配）、网络（支持为网络配别名）、软件包位置等；所有参数可设是否允许用户查看/修改；授权的管理员还能在审批环节替用户完善参数。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这是平台"好不好用"的分水岭。理想状态：开发人员申请一台虚机只填名称、规格、用途三个字段，VLAN 选哪个、存储用哪种全部由预设策略兜底。申请门槛越低，平台采用率越高——而采用率是客户评价项目成败的隐性指标。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>把"普通用户三五个字段完成申请"做成 UAT 的明确验收场景，演示时让客户的真实终端用户（而非 IT 管理员）上手操作，效果最有说服力。</p></div>
+</div></details>
+</section>
+
+<section class="mod m1" id="m5">
+<div class="mod-head"><div class="tag">配置阶段 · 第 5 章</div><h2>计量计费配置</h2><p>资源费用化，让使用可追踪、成本可透明。费用类型定维度，价格模型定规则，明细与分析面向不同角色开放。</p></div>
+
+<details class="item"><summary><span class="t">费用类型</span><span class="d">CPU、内存、存储等统一计费维度</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>费用类型是分类和标识计费项目的维度标签（CPU、内存、存储、网络带宽、软件许可证等）。平台统一抽象各种计费类型，可将各云平台不同的费用数据匹配成统一类型，便于跨云统一分析。入口 <span class="path">计量计费 » 费用模型 » 费用类型</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>多云环境下各云账单口径不一，统一费用类型相当于建立一套"会计科目"，让阿里云的带宽费和私有云的带宽费能放进同一张报表比较。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>费用类型清单和客户财务的成本科目对齐一次，后面报表才不会被挑战"口径不对"。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">价格模型</span><span class="d">计价单位 + 计费周期 + 定价规则 + 生效范围</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>四要素：计价单位（CPU 核数、内存、存储、带宽、时长，均来自 IaC 模型属性）；计费周期（小时/天/周/月）；定价规则（单价、阶梯定价、折扣）；生效范围（按云平台、资源池、租户或服务目录绑定）。支持按需与包年包月、变更操作询价、公有云二次计费。定价规则用于申请时预估费用，资源创建后按规则生成费用数据。入口 <span class="path">计量计费 » 费用模型 » 价格模型</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>私有云本没有"账单"，价格模型让它有了——这是向部门做成本分摊（chargeback）或成本展示（showback）的前提。"公有云二次计费"则支持在云厂商账单基础上加价或打折后再分摊给内部部门。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>定价数据来自客户财务/采购，lead time 极长，启动会上就要提需求。同时确认到底做 showback（只展示）还是 chargeback（真扣款结算）——后者涉及财务流程对接，复杂度完全不同，是范围蔓延的高发区。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">查看费用明细</span><span class="d">按天聚合，可校准、可改归属</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>资源创建后平台按价格模型生成费用数据，按天聚合展示。支持按业务组、项目、所有者、时间、云平台、标签、费用类型、成本中心等维度筛选。管理员可校准费用、更改费用归属。可见性按角色分层：普通用户看自己，业务组/应用系统管理员看本组，平台管理员看全局。入口 <span class="path">计量计费 » 费用数据 » 费用明细</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>"校准"和"改归属"是给现实留的口子——总有资源挂错部门、价格配错的时候，财务对账时需要人工修正能力而不是推倒重来。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>培训客户管理员掌握费用校准操作，这是上线后费用争议的自助解决通道，能挡掉一批升级到你这里的工单。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">费用分析和可视化</span><span class="d">仪表盘、报表、下钻、费用预测</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>多维度统计各业务组、项目、云平台的花费，内置费用仪表盘（总览、占比、趋势，支持下钻）和费用统计报表（按业务组、云资源、项目、成本中心）。支持基于历史账单和规划的费用预测。不同用户只看到有权限的数据。入口 <span class="path">计量计费 » 费用仪表盘</span> 与 <span class="path">智能分析 » 可视化分析 » 报表</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>费用可视化是平台对客户管理层最有展示价值的部分——"哪个部门花了多少钱"一张图说清，往往是汇报场合的明星功能。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>注意范围控制：计费常被客户越聊越深（对接财务系统、自动开票…）。SOW 里只有基础计费的话，把"费用数据展示"和"财务系统集成"的边界划清楚，超出部分走变更流程。</p></div>
+</div></details>
+</section>
+
+<section class="mod m2" id="m6">
+<div class="mod-head"><div class="tag">使用阶段 · 第 6 章</div><h2>资源和服务申请</h2><p>配置阶段的成果在这里兑现：用户通过服务目录自助申请，管理员也可代申请。四条申请路径覆盖不同场景。</p></div>
+
+<details class="item"><summary><span class="t">云资源服务申请</span><span class="d">申请单个云主机或云资源</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>流程：在 <span class="path">服务申请 » 服务目录</span> 选卡片 → 指定业务组和所有者（普通用户给自己申请，管理员可代申请）→ 填部署名称、数量、订阅方式 → 填服务设计时配置的资源参数（环境、存储、规格、网络等）→ 提交后自动部署，有审批则等审批。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这是平台最高频的使用路径。用户实际要填多少参数，完全取决于第 4 章服务卡片的参数预设质量——前面配置偷的懒，这里都会变成用户的抱怨。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>申请全流程（提交 → 审批 → 自动部署 → 拿到机器）是 UAT 测试用例的主干和演示脚本的主线，端到端跑通的时间点应作为项目内部里程碑管理。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">云应用服务申请</span><span class="d">申请完整应用环境（如 MySQL 集群）</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>申请「云应用部署」类型服务，与云资源申请流程类似，区别是需要为应用内每个节点填写参数（资源池、私有网络、虚机配置、存储大小、节点数量等），提交后平台按蓝图自动部署整套环境。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>价值在"整套"：过去搭一套 MySQL 主从要装系统、装软件、配主从、调参数走几天流程，现在一次申请自动交付。这是向客户讲"自动化价值"时最直观的故事。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>云应用部署涉及软件安装，失败率天然高于裸虚机交付（网络、软件源、脚本兼容性都可能出问题），测试阶段给它留足排错时间。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">工单服务申请</span><span class="d">需人工介入的请求，按流程流转</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>工单服务覆盖需要管理员介入的请求：帮助请求、事件处理、调整配额等。用户在服务目录申请已发布的工单服务，填写内容（可查看关联知识库），提交后按预设流程步骤流转，有审批走审批。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>工单是自动化覆盖不到的部分的兜底，也让平台具备轻量 ITSM 能力。"自动化服务流程"类工单还能做到审批通过后自动执行（如自动创建 IP 池），介于纯人工和纯自动之间。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>如果客户已有 ITSM 系统（ServiceNow、蓝凌等），先聊清楚工单边界：哪些走平台工单、哪些走存量系统、要不要集成——这是个容易被忽略到上线前才爆出来的问题。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">购物车批量申请</span><span class="d">多个申请合并提交，统一审批执行</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>申请时可将请求加入批量申请单，在购物车页面（右上方批处理图标）查看、增删，统一提交后统一审批和执行。管理员可在 <span class="path">平台管理 » 界面管理 » 服务申请</span> 配置购物车交互细节：展示字段、子申请展示模式、最大提交数量、申请单流程和表单。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>典型场景是新项目上线：一次要 10 台应用服务器 + 2 台数据库 + 若干中间件，逐个申请逐个审批会把审批人逼疯。购物车让审批人一次看到完整的资源需求全貌再做决策。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>演示给客户的项目管理型用户看，这个功能对"按项目批量要资源"的组织特别有共鸣。</p></div>
+</div></details>
+</section>
+
+<section class="mod m2" id="m7">
+<div class="mod-head"><div class="tag">使用阶段 · 第 7 章</div><h2>云资源运维和变更</h2><p>资源交付后的日常管理。操作权限由第 2 章的角色与授权配置决定：平台管理员管全局，租户管理员管本组，用户管自己。</p></div>
+
+<details class="item"><summary><span class="t">应用栈运维</span><span class="d">拓扑可视化，整栈按依赖顺序启停</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>通过服务目录申请完整应用后生成应用栈实例。部署过程中拓扑图以颜色区分已部署/待部署组件并配文字进度；列表展示部署状态、所有者、到期时间、费用等；运行时拓扑图形化展示监控与告警信息。支持整栈启动（按节点依赖顺序）、停止（逆序）、卸除。入口 <span class="path">我的资源 » 应用栈</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>"按依赖顺序整栈启停"是蓝图编排价值的延续——先起数据库再起应用、关机时反过来，不需要运维人员记住顺序手工执行。拓扑图也是排障时的第一视角。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>应用栈的到期时间、费用展示和第 2 章回收策略、第 5 章计费联动，演示时串起来讲，能体现平台"全生命周期管理"的完整性。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">云主机运维管理</span><span class="d">批量启停、执行脚本、调整配置</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>查看权限范围内所有已纳管云主机，点名称看详情，支持选择一台或多台批量操作：启动、停止、重启、执行脚本、调整配置、修改所有者等。入口 <span class="path">我的资源 » 云主机</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>批量执行脚本是运维团队的效率利器（百台机器统一改配置、打补丁），但也是高危操作——这正是第 2 章授权配置里给危险操作加审批和双因素认证的原因。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>UAT 时专门验证权限边界：用普通用户账号尝试操作别人的机器，确认被正确拦截。"越权操作"是安全评审必查项。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">云资源运维管理</span><span class="d">计算/存储/网络/数据库统一变更</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>查看权限范围内所有已纳管云资源（计算、存储、网络、缓存、关系型数据库等），执行平台支持的变更和运维操作，查看监控情况与费用数据。入口 <span class="path">我的资源 » 云资源</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这是"多云统一运维"的落地页面：不用分别登录各家云控制台，在一个界面管所有资源。对管理多套异构环境的运维团队，这是日常使用时长最高的页面之一。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>注意不同云平台支持的运维操作集合不同（取决于对接深度），向客户演示前先核实目标云上哪些操作可用，避免现场翻车。</p></div>
+</div></details>
+</section>
+
+<section class="mod m2" id="m8">
+<div class="mod-head"><div class="tag">使用阶段 · 第 8 章</div><h2>监控告警和可观测</h2><p>采集是基础，展示和告警是产出。支持云平台 API、Prometheus Exporter、SNMP 三类采集方式，覆盖云资源、软件和物理设备。</p></div>
+
+<details class="item"><summary><span class="t">监控数据采集</span><span class="d">云 API / Prometheus Exporter / SNMP 三路</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>按资源类型分三路：云资源（云主机、RDS 等）支持云平台 API 采集（在云账户上启用）和安装代理采集，兼容 Prometheus 生态各类 Exporter；软件资源通过监控代理（如 MySQL Exporter）；物理设备、网络设备走 SNMP。采集数据用于监控展示和告警定义。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>API 采集（agentless）零侵入但指标有限（通常没有内存/磁盘内部视图）；装 agent 指标全但要进客户机器。实践中常见组合：存量资源先 API 采集兜底，重点系统再装 agent 深度监控。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>装 agent 在很多客户那里需要安全审批（往生产机器装东西），流程可能很长。监控方案设计时把"哪些资源装 agent"列清单提前走客户内部审批。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">监控仪表盘</span><span class="d">资源详情页 + 统一监控大盘</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>监控数据采集后，在云主机/云资源详情页的监控标签页查看单资源数据，也可在监控仪表盘、监控大盘、告警概览等统一界面可视化展示。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>详情页监控服务于"查某台机器的问题"，统一大盘服务于"值班时盯全局"——两个视角对应运维的两种工作模式。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>如果客户已有 Zabbix/Prometheus 监控体系，定位好平台监控的角色（替代还是补充），避免"又一套监控"的抵触情绪。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">资源健康状态图</span><span class="d">颜色编码一眼看清资源健康度</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>按性能指标状态用颜色展示云主机、容器等资源健康度：浅绿到深绿到红色，颜色越深资源使用越多；未配监控显示灰色。点击资源可看详细信息和健康指数。入口 <span class="path">可观测 » 资源状态图</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>一屏热力图扫一眼就知道哪里在冒烟，特别适合放在运维大厅或值班屏上。灰色块还有个副作用：直观暴露"哪些资源还没接监控"，反向推动监控覆盖率。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>视觉冲击力强，适合放进给客户领导的演示环节。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">告警规则定义</span><span class="d">宕机告警、阈值告警、机器学习预测告警</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>平台开箱提供大量告警模板，也可自建。三类规则：宕机告警（检测主机失去响应超时限触发，仅 agent 模式支持）；阈值告警（如 CPU 过去 50 分钟使用率超标）；预测告警（基于机器学习，按历史趋势预测未来将达阈值时提前触发）。入口 <span class="path">可观测 » 告警模板 / 告警规则</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>注意宕机告警依赖 agent——这是"要不要装 agent"决策的重要砝码：纯 API 采集模式下机器挂了可能没人知道。预测告警适合磁盘水位、连接数这类趋势性指标，把"半夜爆掉"变成"提前三天预警"。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>告警阈值没有标准答案，建议先用平台模板默认值上线，运行两周根据误报情况和客户一起调优，把"告警调优"明确为上线后支持期的工作项。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">告警通知和处理</span><span class="d">多渠道通知，支持自愈操作</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>告警可通知用户、角色、排班或指定邮箱，经已配置的消息通道（见第 10 章通知配置）发送。可配置触发告警时自动执行自愈操作、按操作建议人工修复、或提交工单处理。已触发警报支持恢复、暂停、解除操作。入口 <span class="path">可观测 » 告警规则 / 已触发警报</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>"按排班通知"贴合真实值班制度——告警发给当班的人而不是轰炸整个群。自愈操作（如磁盘满了自动清理日志）是从"被动响应"到"自动运维"的台阶，但客户通常需要信任建立期才敢启用。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>告警通知依赖第 10 章的通知渠道配置（SMTP、企微等）先就绪——配置顺序上注意这个跨章节依赖。</p></div>
+</div></details>
+</section>
+
+<section class="mod m3" id="m9">
+<div class="mod-head"><div class="tag">治理与系统 · 第 9 章</div><h2>定制分析仪表盘和报表</h2><p>面向管理和决策的数据出口。仪表盘、报表、大屏各司其职，权限体系确保不同角色只看到该看的数据。</p></div>
+
+<details class="item"><summary><span class="t">仪表盘</span><span class="d">组织/资源概览，可分享导入导出</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>内置仪表盘覆盖组织和资源概览、云资源使用情况、基础设施概览、业务组概览/详情、应用系统详情，按角色授权查看。支持新建、分享、导入导出。入口 <span class="path">智能分析 » 可视化分析</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>导入导出意味着仪表盘配置可以跨环境、跨项目复用——在一个项目调好的仪表盘可以导出给下一个项目用，交付团队应该有意识地沉淀这类资产。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>先用内置仪表盘满足需求，客户要定制再评估。仪表盘定制看起来简单，实际容易陷入无限调整循环，定制需求要框定轮次。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">报表</span><span class="d">资源报表 + 费用报表多维统计</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>内置资源报表（云资源情况、云主机情况、IP 池使用、到期云资源）和费用报表（应用系统、业务组、多级汇总、云账户、云资源明细等），按角色授权。配置了价格模型才有费用报表数据。入口 <span class="path">智能分析 » 可视化分析 » 报表</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>「到期云资源报表」值得一提——配合第 2 章回收策略，管理员定期导出到期清单催办续期或回收，是资源治理的日常工具。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>问清客户现在每月要向上交什么报表，对照内置报表找差距——报表差距是工作量评估里最常被遗漏的项。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">大屏</span><span class="d">云资源和费用大屏展示</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>开箱提供云资源和费用大屏、云资源大屏，支持新建、分享、导入导出。入口 <span class="path">智能分析 » 可视化分析</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>大屏的主要受众其实是"路过的领导"——挂在运维大厅展示数字化建设成果。技术价值有限，汇报价值很高。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>验收演示时把大屏投到客户的真实大屏幕上，仪式感即说服力。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">智能分析权限</span><span class="d">按角色控制可见的分析数据</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>从常规视图和资源视图设置用户查看、管理仪表盘/报表/大屏的权限，实现不同角色只看到被授权的统计信息。入口 <span class="path">智能分析 » 权限</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>费用数据敏感性高（部门预算互相可见可能引发组织矛盾），分析权限是数据治理的最后一道闸。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>和客户确认费用数据的可见范围政策（部门间是否互见），按确认结果配置，别拍脑袋。</p></div>
+</div></details>
+</section>
+
+<section class="mod m3" id="m10">
+<div class="mod-head"><div class="tag">治理与系统 · 第 10 章</div><h2>平台系统配置</h2><p>界面定制与安全加固。品牌化是低成本高感知的快赢项，安全配置则直接对接客户的合规要求。</p></div>
+
+<details class="item"><summary><span class="t">UI 配置</span><span class="d">登录页、服务申请页、欢迎页定制</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>登录页：背景图、文字颜色、验证码和忘记密码开关、登录后跳转 URL。服务申请页：分组与服务展现方式、卡片数量、字段显示、资源池展示方式等。欢迎页：按模块和角色配置展示内容，可配置展示的资源类型（计算、存储、网络、PaaS、CaaS、软件等）。入口 <span class="path">平台管理 » 界面配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>换上客户 logo 和企业配色后，平台从"供应商的产品"变成"客户自己的平台"，心理归属感的变化远超配置成本。不同角色看到不同欢迎页，也让各类用户登录第一眼就看到和自己相关的信息。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>品牌化是典型的快赢（quick win）：成本半天，感知度极高。安排在项目早期完成，之后每次演示客户看到的都是"自己的平台"。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">MFA 多因素认证</span><span class="d">登录与敏感操作的双因素保护</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>在静态密码基础上增加动态认证，支持短信、邮箱、企业微信、钉钉、Microsoft/Google Authenticator 及第三方消息验证。可对登录、系统配置、界面配置、通知配置分别启用，可设免认证时长和免认证用户。还可在授权配置中为应用栈/云资源的关键运维操作启用双因素认证。入口 <span class="path">平台管理 » 系统配置 » 安全配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>注意 MFA 依赖通知渠道先配好（短信网关、企微应用等）。"运维操作级 MFA"是亮点——删生产库这种动作多一道验证码，安全部门会很买账。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>金融、政企客户的安全基线通常强制要求 MFA，提前确认客户用哪种认证渠道（很多内网环境收不了短信，得用企微或 Authenticator）。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">密码策略与网络黑白名单</span><span class="d">密码规则、登录失败限制、IP 访问控制</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>密码配置：首次登录改密、登录失败次数限制、密码过期时间与过期通知、禁止重复使用近几次密码、密码校验规则。访问控制：按 IP 和角色配置黑白名单，黑名单优先于白名单；规则若只选角色不填 IP 则不生效。入口 <span class="path">平台管理 » 系统配置 » 安全配置 / 用户登录类型</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>这些配置项几乎逐条对应等保测评和企业安全基线的检查清单——它们存在的意义就是让平台能通过客户的安全评审。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>主动向客户索要《安全基线要求》文档，按文档逐项配置并留存截图，安全评审时直接交证据包，省去反复整改。</p></div>
+</div></details>
+
+<details class="item"><summary><span class="t">邮件和通知配置</span><span class="d">SMTP、短信、企微、钉钉、飞书多渠道</span><span class="chev">▶</span></summary><div class="body">
+<div class="blk"><span class="lbl a">手册要点</span><p>支持对接邮箱（SMTP）、短信、企业微信、钉钉、飞书及第三方系统，将平台通知和告警发送到对应渠道。通知模板可自定义：将 .ftl 文件放入 /opt/cloudchef/server/templates/（国际化加 _en 后缀），重启 tomcat 生效。入口 <span class="path">平台管理 » 通知配置</span>。</p></div>
+<div class="blk"><span class="lbl b">场景理解</span><p>通知是审批流和告警真正"跑起来"的前提——审批人收不到通知，流程就卡死在第一环。这是个不起眼但牵一发动全身的基础配置。</p></div>
+<div class="blk"><span class="lbl c">PM 视角</span><p>SMTP 账号、企微应用凭证又是一批客户依赖项，和云账户凭证、LDAP 参数一起打包成一份《客户提供信息清单》在启动会上发出，统一追踪。</p></div>
+</div></details>
+</section>
+
+<footer>整理自《骞云SmartCMP平台初始化配置手册》（©骞云科技）· 学习笔记用途 · 配置路径以实际平台版本为准</footer>
+</main>
+</div>
+<script>
+function toggleAll(open){document.querySelectorAll('details.item').forEach(d=>d.open=open)}
+document.getElementById('q').addEventListener('input',function(){
+  const v=this.value.trim().toLowerCase();
+  document.querySelectorAll('details.item').forEach(d=>{
+    const hit=!v||d.textContent.toLowerCase().includes(v);
+    d.classList.toggle('hide',!hit);
+    if(v&&hit)d.open=true;
+  });
+  document.querySelectorAll('section.mod').forEach(s=>{
+    const any=[...s.querySelectorAll('details.item')].some(d=>!d.classList.contains('hide'));
+    s.classList.toggle('hide',!any);
+  });
+});
+</script>
+</body>
+</html>
