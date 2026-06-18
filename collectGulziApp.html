@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谷子收集记录本</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        /* ===== 店铺信息区 ===== */
+        .store-info-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .store-info-section h2 {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .store-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .form-group input:disabled {
+            background: #ecf0f1;
+            cursor: not-allowed;
+            color: #7f8c8d;
+        }
+
+        .store-date {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .store-button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d68910;
+        }
+
+        /* ===== 表单区 ===== */
+        .form-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .image-upload-group {
+            grid-column: 1 / -1;
+        }
+
+        .image-upload-input {
+            display: none;
+        }
+
+        .image-upload-label {
+            display: block;
+            padding: 12px;
+            border: 2px dashed #3498db;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: #f0f8ff;
+        }
+
+        .image-upload-label:hover {
+            background: #e0f0ff;
+        }
+
+        .image-upload-label.has-image {
+            border-style: solid;
+            border-color: #27ae60;
+            background: #f0fdf4;
+        }
+
+        .image-preview {
+            max-width: 120px;
+            max-height: 120px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .form-button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* ===== 列表区 ===== */
+        .list-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 80px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .list-header h2 {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .list-stats {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .stat-item {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .stat-value {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .record-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #ecf0f1;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #fafbfc;
+            transition: all 0.2s;
+        }
+
+        .record-item:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+
+        .record-image {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            background: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .record-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .record-image.placeholder {
+            font-size: 24px;
+            color: #bdc3c7;
+        }
+
+        .record-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .record-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .record-series {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .record-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .record-price {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .record-qty {
+            color: #7f8c8d;
+        }
+
+        .rarity-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .rarity-普通 {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .rarity-限定 {
+            background: #d6eaf8;
+            color: #2874a6;
+        }
+
+        .rarity-绝版 {
+            background: #fadbd8;
+            color: #922b21;
+        }
+
+        .rarity-抽卡 {
+            background: #fef5e7;
+            color: #b7950b;
+        }
+
+        .rarity-其他 {
+            background: #e8daef;
+            color: #6c3483;
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        /* ===== 底部操作栏 ===== */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .bottom-bar button {
+            flex: 1;
+            padding: 12px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* ===== Toast 提示 ===== */
+        .toast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+            z-index: 99;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== 响应式设计 ===== */
+        @media (min-width: 600px) {
+            .store-info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            button {
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .store-info-section,
+            .form-section,
+            .list-section {
+                padding: 12px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .store-button-group {
+                flex-direction: column;
+            }
+
+            .record-item {
+                flex-wrap: wrap;
+            }
+
+            .record-actions {
+                grid-column: 1 / -1;
+                justify-content: flex-end;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎁 谷子收集记录本</h1>
+            <p class="subtitle">记录你的每一个收获</p>
+        </header>
+
+        <!-- 店铺信息区 -->
+        <div class="store-info-section">
+            <h2>
+                <span>🏪 店铺信息</span>
+                <button class="btn-secondary" id="editStoreBtn" style="width: auto; padding: 6px 12px; font-size: 12px;">编辑</button>
+            </h2>
+            <div class="store-info-grid" id="storeInfoGrid">
+                <div class="form-group">
+                    <label>店名</label>
+                    <input type="text" id="storeName" placeholder="如：迪士尼旗舰店">
+                </div>
+                <div class="form-group">
+                    <label>位置/商场</label>
+                    <input type="text" id="location" placeholder="如：大悦城 3F">
+                </div>
+            </div>
+            <div class="store-date">📅 记录日期：<span id="recordDate"></span></div>
+            <div class="store-button-group">
+                <button class="btn-success" id="startRecordBtn">开始记录</button>
+            </div>
+        </div>
+
+        <!-- 快速录入表单 -->
+        <div class="form-section" id="formSection" style="display: none;">
+            <h2>📝 添加谷子</h2>
+            <form id="recordForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>IP名称 *</label>
+                        <input type="text" id="ipName" placeholder="如：迪士尼" required>
+                    </div>
+                    <div class="form-group">
+                        <label>系列</label>
+                        <input type="text" id="series" placeholder="如：2024春季">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>商品具体名 *</label>
+                        <input type="text" id="productName" placeholder="如：米奇手办 Ver.1" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>价格（元）*</label>
+                        <input type="number" id="price" step="0.01" placeholder="59" required>
+                    </div>
+                    <div class="form-group">
+                        <label>数量</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>稀缺度</label>
+                        <select id="rarity">
+                            <option value="普通">普通</option>
+                            <option value="限定">限定</option>
+                            <option value="绝版">绝版</option>
+                            <option value="抽卡">抽卡</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid image-upload-group">
+                    <div class="form-group full">
+                        <label>商品图片</label>
+                        <input type="file" id="imageInput" class="image-upload-input" accept="image/*">
+                        <label for="imageInput" class="image-upload-label" id="imageLabelBox">
+                            <div>📷 点击拍照或上传图片</div>
+                            <div id="imagePreviewContainer"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-grid full">
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="notes" placeholder="如：还有蓝色款、只剩1个..." rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-button-group">
+                    <button type="submit" class="btn-success" id="submitBtn">添加记录</button>
+                    <button type="button" class="btn-secondary" id="resetBtn">清空表单</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 列表区 -->
+        <div class="list-section">
+            <div class="list-header">
+                <h2>📊 记录列表</h2>
+                <div class="list-stats">
+                    <span>共 <span class="stat-value" id="totalCount">0</span> 条</span>
+                    <span class="stat-item">总计 ¥<span class="stat-value" id="totalPrice">0</span></span>
+                </div>
+            </div>
+            <div id="recordsList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>还没有记录，开始添加吧！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-bar">
+        <button class="btn-primary" id="exportBtn">⬇️ 导出 Excel</button>
+        <button class="btn-warning" id="editStoreBtn2">✏️ 编辑店铺</button>
+        <button class="btn-danger" id="clearAllBtn">🗑️ 清空全部</button>
+    </div>
+
+    <script>
+        // ===== 数据管理 =====
+        const DATA_KEY = 'gulziCollectData';
+        const EDIT_MODE_KEY = 'editingRecordId';
+
+        function loadData() {
+            const data = localStorage.getItem(DATA_KEY);
+            return data ? JSON.parse(data) : {
+                store: { storeName: '', location: '', date: formatDate(new Date()) },
+                items: []
+            };
+        }
+
+        function saveData(data) {
+            localStorage.setItem(DATA_KEY, JSON.stringify(data));
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // ===== 初始化 =====
+        document.getElementById('recordDate').textContent = formatDate(new Date());
+
+        // ===== 店铺信息管理 =====
+        const storeNameInput = document.getElementById('storeName');
+        const locationInput = document.getElementById('location');
+        const startRecordBtn = document.getElementById('startRecordBtn');
+        const formSection = document.getElementById('formSection');
+        const editStoreBtns = document.querySelectorAll('#editStoreBtn, #editStoreBtn2');
+
+        function updateStoreInfoUI() {
+            const data = loadData();
+            storeNameInput.value = data.store.storeName;
+            locationInput.value = data.store.location;
+
+            const isStoreSet = data.store.storeName && data.store.location;
+            storeNameInput.disabled = isStoreSet;
+            locationInput.disabled = isStoreSet;
+            startRecordBtn.textContent = isStoreSet ? '✅ 店铺已锁定' : '开始记录';
+            startRecordBtn.disabled = isStoreSet;
+            formSection.style.display = isStoreSet ? 'block' : 'none';
+        }
+
+        startRecordBtn.addEventListener('click', () => {
+            const storeName = storeNameInput.value.trim();
+            const location = locationInput.value.trim();
+
+            if (!storeName || !location) {
+                showToast('请填写店名和位置');
+                return;
+            }
+
+            const data = loadData();
+            data.store.storeName = storeName;
+            data.store.location = location;
+            data.store.date = formatDate(new Date());
+            saveData(data);
+
+            updateStoreInfoUI();
+            showToast('✅ 店铺信息已保存');
+        });
+
+        editStoreBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const data = loadData();
+                data.store = { storeName: '', location: '', date: formatDate(new Date()) };
+                data.items = [];
+                saveData(data);
+                updateStoreInfoUI();
+                renderRecordsList();
+                showToast('已清空，可以编辑店铺信息');
+            });
+        });
+
+        // ===== 图片处理 =====
+        const imageInput = document.getElementById('imageInput');
+        const imageLabelBox = document.getElementById('imageLabelBox');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        let currentImageBase64 = null;
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('图片过大，请选择小于 5MB 的图片');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentImageBase64 = event.target.result;
+                imageLabelBox.classList.add('has-image');
+                imagePreviewContainer.innerHTML = `<img src="${currentImageBase64}" class="image-preview" alt="preview">`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ===== 表单提交 =====
+        const recordForm = document.getElementById('recordForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        recordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const ipName = document.getElementById('ipName').value.trim();
+            const series = document.getElementById('series').value.trim();
+            const productName = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('price').value);
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const rarity = document.getElementById('rarity').value;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!ipName || !productName || !price) {
+                showToast('请填写必填项');
+                return;
+            }
+
+            const data = loadData();
+            const editingId = localStorage.getItem(EDIT_MODE_KEY);
+
+            const record = {
+                id: editingId || Date.now(),
+                ipName,
+                series,
+                productName,
+                price,
+                quantity,
+                rarity,
+                image: currentImageBase64 || null,
+                notes,
+                createdAt: editingId ? 
+                    data.items.find(r => r.id == editingId)?.createdAt : 
+                    new Date().toISOString()
+            };
+
+            if (editingId) {
+                data.items = data.items.map(r => r.id == editingId ? record : r);
+                showToast('✅ 记录已更新');
+                localStorage.removeItem(EDIT_MODE_KEY);
+                submitBtn.textContent = '添加记录';
+            } else {
+                data.items.push(record);
+                showToast('✅ 已添加 1 条记录');
+            }
+
+            saveData(data);
+            resetForm();
+            renderRecordsList();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            resetForm();
+        });
+
+        function resetForm() {
+            recordForm.reset();
+            currentImageBase64 = null;
+            imageLabelBox.classList.remove('has-image');
+            imagePreviewContainer.innerHTML = '';
+            localStorage.removeItem(EDIT_MODE_KEY);
+            submitBtn.textContent = '添加记录';
+        }
+
+        // ===== 列表渲染 =====
+        function renderRecordsList() {
+            const data = loadData();
+            const recordsList = document.getElementById('recordsList');
+            const items = data.items;
+
+            if (items.length === 0) {
+                recordsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>还没有记录，开始添加吧！</p>
+                    </div>
+                `;
+                updateStats(0, 0);
+                return;
+            }
+
+            let totalPrice = 0;
+            recordsList.innerHTML = items.map((item, index) => {
+                totalPrice += item.price * item.quantity;
+                return `
+                    <div class="record-item">
+                        <div class="record-image ${!item.image ? 'placeholder' : ''}">
+                            ${item.image ? `<img src="${item.image}" alt="${item.productName}">` : '📷'}
+                        </div>
+                        <div class="record-content">
+                            <div class="record-title">${item.ipName} - ${item.productName}</div>
+                            ${item.series ? `<div class="record-series">${item.series}</div>` : ''}
+                            <div class="record-meta">
+                                <span class="record-price">¥${item.price.toFixed(2)}</span>
+                                <span class="record-qty">×${item.quantity}</span>
+                                <span class="rarity-tag rarity-${item.rarity}">${item.rarity}</span>
+                            </div>
+                            ${item.notes ? `<div style="font-size: 12px; color: #7f8c8d; margin-top: 4px;">💬 ${item.notes}</div>` : ''}
+                        </div>
+                        <div class="record-actions">
+                            <button class="btn-small btn-edit" onclick="editRecord(${item.id})">编辑</button>
+                            <button class="btn-small btn-delete" onclick="deleteRecord(${item.id})">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateStats(items.length, totalPrice);
+        }
+
+        function updateStats(count, total) {
+            document.getElementById('totalCount').textContent = count;
+            document.getElementById('totalPrice').textContent = total.toFixed(2);
+        }
+
+        // ===== 编辑和删除 =====
+        function editRecord(id) {
+            const data = loadData();
+            const record = data.items.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById('ipName').value = record.ipName;
+            document.getElementById('series').value = record.series || '';
+            document.getElementById('productName').value = record.productName;
+            document.getElementById('price').value = record.price;
+            document.getElementById('quantity').value = record.quantity;
+            document.getElementById('rarity').value = record.rarity;
+            document.getElementById('notes').value = record.notes || '';
+
+            if (record.image) {
+                currentImageBase64 = record.image;
+                imageLabelBox.classList.add('has-image');
+                imagePreviewContainer.innerHTML = `<img src="${record.image}" class="image-preview" alt="preview">`;
+            }
+
+            localStorage.setItem(EDIT_MODE_KEY, id);
+            submitBtn.textContent = '更新记录';
+
+            window.scrollTo({ top: document.getElementById('recordForm').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        function deleteRecord(id) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+
+            const data = loadData();
+            data.items = data.items.filter(r => r.id !== id);
+            saveData(data);
+            renderRecordsList();
+            showToast('✅ 已删除');
+        }
+
+        // ===== Excel 导出 =====
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = loadData();
+            if (data.items.length === 0) {
+                showToast('没有数据可以导出');
+                return;
+            }
+
+            const excelData = [
+                ['谷子收集记录', ''],
+                ['店名', data.store.storeName],
+                ['位置', data.store.location],
+                ['记录日期', data.store.date],
+                [''],
+                ['IP名称', '系列', '商品名称', '价格', '数量', '总计', '稀缺度', '备注']
+            ];
+
+            let totalPrice = 0;
+            data.items.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                totalPrice += subtotal;
+                excelData.push([
+                    item.ipName,
+                    item.series || '',
+                    item.productName,
+                    item.price.toFixed(2),
+                    item.quantity,
+                    subtotal.toFixed(2),
+                    item.rarity,
+                    item.notes || ''
+                ]);
+            });
+
+            excelData.push(['', '', '', '', '合计', totalPrice.toFixed(2)]);
+
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            ws['!cols'] = [
+                { wch: 12 },
+                { wch: 15 },
+                { wch: 20 },
+                { wch: 10 },
+                { wch: 8 },
+                { wch: 10 },
+                { wch: 10 },
+                { wch: 15 }
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '谷子记录');
+
+            const filename = `谷子记录_${data.store.storeName || '未命名'}_${data.store.date}.xlsx`;
+            XLSX.writeFile(wb, filename);
+
+            showToast('✅ 已导出 Excel');
+        });
+
+        // ===== 清空全部 =====
+        document.getElementById('clearAllBtn').addEventListener('click', () => {
+            if (!confirm('确定要清空所有数据吗？此操作无法撤销！')) return;
+            if (!confirm('真的要清空吗？')) return;
+
+            localStorage.removeItem(DATA_KEY);
+            localStorage.removeItem(EDIT_MODE_KEY);
+            updateStoreInfoUI();
+            renderRecordsList();
+            resetForm();
+            showToast('✅ 已清空所有数据');
+        });
+
+        // ===== Toast 提示 =====
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ===== 页面初始化 =====
+        window.addEventListener('load', () => {
+            updateStoreInfoUI();
+            renderRecordsList();
+        });
+    </script>
+</body>
+</html>
