@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMP 平台集成全景图</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#F0F2F5;color:#1a1a1a;min-height:100vh}
+.app-header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:20px 32px 0;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+.app-header h1{color:#fff;font-size:20px;font-weight:bold;letter-spacing:.5px}
+.app-header p{color:#90CAF9;font-size:12px;margin-top:3px}
+.tabs{display:flex;gap:4px;margin-top:16px}
+.tab{padding:10px 22px;font-size:13px;font-weight:bold;color:rgba(255,255,255,.6);border:none;background:rgba(255,255,255,.08);border-radius:8px 8px 0 0;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.tab:hover{color:white;background:rgba(255,255,255,.15)}
+.tab.active{color:#1a1a2e;background:#F0F2F5}
+.content{padding:20px 24px}
+.panel{display:none}
+.panel.active{display:block}
+.section-label{font-size:11px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-left:2px}
+/* TAB 1 */
+.arch-container{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.arch-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:10px 16px;background:#F8F9FA;border-radius:8px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#555}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.arch-svg-wrap{overflow-x:auto}
+/* TAB 2 */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cat-card{border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.cat-head{padding:10px 14px;color:white;font-size:13px;font-weight:bold;display:flex;align-items:center;gap:8px}
+.cat-body{background:white;padding:10px;display:flex;flex-direction:column;gap:8px}
+.plat-item{border-radius:7px;padding:9px 11px;border-left:3px solid;background:#FAFAFA}
+.plat-name{font-size:12px;font-weight:bold;color:#1a1a1a}
+.plat-sub{font-size:10px;color:#888;margin-top:1px}
+.plat-tags{display:flex;flex-wrap:wrap;gap:3px;margin:5px 0}
+.plat-tag{font-size:9px;padding:1px 5px;border-radius:3px;color:white}
+.plat-resp{font-size:10px;color:#444;line-height:1.5;margin-bottom:4px}
+.plat-api{font-size:9px;color:#666;background:#F0F2F5;border-radius:4px;padding:3px 7px;line-height:1.6}
+.plat-api b{color:#333}
+/* TAB 3 */
+.orch-layout{display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:start}
+.step-list{background:#1a1a2e;border-radius:10px;padding:14px;position:sticky;top:16px}
+.step-list-title{color:#90CAF9;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;text-align:center}
+.step-btn{display:flex;align-items:flex-start;gap:9px;background:rgba(255,255,255,.07);border:none;border-radius:7px;padding:9px 10px;margin-bottom:6px;cursor:pointer;transition:background .2s;width:100%;text-align:left}
+.step-btn:hover{background:rgba(255,255,255,.14)}
+.step-btn.active{background:rgba(255,255,255,.22);outline:1.5px solid rgba(255,255,255,.45)}
+.step-num{width:20px;height:20px;border-radius:50%;background:white;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-info{flex:1}
+.step-title{font-size:11px;font-weight:bold;color:white;line-height:1.3}
+.step-plat{font-size:9px;color:rgba(255,255,255,.5);margin-top:2px}
+.detail-card{background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);min-height:520px;overflow:hidden}
+.detail-top{padding:16px 20px 14px;border-bottom:1px solid #F0F2F5}
+.detail-step-no{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.detail-h{font-size:17px;font-weight:bold;color:#1a1a1a}
+.detail-badge{display:inline-block;font-size:10px;padding:2px 9px;border-radius:10px;color:white;margin-top:5px}
+.detail-body{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.detail-sec-title{font-size:10px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.detail-flow{display:flex;flex-direction:column;gap:4px}
+.flow-step{display:flex;align-items:flex-start;gap:8px}
+.flow-circle{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:white;flex-shrink:0;margin-top:1px}
+.flow-text{font-size:11px;color:#333;line-height:1.5;padding-top:2px}
+.flow-connector{width:1px;height:10px;background:#DDD;margin-left:9px}
+.api-grid{display:flex;flex-direction:column;gap:5px}
+.api-item{background:#F8F9FA;border-radius:6px;padding:7px 10px;border-left:2px solid #E0E0E0}
+.api-label{font-size:9px;font-weight:bold;color:#888;text-transform:uppercase;margin-bottom:2px}
+.api-code{font-size:10px;font-family:'Courier New',monospace;color:#1a1a1a;line-height:1.6}
+.detail-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;color:#BBB}
+.detail-placeholder .ph-icon{font-size:40px;margin-bottom:10px}
+.detail-placeholder p{font-size:13px}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <h1>&#128279; CMP 平台集成全景图</h1>
+  <p>Cloud Management Platform &middot; 编排架构 &middot; 平台分类 &middot; 对接方式</p>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('arch',this)">① 架构总览</button>
+    <button class="tab" onclick="switchTab('cards',this)">② 平台分类 &amp; 职责</button>
+    <button class="tab" onclick="switchTab('orch',this)">③ 编排流程详解</button>
+  </div>
+</div>
+<div class="content">
+
+<!-- TAB 1 -->
+<div class="panel active" id="panel-arch">
+<div class="arch-container">
+<div class="section-label">整体架构 · CMP 作为编排中心，向上接收审批，向下驱动各层平台</div>
+<div class="arch-legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#1565C0"></span>流程层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#2E7D32"></span>资源层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#00838F"></span>网络层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#E65100"></span>执行层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#6A1B9A"></span>安全层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#C62828"></span>监控层</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#F57F17"></span>备份层</div>
+  <div style="margin-left:auto;display:flex;gap:16px;align-items:center">
+    <div class="legend-item">
+      <svg width="32" height="10" style="flex-shrink:0"><defs><marker id="la1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#555"/></marker></defs><line x1="0" y1="5" x2="24" y2="5" stroke="#555" stroke-width="1.8" marker-end="url(#la1)"/></svg>
+      <span>直接调用</span>
+    </div>
+    <div class="legend-item">
+      <svg width="32" height="10" style="flex-shrink:0"><defs><marker id="la2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#888"/></marker></defs><line x1="0" y1="5" x2="24" y2="5" stroke="#888" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#la2)"/></svg>
+      <span>按需/回调</span>
+    </div>
+  </div>
+</div>
+<div class="arch-svg-wrap">
+<svg viewBox="0 0 860 600" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:720px;display:block">
+<defs>
+  <marker id="ab" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#1565C0"/></marker>
+  <marker id="ag" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#2E7D32"/></marker>
+  <marker id="ag2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#388E3C"/></marker>
+  <marker id="at" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#00838F"/></marker>
+  <marker id="ao" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#E65100"/></marker>
+  <marker id="abk" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#F57F17"/></marker>
+  <marker id="ap" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#6A1B9A"/></marker>
+  <marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#C62828"/></marker>
+  <marker id="ard" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#D81B60"/></marker>
+</defs>
+<rect x="8" y="8" width="130" height="584" rx="8" fill="#E3F2FD" opacity=".45"/>
+<rect x="148" y="8" width="160" height="584" rx="8" fill="#EDE7F6" opacity=".5"/>
+<rect x="318" y="8" width="160" height="584" rx="8" fill="#E8F5E9" opacity=".5"/>
+<rect x="488" y="8" width="160" height="584" rx="8" fill="#FFF3E0" opacity=".5"/>
+<rect x="658" y="8" width="194" height="584" rx="8" fill="#FCE4EC" opacity=".4"/>
+<text x="73" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">流程层</text>
+<text x="228" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#4A148C">编排中心</text>
+<text x="398" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E7D32">资源层</text>
+<text x="568" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#E65100">执行层</text>
+<text x="755" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#880E4F">安全/监控/备份</text>
+<!-- ServiceNow -->
+<rect x="18" y="50" width="110" height="58" rx="7" fill="#1565C0"/>
+<text x="73" y="73" text-anchor="middle" font-size="12" font-weight="bold" fill="white">ServiceNow</text>
+<text x="73" y="88" text-anchor="middle" font-size="9" fill="#BBDEFB">ITSM · 审批</text>
+<text x="73" y="101" text-anchor="middle" font-size="9" fill="#BBDEFB">CMDB 记录</text>
+<!-- CMP -->
+<rect x="160" y="120" width="136" height="360" rx="9" fill="#4A148C"/>
+<text x="228" y="148" text-anchor="middle" font-size="14" font-weight="bold" fill="white">CMP</text>
+<text x="228" y="163" text-anchor="middle" font-size="9" fill="#CE93D8">编排中心</text>
+<rect x="170" y="178" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="194" text-anchor="middle" font-size="9" fill="white">① 接收申请 / 审批</text>
+<rect x="170" y="209" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="225" text-anchor="middle" font-size="9" fill="white">② 获取凭证 (Vault)</text>
+<rect x="170" y="240" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="256" text-anchor="middle" font-size="9" fill="white">③ 触发 TFE 建 VM</text>
+<rect x="170" y="271" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="287" text-anchor="middle" font-size="9" fill="white">④ 分配 IP / DNS</text>
+<rect x="170" y="302" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="318" text-anchor="middle" font-size="9" fill="white">⑤ 触发 AAP 安装</text>
+<rect x="170" y="333" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="349" text-anchor="middle" font-size="9" fill="white">⑥ 注册备份策略</text>
+<rect x="170" y="364" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="380" text-anchor="middle" font-size="9" fill="white">⑦ 纳管监控 / 日志</text>
+<rect x="170" y="395" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="411" text-anchor="middle" font-size="9" fill="white">⑧ 注册 PAM 账号</text>
+<rect x="170" y="426" width="116" height="24" rx="4" fill="rgba(255,255,255,.13)"/>
+<text x="228" y="442" text-anchor="middle" font-size="9" fill="white">⑨ 回写 CMDB</text>
+<!-- TFE -->
+<rect x="328" y="80" width="140" height="54" rx="7" fill="#2E7D32"/>
+<text x="398" y="101" text-anchor="middle" font-size="12" font-weight="bold" fill="white">TFE</text>
+<text x="398" y="116" text-anchor="middle" font-size="9" fill="#C8E6C9">Terraform Enterprise</text>
+<text x="398" y="129" text-anchor="middle" font-size="9" fill="#C8E6C9">IaC · VM / 网络 / 存储</text>
+<!-- vCenter -->
+<rect x="328" y="146" width="140" height="54" rx="7" fill="#388E3C"/>
+<text x="398" y="167" text-anchor="middle" font-size="12" font-weight="bold" fill="white">VMware vCenter</text>
+<text x="398" y="182" text-anchor="middle" font-size="9" fill="#C8E6C9">虚拟化底层</text>
+<text x="398" y="195" text-anchor="middle" font-size="9" fill="#C8E6C9">VM 克隆 · 资源调配</text>
+<!-- Infoblox -->
+<rect x="328" y="216" width="140" height="54" rx="7" fill="#00838F"/>
+<text x="398" y="237" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Infoblox</text>
+<text x="398" y="252" text-anchor="middle" font-size="9" fill="#B2EBF2">DNS / DHCP / IPAM</text>
+<text x="398" y="265" text-anchor="middle" font-size="9" fill="#B2EBF2">自动分配 IP + DNS</text>
+<!-- AAP -->
+<rect x="498" y="290" width="140" height="54" rx="7" fill="#E65100"/>
+<text x="568" y="311" text-anchor="middle" font-size="12" font-weight="bold" fill="white">AAP</text>
+<text x="568" y="326" text-anchor="middle" font-size="9" fill="#FFE0B2">Ansible Automation</text>
+<text x="568" y="339" text-anchor="middle" font-size="9" fill="#FFE0B2">配置管理 · DB / 软件安装</text>
+<!-- Vault -->
+<rect x="668" y="48" width="178" height="52" rx="7" fill="#6A1B9A"/>
+<text x="757" y="68" text-anchor="middle" font-size="11" font-weight="bold" fill="white">HashiCorp Vault</text>
+<text x="757" y="83" text-anchor="middle" font-size="9" fill="#E1BEE7">秘密管理 · 凭证动态下发</text>
+<text x="757" y="95" text-anchor="middle" font-size="9" fill="#E1BEE7">AppRole 认证 · KV Secret</text>
+<!-- CyberArk -->
+<rect x="668" y="112" width="178" height="52" rx="7" fill="#880E4F"/>
+<text x="757" y="132" text-anchor="middle" font-size="11" font-weight="bold" fill="white">CyberArk</text>
+<text x="757" y="147" text-anchor="middle" font-size="9" fill="#F8BBD0">PAM · 特权账号管理</text>
+<text x="757" y="159" text-anchor="middle" font-size="9" fill="#F8BBD0">密码轮换 · PSM 跳板</text>
+<!-- Cohesity -->
+<rect x="668" y="355" width="178" height="52" rx="7" fill="#F57F17"/>
+<text x="757" y="375" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Cohesity / NetBackup</text>
+<text x="757" y="390" text-anchor="middle" font-size="9" fill="#FFF9C4">备份策略 · Agent 安装</text>
+<text x="757" y="402" text-anchor="middle" font-size="9" fill="#FFF9C4">Tag-based 自动纳管</text>
+<!-- Dynatrace -->
+<rect x="668" y="420" width="178" height="52" rx="7" fill="#C62828"/>
+<text x="757" y="440" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Dynatrace / Datadog</text>
+<text x="757" y="455" text-anchor="middle" font-size="9" fill="#FFCDD2">APM · 基础设施监控</text>
+<text x="757" y="467" text-anchor="middle" font-size="9" fill="#FFCDD2">Agent 自动发现 · 告警</text>
+<!-- Splunk -->
+<rect x="668" y="485" width="178" height="52" rx="7" fill="#D81B60"/>
+<text x="757" y="505" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Splunk</text>
+<text x="757" y="520" text-anchor="middle" font-size="9" fill="#F8BBD0">日志 / SIEM</text>
+<text x="757" y="532" text-anchor="middle" font-size="9" fill="#F8BBD0">Forwarder 安装 · 纳管</text>
+<!-- ARROWS -->
+<path d="M128,79 Q144,79 148,195" fill="none" stroke="#1565C0" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ab)"/>
+<text x="108" y="128" font-size="9" fill="#1565C0">Webhook</text>
+<line x1="296" y1="245" x2="328" y2="115" stroke="#2E7D32" stroke-width="1.8" marker-end="url(#ag)"/>
+<text x="294" y="192" font-size="8" fill="#2E7D32">REST</text>
+<line x1="398" y1="134" x2="398" y2="146" stroke="#388E3C" stroke-width="1.4" stroke-dasharray="3,2" marker-end="url(#ag2)"/>
+<line x1="296" y1="280" x2="328" y2="252" stroke="#00838F" stroke-width="1.8" marker-end="url(#at)"/>
+<text x="292" y="272" font-size="8" fill="#00838F">WAPI</text>
+<line x1="296" y1="314" x2="498" y2="317" stroke="#E65100" stroke-width="1.8" marker-end="url(#ao)"/>
+<text x="360" y="307" font-size="9" fill="#E65100">Job Template API</text>
+<line x1="296" y1="345" x2="668" y2="376" stroke="#F57F17" stroke-width="1.5" marker-end="url(#abk)"/>
+<line x1="296" y1="222" x2="668" y2="82" stroke="#6A1B9A" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ap)"/>
+<text x="448" y="145" font-size="8" fill="#6A1B9A">AppRole</text>
+<line x1="296" y1="410" x2="668" y2="148" stroke="#880E4F" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ap)"/>
+<line x1="638" y1="330" x2="668" y2="445" stroke="#C62828" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="636" y="390" font-size="8" fill="#C62828">Agent</text>
+<line x1="638" y1="338" x2="668" y2="508" stroke="#D81B60" stroke-width="1.5" marker-end="url(#ard)"/>
+<path d="M160,441 Q30,441 30,108" fill="none" stroke="#1565C0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ab)"/>
+<text x="12" y="310" font-size="8" fill="#1565C0" transform="rotate(-90,12,310)">回写 CMDB</text>
+<!-- Note -->
+<rect x="155" y="500" width="295" height="82" rx="6" fill="white" opacity=".9" stroke="#E0E0E0"/>
+<text x="165" y="516" font-size="9" font-weight="bold" fill="#444">执行顺序</text>
+<text x="165" y="530" font-size="9" fill="#555">① 接收申请 → ② 取凭证 → ③ 建 VM</text>
+<text x="165" y="544" font-size="9" fill="#555">→ ④ 分配 IP/DNS → ⑤ 安装软件/DB</text>
+<text x="165" y="558" font-size="9" fill="#555">→ ⑥ 注册备份 → ⑦ 纳管监控</text>
+<text x="165" y="572" font-size="9" fill="#555">→ ⑧ 注册 PAM → ⑨ 回写 CMDB</text>
+</svg>
+</div>
+</div>
+</div>
+
+<!-- TAB 2 -->
+<div class="panel" id="panel-cards">
+<div class="cards-grid">
+<div class="cat-card"><div class="cat-head" style="background:#1565C0">📋 流程层 · ITSM</div><div class="cat-body">
+<div class="plat-item" style="border-color:#1565C0"><div class="plat-name">ServiceNow</div><div class="plat-sub">全球最主流 ITSM 平台</div><div class="plat-tags"><span class="plat-tag" style="background:#1565C0">工单审批</span><span class="plat-tag" style="background:#1565C0">CMDB</span><span class="plat-tag" style="background:#1565C0">变更管理</span></div><div class="plat-resp">发起 VM/DB 申请 → 多级审批 → 触发 CMP 开通 → 完成后回写 CMDB CI 记录</div><div class="plat-api"><b>对接：</b>Table API (REST) · OAuth2 · Webhook 回调 · Import Set API</div></div>
+<div class="plat-item" style="border-color:#1976D2"><div class="plat-name">BMC Helix / Remedy</div><div class="plat-sub">传统企业 ITSM</div><div class="plat-tags"><span class="plat-tag" style="background:#1976D2">工单</span><span class="plat-tag" style="background:#1976D2">资产管理</span></div><div class="plat-resp">老牌 ITSM，部分金融/国企仍在使用，功能与 ServiceNow 类似</div><div class="plat-api"><b>对接：</b>REST API · AR System SOAP API</div></div>
+</div></div>
+<div class="cat-card"><div class="cat-head" style="background:#2E7D32">🖥️ 资源层 · 基础设施</div><div class="cat-body">
+<div class="plat-item" style="border-color:#2E7D32"><div class="plat-name">TFE <span style="font-size:10px;color:#888">· Terraform Enterprise</span></div><div class="plat-tags"><span class="plat-tag" style="background:#2E7D32">IaC</span><span class="plat-tag" style="background:#2E7D32">VM创建</span><span class="plat-tag" style="background:#2E7D32">网络/存储</span></div><div class="plat-resp">声明式编排资源，CMP 触发后由 TFE 调用底层 vCenter/云 API 建资源</div><div class="plat-api"><b>对接：</b>POST /api/v2/runs 触发 → 传变量 → GET 轮询状态 → 读 Outputs</div></div>
+<div class="plat-item" style="border-color:#388E3C"><div class="plat-name">VMware vCenter</div><div class="plat-tags"><span class="plat-tag" style="background:#388E3C">VM克隆</span><span class="plat-tag" style="background:#388E3C">资源调配</span></div><div class="plat-resp">实际执行 VM 克隆、CPU/内存/磁盘配置，通常由 TFE vSphere Provider 调用</div><div class="plat-api"><b>对接：</b>vSphere REST API (7.0+) · pyvmomi SDK（老版本）</div></div>
+</div></div>
+<div class="cat-card"><div class="cat-head" style="background:#00838F">🌐 网络层 · DNS/IP</div><div class="cat-body">
+<div class="plat-item" style="border-color:#00838F"><div class="plat-name">Infoblox</div><div class="plat-sub">IPAM / DNS / DHCP 一体化</div><div class="plat-tags"><span class="plat-tag" style="background:#00838F">IP分配</span><span class="plat-tag" style="background:#00838F">DNS注册</span><span class="plat-tag" style="background:#00838F">网络资产</span></div><div class="plat-resp">VM 开通时从 Pool 分配 IP，注册 A/PTR DNS 记录；VM 销毁时回收</div><div class="plat-api"><b>对接：</b>WAPI REST API · POST /wapi/v2.x/record:host · DELETE 回收</div></div>
+</div></div>
+<div class="cat-card"><div class="cat-head" style="background:#E65100">⚙️ 执行层 · 自动化</div><div class="cat-body">
+<div class="plat-item" style="border-color:#E65100"><div class="plat-name">AAP <span style="font-size:10px;color:#888">· Ansible Automation Platform</span></div><div class="plat-tags"><span class="plat-tag" style="background:#E65100">配置管理</span><span class="plat-tag" style="background:#E65100">DB安装</span><span class="plat-tag" style="background:#E65100">Agent部署</span></div><div class="plat-resp">核心执行引擎：OS 加固、DB 安装、中间件部署、监控/备份 Agent 安装</div><div class="plat-api"><b>对接：</b>POST .../job_templates/{id}/launch · 传 extra_vars · GET 轮询 Job 状态</div></div>
+<div class="plat-item" style="border-color:#BF360C"><div class="plat-name">Jenkins / GitLab CI</div><div class="plat-tags"><span class="plat-tag" style="background:#BF360C">CI/CD</span><span class="plat-tag" style="background:#BF360C">应用部署</span></div><div class="plat-resp">VM 开通后可触发 CI/CD 流水线完成应用自动部署（扩展场景）</div><div class="plat-api"><b>对接：</b>Jenkins REST API · GitLab Pipeline API / Webhook</div></div>
+</div></div>
+<div class="cat-card"><div class="cat-head" style="background:#6A1B9A">🔐 安全层 · 凭证/PAM</div><div class="cat-body">
+<div class="plat-item" style="border-color:#6A1B9A"><div class="plat-name">HashiCorp Vault</div><div class="plat-sub">秘密管理平台</div><div class="plat-tags"><span class="plat-tag" style="background:#6A1B9A">密码动态下发</span><span class="plat-tag" style="background:#6A1B9A">证书</span><span class="plat-tag" style="background:#6A1B9A">Token</span></div><div class="plat-resp">CMP/AAP 运行时动态拉取凭证，避免硬编码；支持自动轮换和完整审计</div><div class="plat-api"><b>对接：</b>AppRole 认证 → KV v2 REST · Ansible Vault lookup plugin</div></div>
+<div class="plat-item" style="border-color:#880E4F"><div class="plat-name">CyberArk</div><div class="plat-sub">特权账号管理 PAM</div><div class="plat-tags"><span class="plat-tag" style="background:#880E4F">root账号</span><span class="plat-tag" style="background:#880E4F">密码轮换</span><span class="plat-tag" style="background:#880E4F">跳板登录</span></div><div class="plat-resp">VM 开通后注册 root/admin，运维人员通过 PSM 跳板登录，不直接接触密码</div><div class="plat-api"><b>对接：</b>PVWA REST API · POST /api/Accounts 创建 · DELETE 注销</div></div>
+</div></div>
+<div class="cat-card"><div class="cat-head" style="background:#C62828">📊 监控 &amp; 备份层</div><div class="cat-body">
+<div class="plat-item" style="border-color:#C62828"><div class="plat-name">Dynatrace / Datadog</div><div class="plat-tags"><span class="plat-tag" style="background:#C62828">APM</span><span class="plat-tag" style="background:#C62828">基础设施</span><span class="plat-tag" style="background:#C62828">告警</span></div><div class="plat-resp">AAP 安装 OneAgent/Agent，自动发现主机进程，关联告警策略和 SLA 标签</div><div class="plat-api"><b>对接：</b>Dynatrace REST API 打标签 · Datadog POST /api/v1/tags/hosts</div></div>
+<div class="plat-item" style="border-color:#D81B60"><div class="plat-name">Splunk</div><div class="plat-tags"><span class="plat-tag" style="background:#D81B60">日志采集</span><span class="plat-tag" style="background:#D81B60">SIEM</span></div><div class="plat-resp">AAP 安装 Universal Forwarder，指向 Indexer，采集系统/应用/安全日志</div><div class="plat-api"><b>对接：</b>Splunk REST API · AAP Playbook 安装 Forwarder</div></div>
+<div class="plat-item" style="border-color:#F57F17"><div class="plat-name">Cohesity / NetBackup</div><div class="plat-tags"><span class="plat-tag" style="background:#F57F17">备份策略</span><span class="plat-tag" style="background:#F57F17">Agent</span><span class="plat-tag" style="background:#F57F17">Tag-based</span></div><div class="plat-resp">按 SLA 标签选择备份策略，安装 Agent 注册保护组；VM 销毁自动解除</div><div class="plat-api"><b>对接：</b>Cohesity REST API · NetBackup REST (9.x+) · 或 AAP CLI</div></div>
+</div></div>
+</div>
+</div>
+
+<!-- TAB 3 -->
+<div class="panel" id="panel-orch">
+<div class="orch-layout">
+<div class="step-list">
+<div class="step-list-title">CMP 编排步骤</div>
+<button class="step-btn" onclick="showStep('s0',this)"><div class="step-num" style="color:#1565C0">0</div><div class="step-info"><div class="step-title">接收申请 &amp; 审批</div><div class="step-plat">ServiceNow → CMP</div></div></button>
+<button class="step-btn" onclick="showStep('s1',this)"><div class="step-num" style="color:#6A1B9A">1</div><div class="step-info"><div class="step-title">获取凭证</div><div class="step-plat">CMP → Vault</div></div></button>
+<button class="step-btn" onclick="showStep('s2',this)"><div class="step-num" style="color:#2E7D32">2</div><div class="step-info"><div class="step-title">创建 VM</div><div class="step-plat">CMP → TFE → vCenter</div></div></button>
+<button class="step-btn" onclick="showStep('s3',this)"><div class="step-num" style="color:#00838F">3</div><div class="step-info"><div class="step-title">分配 IP / DNS</div><div class="step-plat">CMP → Infoblox</div></div></button>
+<button class="step-btn" onclick="showStep('s4',this)"><div class="step-num" style="color:#E65100">4</div><div class="step-info"><div class="step-title">安装软件 / DB</div><div class="step-plat">CMP → AAP</div></div></button>
+<button class="step-btn" onclick="showStep('s5',this)"><div class="step-num" style="color:#F57F17">5</div><div class="step-info"><div class="step-title">注册备份策略</div><div class="step-plat">CMP → Cohesity / NBU</div></div></button>
+<button class="step-btn" onclick="showStep('s6',this)"><div class="step-num" style="color:#C62828">6</div><div class="step-info"><div class="step-title">纳管监控 / 日志</div><div class="step-plat">AAP → Dynatrace / Splunk</div></div></button>
+<button class="step-btn" onclick="showStep('s7',this)"><div class="step-num" style="color:#880E4F">7</div><div class="step-info"><div class="step-title">注册特权账号</div><div class="step-plat">CMP → CyberArk</div></div></button>
+<button class="step-btn" onclick="showStep('s8',this)"><div class="step-num" style="color:#1565C0">8</div><div class="step-info"><div class="step-title">回写 CMDB &amp; 关单</div><div class="step-plat">CMP → ServiceNow</div></div></button>
+</div>
+<div class="detail-card" id="detail-card">
+<div class="detail-placeholder"><div class="ph-icon">👈</div><p>点击左侧步骤查看详情</p></div>
+</div>
+</div>
+</div>
+
+</div>
+<script>
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active')}
+var SD={
+s0:{c:'#1565C0',no:'步骤 0',title:'接收申请 & 触发审批',badge:'ServiceNow → CMP',flow:['用户在 ServiceNow 提交 VM/DB 开通工单','工单进入 ITIL 审批流，经多级审批人签批','审批通过后 ServiceNow Business Rule 触发 Webhook，POST 到 CMP 接口','CMP 解析参数（规格、OS、业务归属、SLA 等），创建内部 Provisioning Task','校验合规性（资源配额、安全基线），通过后进入编排流程'],apis:[{l:'触发方式',c:'ServiceNow Webhook (Business Rule)\nPOST https://cmp.internal/api/provision/trigger'},{l:'或 CMP 主动轮询',c:'GET /api/now/table/sc_task?state=approved'},{l:'认证',c:'OAuth2 Client Credentials\nBasic Auth（较老环境）'}]},
+s1:{c:'#6A1B9A',no:'步骤 1',title:'获取凭证',badge:'CMP → HashiCorp Vault',flow:['在执行任何下游调用前，先向 Vault 认证获取临时凭证','以 AppRole（role_id + secret_id）换取短期 Vault Token','用 Token 读取各平台服务账号密码（vCenter、TFE、AAP 等）','凭证仅存内存，用完即丢，不落盘不写日志','AAP Playbook 内也通过 Vault lookup plugin 动态获取密码'],apis:[{l:'AppRole 认证',c:'POST /v1/auth/approle/login\n{"role_id":"xxx","secret_id":"yyy"}'},{l:'读取凭证',c:'GET /v1/secret/data/platforms/vcenter\nX-Vault-Token: <token>'},{l:'Ansible 集成',c:"vars:\n  db_pass: \"{{ lookup('hashi_vault','secret=...') }}\""}]},
+s2:{c:'#2E7D32',no:'步骤 2',title:'创建 VM',badge:'CMP → TFE → vCenter',flow:['CMP 向 TFE 指定 Workspace 注入变量并触发 Run','TFE 执行 Terraform Plan（预览变更），自动 Apply','Apply 阶段：vSphere Provider 调用 vCenter API 克隆 VM 模板','vCenter 完成 VM 创建（分配 CPU/内存/磁盘，挂载网络）','TFE Run 变为 applied，CMP 读取 Outputs（VM IP、ID 等）'],apis:[{l:'触发 Run',c:'POST /api/v2/runs\n{"data":{"relationships":{"workspace":{"data":{"id":"ws-xxx"}}}}}'},{l:'注入变量',c:'POST /api/v2/workspaces/{ws_id}/vars\n{"key":"vm_name","value":"prod-db-01"}'},{l:'轮询状态',c:'GET /api/v2/runs/{run_id}\n→ 等待 status = "applied"'},{l:'读取输出',c:'GET /api/v2/workspaces/{id}/current-state-version-outputs'}]},
+s3:{c:'#00838F',no:'步骤 3',title:'分配 IP / DNS',badge:'CMP → Infoblox',flow:['根据 VM 归属网段/VLAN 向 Infoblox 申请 IP','Infoblox 从 IP Pool 分配一个可用地址','同时注册正向 DNS（A 记录：主机名 → IP）','注册反向 DNS（PTR 记录：IP → 主机名）','VM 销毁时调 DELETE 回收 IP 和 DNS 记录'],apis:[{l:'创建主机记录（IP+DNS 同步）',c:'POST /wapi/v2.12/record:host\n{"name":"vm01.corp.com","networks":[{"_ref":"network/xxx"}]}'},{l:'查可用网段',c:'GET /wapi/v2.12/network?network=10.0.1.0/24'},{l:'回收',c:'DELETE /wapi/v2.12/record:host/{_ref}'}]},
+s4:{c:'#E65100',no:'步骤 4',title:'安装软件 / 数据库',badge:'CMP → AAP（核心执行层）',flow:['VM 就绪后，CMP 根据申请类型选择对应 Job Template','触发 AAP 执行：OS 基线加固 → DB 安装 → 中间件部署','AAP 通过 SSH 连接 VM，执行幂等 Playbook','同步安装备份 Agent、监控 Agent、Splunk Forwarder','Job 完成后 CMP 获取结果，判断成功/失败'],apis:[{l:'触发 Job',c:'POST /api/v2/job_templates/{id}/launch\n{"extra_vars":{"target_ip":"10.0.1.5","db_type":"oracle","db_version":"19c"}}'},{l:'轮询状态',c:'GET /api/v2/jobs/{job_id}\n→ 等待 status = "successful"'},{l:'获取日志',c:'GET /api/v2/jobs/{job_id}/stdout?format=txt'},{l:'认证',c:'Authorization: Bearer {personal_access_token}'}]},
+s5:{c:'#F57F17',no:'步骤 5',title:'注册备份策略',badge:'CMP → Cohesity / NetBackup（或经 AAP）',flow:['解析申请中的 backup_sla 标签（gold/silver/bronze/none）','Cohesity 路径：调 REST API 将 VM 加入对应 Protection Group','NetBackup 路径 A：调 NBU REST API (9.x+) 注册 Client 到 Policy','NetBackup 路径 B：AAP Playbook 执行 nbclient 安装 CLI（老版本）','Tag-based：给 VM 打 vSphere Tag，备份平台自动发现纳管'],apis:[{l:'Cohesity 加入保护组',c:'POST /v1/protectionGroups/{id}/addObjects\n{"objects":[{"id":"vm-uuid-xxx"}]}'},{l:'NetBackup 注册 Client',c:'POST /netbackup/config/policies/{policy}/clients\n{"data":{"type":"client","id":"vm01.corp.com"}}'},{l:'Tag-based',c:'给 VM 打 vSphere Tag: backup:gold\n→ Cohesity 自动关联 Gold Policy'}]},
+s6:{c:'#C62828',no:'步骤 6',title:'纳管监控 / 日志',badge:'AAP → Dynatrace / Datadog / Splunk',flow:['AAP 步骤 4 执行时同步安装监控 Agent 和日志 Forwarder','Dynatrace：OneAgent 自动发现主机/进程/依赖，上报 DT 平台','Datadog：Agent 安装后通过 API 打业务标签，绑定告警策略','Splunk：安装 Universal Forwarder，配置指向 Indexer','CMP 可选调 API 补充 CMDB 标签或告警阈值配置'],apis:[{l:'Dynatrace 打标签',c:'PUT /api/v1/entity/infrastructure/hosts/{id}/tags\n[{"key":"env","value":"prod"}]'},{l:'Datadog 主机标签',c:'POST /api/v1/tags/hosts/{host_name}\n{"tags":["env:prod","service:db"]}'},{l:'Splunk Forwarder 配置',c:'[tcpout]\ndefaultGroup = indexers\nserver = splunk-idx.corp.com:9997'}]},
+s7:{c:'#880E4F',no:'步骤 7',title:'注册特权账号 (PAM)',badge:'CMP → CyberArk',flow:['VM 开通完成后，将 root/Administrator 注册到 CyberArk Safe','传入平台类型、VM IP、账号名、初始密码（从 Vault 获取）','CyberArk CPM 接管后自动密码轮换，CMP 不再保存密码','运维人员通过 CyberArk PSM Web 界面申请跳板会话','VM 销毁时 CMP 调 API 注销账号清理 Safe 记录'],apis:[{l:'登录获取 Token',c:'POST /PasswordVault/api/Auth/CyberArk/Logon\n{"username":"cmp_svc","password":"xxx"}'},{l:'注册账号',c:'POST /PasswordVault/api/Accounts\n{"safeName":"Linux_Prod","platformId":"UnixSSH",\n"address":"10.0.1.5","userName":"root","secret":"init"}'},{l:'销毁时注销',c:'DELETE /PasswordVault/api/Accounts/{account_id}'}]},
+s8:{c:'#1565C0',no:'步骤 8',title:'回写 CMDB & 关闭工单',badge:'CMP → ServiceNow',flow:['所有步骤完成后，CMP 汇总全部资产信息','调 Table API 创建/更新 CI（主机名、IP、OS、CPU/内存、业务归属）','写入 CI 之间的关联关系（DB 依赖 VM 等）','更新原始工单状态为 closed_complete','通知模块发送完成邮件/消息给申请人'],apis:[{l:'创建 Linux Server CI',c:'POST /api/now/table/cmdb_ci_linux_server\n{"name":"vm01","ip_address":"10.0.1.5","os":"RHEL 8"}'},{l:'关闭工单',c:'PATCH /api/now/table/sc_req_item/{sys_id}\n{"state":"closed_complete","close_notes":"Done"}'},{l:'批量写入（推荐）',c:'Import Set API:\nPOST /api/now/import/{staging_table}'}]}
+};
+function showStep(key,btn){
+document.querySelectorAll('.step-btn').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+var d=SD[key];
+var fHTML=d.flow.map(function(f,i){return '<div class="flow-step"><div class="flow-circle" style="background:'+d.c+'">'+(i+1)+'</div><div class="flow-text">'+f+'</div></div>'+(i<d.flow.length-1?'<div class="flow-connector"></div>':'')}).join('');
+var aHTML=d.apis.map(function(a){return '<div class="api-item" style="border-color:'+d.c+'"><div class="api-label">'+a.l+'</div><div class="api-code">'+a.c.replace(/\n/g,'<br>')+'</div></div>'}).join('');
+document.getElementById('detail-card').innerHTML='<div class="detail-top" style="border-left:4px solid '+d.c+';padding-left:16px"><div class="detail-step-no" style="color:'+d.c+'">'+d.no+'</div><div class="detail-h">'+d.title+'</div><span class="detail-badge" style="background:'+d.c+'">'+d.badge+'</span></div><div class="detail-body"><div><div class="detail-sec-title">执行过程</div><div class="detail-flow">'+fHTML+'</div></div><div><div class="detail-sec-title">对接方式 / API</div><div class="api-grid">'+aHTML+'</div></div></div>';
+}
+</script>
+</body>
+</html>
