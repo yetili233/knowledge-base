@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<!-- saved from url=(0137)file:///C:/Users/yeti2/Downloads/%E4%BA%91%E7%AE%A1%E5%B9%B3%E5%8F%B0%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%96%BD%E8%AE%A1%E5%88%92_v4%20(1).html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云管平台项目实施计划</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    padding: 20px;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.container { max-width: 1280px; margin: 0 auto; }
+
+/* ===== 头部 ===== */
+.header {
+    background: white;
+    padding: 24px 28px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.header h1 { font-size: 24px; color: #1e3a5f; font-weight: 600; }
+.header p { color: #8a9aa8; font-size: 12px; margin-top: 4px; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ===== 按钮 ===== */
+.btn {
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff;
+}
+.btn-primary { background: #2f6db5; color: white; }
+.btn-primary:hover { background: #275a96; }
+.btn-outline { border-color: #d0d7de; color: #2c3e50; }
+.btn-outline:hover { background: #f0f3f6; }
+.btn-text {
+    background: transparent;
+    color: #5a6b7b;
+    border: none;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+.btn-text:hover { background: #eef2f6; color: #2f6db5; border-radius: 4px; }
+.btn-text.danger:hover { color: #c0392b; background: #fdf0ef; }
+.btn-small { padding: 5px 10px; font-size: 12px; }
+
+/* ===== 统计 ===== */
+.stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat-card {
+    flex: 1; min-width: 120px;
+    background: white;
+    padding: 14px 18px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    display: flex; align-items: baseline; gap: 8px;
+}
+.stat-number { font-size: 22px; font-weight: 700; color: #2f6db5; }
+.stat-label { font-size: 12px; color: #8a9aa8; }
+
+/* ===== 阶段卡片 ===== */
+.timeline { display: flex; flex-direction: column; gap: 14px; }
+.phase {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+.phase-header {
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    border-left: 4px solid #2f6db5;
+    background: #fbfcfd;
+}
+.phase-header:hover { background: #f4f7fa; }
+.phase-header-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.phase-number {
+    color: #2f6db5;
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+}
+.phase-title { font-size: 16px; font-weight: 600; color: #1e3a5f; }
+.phase-desc { font-size: 12px; color: #8a9aa8; margin-top: 2px; }
+.phase-header-right { display: flex; align-items: center; gap: 8px; }
+.phase-toggle { font-size: 12px; color: #8a9aa8; transition: transform 0.2s; }
+.phase.collapsed .phase-toggle { transform: rotate(-90deg); }
+.phase-content { padding: 8px 20px 16px; }
+.phase.collapsed .phase-content { display: none; }
+.phase-toolbar { padding: 8px 0 4px; display: flex; gap: 6px; }
+
+/* ===== 流程 ===== */
+.process-item {
+    border: 1px solid #e8edf2;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    background: #fff;
+}
+.process-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.process-title-area { flex: 1; min-width: 0; }
+.process-name { font-weight: 600; font-size: 14px; color: #1e3a5f; }
+.process-name .num { color: #2f6db5; margin-right: 6px; }
+.process-name-en { font-size: 11px; color: #a4b1bd; font-style: italic; margin-top: 1px; }
+.process-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+.process-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #5a6b7b;
+}
+.process-meta b { color: #2c3e50; font-weight: 600; }
+.tag {
+    display: inline-block;
+    border: 1px solid #cfdce9;
+    color: #2f6db5;
+    padding: 0 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 18px;
+}
+.milestone-tag {
+    display: inline-block;
+    background: #fdf6ec;
+    color: #b07a1f;
+    padding: 0 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 18px;
+    font-weight: 600;
+}
+
+/* 详细字段区 */
+.field-rows { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.field-row {
+    display: flex;
+    gap: 10px;
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+.field-label {
+    flex-shrink: 0;
+    width: 76px;
+    color: #8a9aa8;
+    font-weight: 600;
+    padding-top: 1px;
+}
+.field-value { flex: 1; color: #3d4f60; white-space: pre-wrap; word-break: break-word; }
+
+/* ===== 子流程 ===== */
+.sub-processes {
+    margin-top: 12px;
+    border-top: 1px dashed #e2e8ee;
+    padding-top: 10px;
+}
+.sub-process-item {
+    padding: 8px 0 8px 18px;
+    border-left: 2px solid #e2e8ee;
+    margin-bottom: 6px;
+}
+.sub-process-item:last-child { margin-bottom: 0; }
+.sub-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.sub-name { font-weight: 600; font-size: 13px; color: #2c3e50; }
+.sub-name .num { color: #2f6db5; margin-right: 5px; }
+.sub-name-en { font-size: 11px; color: #a4b1bd; font-style: italic; }
+.sub-process-item .field-rows { margin-top: 6px; }
+.sub-process-item .field-row { font-size: 12px; }
+
+/* ===== 名词解释 ===== */
+.glossary { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-top: 14px; overflow: hidden; }
+.glossary-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    border-left: 4px solid #8a9aa8;
+    background: #fbfcfd;
+}
+.glossary-header:hover { background: #f4f7fa; }
+.glossary-header .g-title { font-size: 15px; font-weight: 600; color: #1e3a5f; }
+.glossary-header .g-count { font-size: 12px; color: #8a9aa8; margin-left: 8px; font-weight: 400; }
+.glossary-header-right { display: flex; align-items: center; gap: 8px; }
+.glossary.collapsed .glossary-body { display: none; }
+.glossary.collapsed .phase-toggle { transform: rotate(-90deg); }
+.glossary table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.glossary td { padding: 5px 14px; text-align: left; border-bottom: 1px solid #f2f5f8; vertical-align: top; line-height: 1.5; }
+.glossary tr:last-child td { border-bottom: none; }
+.glossary td:first-child { width: 120px; font-weight: 600; color: #1e3a5f; white-space: nowrap; padding-left: 20px; }
+.glossary td:nth-child(2) { white-space: pre-wrap; color: #5a6b7b; }
+.glossary .g-actions { width: 90px; white-space: nowrap; text-align: right; padding-right: 14px; }
+
+/* ===== 模态框 ===== */
+.modal {
+    display: none;
+    position: fixed; z-index: 1000; inset: 0;
+    background: rgba(20,30,40,0.45);
+}
+.modal.active { display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; }
+.modal-content {
+    background: white;
+    padding: 26px;
+    border-radius: 8px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+}
+.modal-header { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: #1e3a5f; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { margin-bottom: 12px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { display: block; margin-bottom: 4px; font-weight: 600; color: #5a6b7b; font-size: 12px; }
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d0d7de;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #2c3e50;
+}
+.form-group textarea { resize: vertical; min-height: 64px; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none; border-color: #2f6db5; box-shadow: 0 0 0 3px rgba(47,109,181,0.12);
+}
+.modal-actions { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+
+/* ===== Toast ===== */
+.toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #2c3e50; color: white;
+    padding: 11px 18px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 2000;
+    font-size: 13px;
+    animation: slideInUp 0.25s ease;
+}
+@keyframes slideInUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.section-title { font-size: 15px; font-weight: 600; color: #1e3a5f; padding: 14px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .field-label { width: 64px; }
+    .process-head, .sub-head { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>云管平台项目实施计划</h1>
+            <p>CMP Project Implementation Plan · 点击阶段标题可展开/收起</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openPhaseModal()">+ 添加阶段</button>
+            <button class="btn btn-outline" onclick="toggleAllPhases()">展开/收起</button>
+            <button class="btn btn-outline" onclick="exportData()">导出JSON</button>
+            <button class="btn btn-outline" onclick="document.getElementById(&#39;importFile&#39;).click()">导入JSON</button>
+            <button class="btn btn-outline" onclick="resetData()">重置为默认</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </div>
+
+    <div class="stats" id="statsContainer">
+        <div class="stat-card"><span class="stat-number">6</span><span class="stat-label">阶段</span></div>
+        <div class="stat-card"><span class="stat-number">15</span><span class="stat-label">主流程</span></div>
+        <div class="stat-card"><span class="stat-number">5</span><span class="stat-label">子流程</span></div>
+        <div class="stat-card"><span class="stat-number">6</span><span class="stat-label">里程碑</span></div>
+    </div>
+    <div class="timeline" id="timeline"><div class="phase" id="phase-1">
+            <div class="phase-header" onclick="togglePhase(1)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 1</span>
+                    <div>
+                        <div class="phase-title">阶段一：项目启动</div>
+                        <div class="phase-desc">项目正式启动前的业务准备工作及启动会议</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 1)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(1)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(1)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(1)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">1.1</span>项目业务准备</div>
+                            <div class="process-name-en">Project Business</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 1, 11)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 1, 11)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(1, 11, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(1, 11, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(1, 11)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">准备</span>
+                        <span><b>人天:</b> 售前</span>
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">项目正式启动前的业务准备工作，涵盖招投标、Technical Proposal（作为标书）、需求度评估及SOW范围明确。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 招投标时华为或阿里等合作商提供 High Level Scope，我们再将Technical Proposal 当做标书改；
+② 海外项目一般有一周时间去客户现场沟通研发可行性，或提供替代方案；
+③ （非必要）Questionnaire 按照标准文档提问，整理后内部过一下（最好喊老板/天竞一起review），再改成英文版发送客户；
+④ 明确 SOW 范围，避免后期 scope creep。</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">① SOW
+② 明确项目干系人（Stakeholder List）</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">1. 不同阶段可能有不同的 questionnaire（有需求需要澄清时就可以发）；
+• 大致功能范围确定后，针对具体业务需求再发更具体的 questionnaire。
+
+2. 售前阶段项目文件放在“售前和方案资料”，切换到交付后文件放在“交付资料和项目”</div></div>
+                    </div>
+                    
+                <div class="sub-processes">
+                    
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">1.1.1</span>POC（概念验证）</span>
+                                    <span class="sub-name-en">　Proof of Concept</span>
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal(&#39;editSub&#39;, 1, 11, 111)">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 11, 111, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 11, 111, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(1, 11, 111)">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                <span><b>人天:</b> 视需求</span>
+                                <span><b>责任人:</b> 售前+交付+PM（POC前会有初步需求范围）</span>
+                                
+                            </div>
+                            <div class="field-rows">
+                                <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">规模较大、较为看重的客户倾向在售前进行 POC，先初步确认 CMP 是否能够满足业务需求，随后逐步完善该版本。</div></div>
+                                <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">POC 会直接在客户环境部署专门的 POC Testing 环境。（一般都是单节点）
+POC到项目正式实施一般需要比较长的周期。大部分项目都有POC。</div></div>
+                                <div class="field-row"><div class="field-label">交付物</div><div class="field-value">POC 测试报告（作为业务达标的依据）</div></div>
+                                <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">1. POC的演示流程前需要和客户会议投屏沟通，确认他们内部的jira流转流程，方便配置【前提条件：我们自己要先测试过流程能够走通，再和客户讨论要走什么流程】；
+2. 可能部分演示内容流程是需要客户由jira发起的，客户需要额外的开发，也需要提前沟通；
+3. 演示case确认后，由客户开着远程，我们远程配置调试（看客户的安全等级，如果安全等级不高的话，可能给我们一个vpn就可以访问到了）；</div></div>
+                            </div>
+                        </div>
+                    
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">1.1.2</span>SOW、合同签订</span>
+                                    
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal(&#39;editSub&#39;, 1, 11, 112)">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 11, 112, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 11, 112, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(1, 11, 112)">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                
+                                
+                                
+                            </div>
+                            <div class="field-rows">
+                                <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">一般在POC验证完成后确认完整的SOW</div></div>
+                                <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">项目时间范围、人员安排、成本估算</div></div>
+                                <div class="field-row"><div class="field-label">交付物</div><div class="field-value">SOW（仅确定范围，编写完成签订合同后才会进行明确需求的design workshop）
+合同</div></div>
+                                <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">1. 客户可能会要求提供给供应商集成的授权文件-睿睿有标准版；
+2. 软著文档-直接提供中文版
+
+*重点：我们有啥给啥，不需要根据客户的需求提供定制版本
+
+3. 内部文件报批流程：邮件申请，把要盖章的文件放在附件里，说明下是哪个项目要盖章，发送老板，抄送佳雨和sophia就可以</div></div>
+                            </div>
+                        </div>
+                    
+                </div>
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">1.2</span>内部启动会议</div>
+                            <div class="process-name-en">Kick-off Conference</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 1, 12)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 1, 12)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(1, 12, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(1, 12, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(1, 12)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">准备</span>
+                        <span><b>人天:</b> 1天</span>
+                        
+                        <span><b>责任人:</b> PM-准备会议材料，发起会议</span>
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">内部明确项目启动、实施计划、干系人及各方职责。</div></div>
+                        
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">Project Kick-off Meeting PPT初版
+Project Implementation Plan初版-WBS输出</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">一般内部没有正式启动会议</div></div>
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">1.3</span>客户启动会议</div>
+                            <div class="process-name-en">Kick-off Conference</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 1, 13)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 1, 13)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(1, 13, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(1, 13, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(1, 13)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">准备</span>
+                        <span><b>人天:</b> 1天</span>
+                        
+                        <span><b>责任人:</b> PM-完善会议材料，发起会议</span>
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">项目正式开始，与客户召开启动会议，明确实施计划、干系人及各方职责。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">② 和客户开会讨论需求时，如果有符合标准化 workflow 的需求，可以提前准备 PPT 投屏展示；
+③ 启动会议时需要明确讨论所有内容可行后再推进。</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">① Project Implementation Plan
+② Project Kick-off Meeting PPT</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">@和客户需求讨论前先准备和演示环境，配置好客户需要的服务卡片以及流程；
+
+@客户开会前明确项目范围
+1. 多少个物理CPU，多少个虚拟机，12个CPU则为120个虚拟机（x10）
+2. 需要哪些模块（最常见的是多租户和标准计费）
+3. 是否需要对接华为FC（一般都是和华为合作的项目）
+4. 单节点还是多节点安装；
+CPU数量 → 虚拟机规模 → 选模块 → 确认可用性要求（RTO）→ 定节点数 → 问有无F5 → 确认操作系统版本 → 确认华为FC对接需求
+5. 用户和认证即是否对接LDAP或者AD可以在需求设计阶段问；</div></div>
+                    </div>
+                    
+                <div class="sub-processes">
+                    
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">1.3.1</span>需求沟通</span>
+                                    <span class="sub-name-en">　design workshop</span>
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal(&#39;editSub&#39;, 1, 13, 1)">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 13, 1, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(1, 13, 1, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(1, 13, 1)">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                <span><b>人天:</b> 1天</span>
+                                
+                                
+                            </div>
+                            <div class="field-rows">
+                                <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">和客户会议进行需求明细讨论</div></div>
+                                
+                                
+                                <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">1. 内部准备当前设计流程PPT以及内部架构图；
+2. 内部准备discussion list包含每个具体项是否需要（可让ai设计）；
+3. 内部准备演示环境；
+</div></div>
+                            </div>
+                        </div>
+                    
+                </div>
+                </div>
+            </div>
+        </div><div class="phase" id="phase-2">
+            <div class="phase-header" onclick="togglePhase(2)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 2</span>
+                    <div>
+                        <div class="phase-title">阶段二：调研与设计</div>
+                        <div class="phase-desc">现状调研、需求分析、蓝图规划及平台详细设计（界限较为模糊，一般和阶段三同时进行）</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 2)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(2)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(2)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(2)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">2.1</span>现状调研与需求分析、蓝图规划</div>
+                            <div class="process-name-en">Current Situation Survey &amp; Demand Analysis</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 2, 21)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 2, 21)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(2, 21, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(2, 21, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(2, 21)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">调研</span>
+                        <span><b>人天:</b> 1-2周</span>
+                        <span><b>并行/顺序:</b> 与平台详细实施设计同时进行</span>
+                        
+                        <span class="milestone-tag">M1: Requirement Finalization</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">对客户现有情况进行全面调研，收集并分析业务需求，输出需求确认文档。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 在需求调研的同时，让客户同步准备好可部署的测试环境及其他所需信息；
+② 国内项目：最简单的是按照标准化流程，直接买系统，培训结束就交付；
+③ 里程碑达成标准：需求文档经客户确认签字。
+
+启动后就安装平台，随后慢慢完善业务需求，基础配置和复杂配置需求同步进行</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">Requirement Finalization Document（需求确认文档）</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">1. 日报+周报+milestone汇报（每次跟客户的会议纪要都需要记录到wiki上，包括参会人、主题以及下一步计划等）
+2. 需求说明文档
+3. 产品接口说明文档</div></div>
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">2.2</span>平台详细实施设计</div>
+                            <div class="process-name-en">Detailed Implementation Design of the Platform</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 2, 22)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 2, 22)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(2, 22, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(2, 22, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(2, 22)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">设计</span>
+                        <span><b>人天:</b> 1周</span>
+                        
+                        
+                        <span class="milestone-tag">Blueprint confirmation</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">基于调研结果，制定平台详细实施设计方案，包括架构设计、模块规划、配置方案等。</div></div>
+                        
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">1. Platform Implementation Design Document
+2. LLD（详细设计文档）</div></div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div><div class="phase collapsed" id="phase-3">
+            <div class="phase-header" onclick="togglePhase(3)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 3</span>
+                    <div>
+                        <div class="phase-title">阶段三：平台实施</div>
+                        <div class="phase-desc">多云管理平台各模块的实施、测试与定制化开发</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 3)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(3)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(3)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(3)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">3.1</span>多云管理平台各模块实施与交付</div>
+                            <div class="process-name-en">Implementation and Delivery of Each Module of the Multi-cloud Management Platform</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 3, 31)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 3, 31)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(3, 31, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(3, 31, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(3, 31)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">平台实施</span>
+                        <span><b>人天:</b> 3周+</span>
+                        
+                        
+                        <span class="milestone-tag">M2: CMP Standard Product Deployment</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">客户明确需求后，配置测试环境并逐模块部署多云管理平台，完成标准化产品交付。周期较长。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 客户需提供可部署的测试环境；
+② 里程碑达成：CMP 标准产品在测试环境部署完成并通过初步验证。
+③ 阶段开始后每周五进行内部周会；（建议是每周一？）</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">平台</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">需收集客户环境信息：
+① Cluster Information
+② Cluster Installation Schedule</div></div>
+                    </div>
+                    
+                <div class="sub-processes">
+                    
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">3.1.1</span>测试环境 Platform 配置与部署</span>
+                                    
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal(&#39;editSub&#39;, 3, 31, 311)">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(3, 31, 311, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(3, 31, 311, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(3, 31, 311)">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                <span><b>人天:</b> 1周</span>
+                                
+                                
+                            </div>
+                            <div class="field-rows">
+                                <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">在客户测试环境完成平台基础配置与部署。</div></div>
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">3.1.2</span>Cloud Service Catalog 配置</span>
+                                    <span class="sub-name-en">　Cloud Service Catalog Configuration</span>
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal(&#39;editSub&#39;, 3, 31, 312)">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(3, 31, 312, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(3, 31, 312, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(3, 31, 312)">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                <span><b>人天:</b> 3周</span>
+                                
+                                
+                            </div>
+                            <div class="field-rows">
+                                <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">完成云服务目录的完整配置，按业务需求交付配置结果。</div></div>
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    
+                </div>
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">3.2</span>定制化内容开发和部署</div>
+                            <div class="process-name-en">CMP Customization Development and Deployment</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 3, 32)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 3, 32)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(3, 32, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(3, 32, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(3, 32)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">平台实施</span>
+                        <span><b>人天:</b> 视需求</span>
+                        <span><b>并行/顺序:</b> 流程5中后期可同步进行</span>
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">基于客户业务需求进行定制化功能开发并部署，补充平台缺失能力。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 海外项目需要考虑平台的颜色风格、Logo 等 UI 定制；
+② 技术开发新功能前需先给出设计方案，内部 review 通过后再开发；
+③ 同步研发进行定制化开发（存在内部平台缺失内容时内部自行补充）。</div></div>
+                        
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">定制开发内容的计划和跟踪，研发自己拆任务</div></div>
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">3.3</span>测试、在线试运行 &amp; 持续优化</div>
+                            <div class="process-name-en">Testing, Online Trial Operation &amp; Continuous Optimization</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 3, 33)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 3, 33)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(3, 33, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(3, 33, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(3, 33)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">测试</span>
+                        <span><b>人天:</b> 2-3周</span>
+                        <span><b>并行/顺序:</b> 与实施中后期同步</span>
+                        
+                        <span class="milestone-tag">M3: CMP Customization Dev &amp; Deployment</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">在实施中后期（除了开发过程中的最小单元测试）同步进行完整测试、试运行与持续优化；同步准备正式环境。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 每个 drop 上线前，测试结束后需提供版本更新日志（包括上线了什么新功能、更改了什么配置）；
+② 每次开发提交代码合并前都需要 Grisson 进行 code review（研发部门）。</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">版本更新日志（Release Notes）</div></div>
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">流程5中后期就可以同步开发客户定制化内容；正式环境同步准备。</div></div>
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">3.4</span>正式环境升级</div>
+                            
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 3, 34)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 3, 34)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(3, 34, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(3, 34, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(3, 34)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">平台实施</span>
+                        
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div><div class="phase collapsed" id="phase-4">
+            <div class="phase-header" onclick="togglePhase(4)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 4</span>
+                    <div>
+                        <div class="phase-title">阶段四：上线准备</div>
+                        <div class="phase-desc">用户培训及验收测试阶段</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 4)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(4)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(4)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(4)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">4.1</span>培训（测试环境）</div>
+                            <div class="process-name-en">Training</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 4, 41)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 4, 41)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(4, 41, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(4, 41, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(4, 41)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">培训</span>
+                        <span><b>人天:</b> 1周</span>
+                        
+                        
+                        <span class="milestone-tag">M4: Training</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">内部先准备好培训手册及操作手册，再对客户相关人员进行系统使用培训。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 顺序建议：先 UAT 再 Training；
+② Onsite 项目：建议在一周内完成 UAT + Training；
+③ Online 项目：时间可以更灵活、拉长。</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">① Training Manual（培训手册）
+② User Manual（用户操作手册）</div></div>
+                        
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">4.2</span>UAT 用户验收测试</div>
+                            <div class="process-name-en">User Acceptance Testing (UAT)</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 4, 42)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 4, 42)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(4, 42, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(4, 42, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(4, 42)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">UAT测试</span>
+                        <span><b>人天:</b> 1-2周</span>
+                        
+                        
+                        <span class="milestone-tag">M5: UAT</span>
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">提前准备验收测试模板，由用户执行验收测试，逐一确认系统满足需求。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 先准备好 UAT Template，再由客户执行；
+② UAT 通过后输出验收报告作为里程碑交付物。
+③ 上生产前出 Test Case，提交客户确认覆盖是否全面；
+④ 由交付人员演示并添加截图，确保每一个 case 都 OK，能全面 cover；</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">① UAT Template（验收测试模板）
+② UAT Report（验收报告）</div></div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div><div class="phase collapsed" id="phase-5">
+            <div class="phase-header" onclick="togglePhase(5)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 5</span>
+                    <div>
+                        <div class="phase-title">阶段五：项目收尾</div>
+                        <div class="phase-desc">系统上线、试运行与项目验收阶段</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 5)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(5)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(5)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(5)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">5.1</span>内部上线</div>
+                            <div class="process-name-en">Internal Launch</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 5, 51)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 5, 51)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(5, 51, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(5, 51, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(5, 51)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">上线</span>
+                        <span><b>人天:</b> —</span>
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">系统在内部/测试环境正式上线，完成最终验证。</div></div>
+                        
+                        
+                        <div class="field-row"><div class="field-label">内部记录</div><div class="field-value">① 单节点测试环境，配置好后直接部署；
+② 如需去客户现场部署：先在公司内完整演练一遍（使用 mock 数据）；
+③ 让客户开子账号供测试，内部验证无误后让客户确认；
+④ 一定要完整确认，避免后续在生产环境做较大改动。</div></div>
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">5.2</span>正式上线</div>
+                            <div class="process-name-en">Official Launch</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 5, 52)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 5, 52)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(5, 52, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(5, 52, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(5, 52)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">上线</span>
+                        <span><b>人天:</b> —</span>
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">系统向客户正式上线，完成生产环境部署及全量回归测试。</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">① 客户环境的变更需提 Change Request，所以尽量在测试环境完全没问题的情况下再上生产，提前确认可上生产的时间窗口；
+② 生产迁移完成后再全量回归测试，确认 UAT 与生产环境一致；
+⑤ 上线完成后：清除系统上的测试数据、更改 root 权限等。
+上线前网络配置（多个系统的配合上线窗口）</div></div>
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">① Deployment Architecture Document
+② Deployment Documentation
+③ 生产回归测试报告</div></div>
+                        
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">5.3</span>试运行</div>
+                            
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 5, 53)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 5, 53)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(5, 53, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(5, 53, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(5, 53)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">上线</span>
+                        
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">试运行+bug修复+优化调整</div></div>
+                        <div class="field-row"><div class="field-label">注意事项</div><div class="field-value">针对客户反馈问题进行多次迭代更新上线</div></div>
+                        
+                        
+                    </div>
+                    
+                </div>
+            
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">5.4</span>项目验收</div>
+                            <div class="process-name-en">Project Acceptance</div>
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal(&#39;editProcess&#39;, 5, 54)">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal(&#39;addSub&#39;, 5, 54)">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(5, 54, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(5, 54, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(5, 54)">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">上线</span>
+                        <span><b>人天:</b> —</span>
+                        
+                        
+                        
+                    </div>
+                    <div class="field-rows">
+                        <div class="field-row"><div class="field-label">内容说明</div><div class="field-value">完成所有交付物的客户确认，项目正式验收结束，合同关闭。</div></div>
+                        
+                        <div class="field-row"><div class="field-label">交付物</div><div class="field-value">全部 Deliverables 清单</div></div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div><div class="phase collapsed" id="phase-6">
+            <div class="phase-header" onclick="togglePhase(6)">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE 6</span>
+                    <div>
+                        <div class="phase-title">阶段六：运营与优化</div>
+                        <div class="phase-desc">持续维保和平台优化</div>
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal(&#39;addProcess&#39;, 6)">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(6)">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(6)">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(6)">▼</span>
+                </div>
+            </div>
+            <div class="phase-content"><div style="padding:14px 0;color:#a4b1bd;font-size:13px;">暂无流程，点击右上角 +流程 添加</div></div>
+        </div></div>
+
+    <div class="glossary collapsed" id="glossaryCard">
+        <div class="glossary-header" onclick="toggleGlossary()">
+            <div>
+                <span class="g-title">名词解释 / Glossary</span>
+                <span class="g-count" id="glossaryCount">(6)</span>
+            </div>
+            <div class="glossary-header-right" onclick="event.stopPropagation()">
+                <button class="btn-text" onclick="openGlossaryModal()">+名词</button>
+                <span class="phase-toggle" onclick="toggleGlossary()" style="cursor:pointer;">▼</span>
+            </div>
+        </div>
+        <div class="glossary-body">
+            <table>
+                <tbody id="glossaryBody">
+        <tr>
+            <td>POC</td>
+            <td>Proof of Concept，概念验证。规模较大的客户倾向在售前进行 POC，在该阶段初步确认 CMP 是否能够满足业务需求，随后逐步完善该版本。POC 会直接在客户环境部署专门的 POC Testing 环境。</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(1)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(1)">删除</button>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>SOW</td>
+            <td>Statement of Work，工作说明书。明确项目交付范围、职责分工及验收标准的合同附件。</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(2)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(2)">删除</button>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>CMP</td>
+            <td>Cloud Management Platform，多云管理平台，即本项目的核心交付系统。</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(3)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(3)">删除</button>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>Change Request</td>
+            <td>变更请求。在生产环境做任何变更前需提交的正式申请，需客户审批。</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(4)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(4)">删除</button>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>UAT</td>
+            <td>User Acceptance Testing，用户验收测试。由客户（非实施方）执行，验证系统是否满足业务需求。</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(5)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(5)">删除</button>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>环境</td>
+            <td>1. SIT 开发交付验证
+2. UAT 用户测试验证
+3. PROD 生产</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(6)">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(6)">删除</button>
+            </td>
+        </tr>
+    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 阶段编辑模态框 -->
+<div class="modal" id="phaseModal">
+    <div class="modal-content">
+        <div class="modal-header" id="phaseModalTitle">编辑阶段</div>
+        <form onsubmit="savePhaseForm(event)">
+            <div class="form-group">
+                <label>阶段名称 *</label>
+                <input type="text" id="f_phaseName" required="" placeholder="例：阶段六：运营与优化">
+            </div>
+            <div class="form-group">
+                <label>阶段描述</label>
+                <textarea id="f_phaseDesc" placeholder="阶段的简要描述..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal(&#39;phaseModal&#39;)">取消</button>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 流程/子流程编辑模态框（通用，全部字段可编辑） -->
+<div class="modal" id="processModal">
+    <div class="modal-content">
+        <div class="modal-header" id="processModalTitle">编辑子流程</div>
+        <form onsubmit="saveProcessForm(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>名称（中文）*</label>
+                    <input type="text" id="f_name" required="">
+                </div>
+                <div class="form-group">
+                    <label>名称（英文）</label>
+                    <input type="text" id="f_nameEn">
+                </div>
+                <div class="form-group">
+                    <label>类型</label>
+                    <select id="f_type">
+                        <option value="准备">准备</option>
+                        <option value="调研">调研</option>
+                        <option value="设计">设计</option>
+                        <option value="配置">配置</option>
+                        <option value="平台实施">平台实施</option>
+                        <option value="测试">测试</option>
+                        <option value="培训">培训</option>
+                        <option value="UAT测试">UAT测试</option>
+                        <option value="上线">上线</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>预期人天</label>
+                    <input type="text" id="f_personDays" placeholder="例：1-2周">
+                </div>
+                <div class="form-group">
+                    <label>里程碑节点</label>
+                    <input type="text" id="f_milestone" placeholder="例：M1: Requirement Finalization">
+                </div>
+                <div class="form-group">
+                    <label>并行/顺序</label>
+                    <input type="text" id="f_parallel" placeholder="例：与流程4并行">
+                </div>
+                <div class="form-group full">
+                    <label>阶段内容说明</label>
+                    <textarea id="f_description"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>注意事项</label>
+                    <textarea id="f_notes"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Deliverables（交付物）</label>
+                    <textarea id="f_deliverables"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>责任人</label>
+                    <input type="text" id="f_owner" placeholder="例：PM">
+                </div>
+                <div class="form-group full">
+                    <label>内部流程记录</label>
+                    <textarea id="f_internalRecord" style="height: 173px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal(&#39;processModal&#39;)">取消</button>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 名词解释编辑模态框 -->
+<div class="modal" id="glossaryModal">
+    <div class="modal-content">
+        <div class="modal-header" id="glossaryModalTitle">添加名词</div>
+        <form onsubmit="saveGlossaryForm(event)">
+            <div class="form-group">
+                <label>名词 *</label>
+                <input type="text" id="f_term" required="" placeholder="例：SOW">
+            </div>
+            <div class="form-group">
+                <label>解释</label>
+                <textarea id="f_termDef"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal(&#39;glossaryModal&#39;)">取消</button>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// ============ 默认数据（来自 项目实施计划流程总览_new.xlsx）============
+const defaultData = {
+    phases: [
+        {
+            id: 1, number: 1, name: "阶段一：项目启动",
+            description: "项目正式启动前的业务准备工作及启动会议",
+            processes: [
+                {
+                    id: 11, name: "项目业务准备", nameEn: "Project Business", type: "准备",
+                    personDays: "售前", milestone: "", parallel: "",
+                    description: "项目正式启动前的业务准备工作，涵盖招投标、Technical Proposal（作为标书）、需求度评估及SOW范围明确。",
+                    notes: "① 招投标时华为或阿里等合作商提供 High Level Scope，我们再将Technical Proposal 当做标书改；\n② 海外项目一般有一周时间去客户现场沟通研发可行性，或提供替代方案；\n③ （非必要）Questionnaire 按照标准文档提问，整理后内部过一下（最好喊老板/天竞一起review），再改成英文版发送客户；\n④ 明确 SOW 范围，避免后期 scope creep。",
+                    deliverables: "① SOW\n② 明确项目干系人（Stakeholder List）",
+                    owner: "",
+                    internalRecord: "不同阶段可能有不同的 questionnaire：\n• 有需求需要澄清时就可以发；\n• 大致功能范围确定后，针对具体业务需求再发更具体的 questionnaire。",
+                    subProcesses: [
+                        {
+                            id: 111, name: "POC（概念验证）", nameEn: "Proof of Concept", type: "准备",
+                            personDays: "视需求", milestone: "", parallel: "",
+                            description: "规模较大、较为看重的客户倾向在售前进行 POC，先初步确认 CMP 是否能够满足业务需求，随后逐步完善该版本。",
+                            notes: "POC 会直接在客户环境部署专门的 POC Testing 环境。（一般都是单节点）\nPOC到项目正式实施一般需要比较长的周期。大部分项目都有POC。",
+                            deliverables: "POC 测试报告（作为业务达标的依据）",
+                            owner: "售前+交付+PM（POC前会有初步需求范围）",
+                            internalRecord: ""
+                        },
+                        {
+                            id: 112, name: "SOW、合同签订", nameEn: "", type: "准备",
+                            personDays: "", milestone: "", parallel: "",
+                            description: "一般在POC验证完成后确认完整的SOW",
+                            notes: "项目时间范围、人员安排、成本估算",
+                            deliverables: "SOW\n合同",
+                            owner: "",
+                            internalRecord: ""
+                        }
+                    ]
+                },
+                {
+                    id: 12, name: "内部启动会议", nameEn: "Kick-off Conference", type: "准备",
+                    personDays: "1天", milestone: "", parallel: "",
+                    description: "内部明确项目启动、实施计划、干系人及各方职责。",
+                    notes: "",
+                    deliverables: "Project Kick-off Meeting PPT初版\nProject Implementation Plan初版-WBS输出",
+                    owner: "PM-准备会议材料，发起会议",
+                    internalRecord: "",
+                    subProcesses: []
+                },
+                {
+                    id: 13, name: "客户启动会议", nameEn: "Kick-off Conference", type: "准备",
+                    personDays: "1天", milestone: "", parallel: "",
+                    description: "项目正式开始，与客户召开启动会议，明确实施计划、干系人及各方职责。",
+                    notes: "② 和客户开会讨论需求时，如果有符合标准化 workflow 的需求，可以提前准备 PPT 投屏展示；\n③ 启动会议时需要明确讨论所有内容可行后再推进。",
+                    deliverables: "① Project Implementation Plan\n② Project Kick-off Meeting PPT",
+                    owner: "PM-完善会议材料，发起会议",
+                    internalRecord: "",
+                    subProcesses: []
+                }
+            ]
+        },
+        {
+            id: 2, number: 2, name: "阶段二：调研与设计",
+            description: "现状调研、需求分析、蓝图规划及平台详细设计（界限较为模糊，一般同时进行）",
+            processes: [
+                {
+                    id: 21, name: "现状调研与需求分析、蓝图规划", nameEn: "Current Situation Survey & Demand Analysis", type: "调研",
+                    personDays: "1-2周", milestone: "M1: Requirement Finalization", parallel: "与平台详细实施设计同时进行",
+                    description: "对客户现有情况进行全面调研，收集并分析业务需求，输出需求确认文档。",
+                    notes: "① 在需求调研的同时，让客户同步准备好可部署的测试环境及其他所需信息；\n② 国内项目：最简单的是按照标准化流程，直接买系统，培训结束就交付；\n③ 里程碑达成标准：需求文档经客户确认签字。\n\n启动后就安装平台，随后慢慢完善业务需求，基础配置和复杂配置需求同步进行",
+                    deliverables: "Requirement Finalization Document（需求确认文档）",
+                    owner: "",
+                    internalRecord: "1. 日报+周报+milestone汇报（每次跟客户的会议纪要都需要记录到wiki上，包括参会人、主题以及下一步计划等）\n2. 需求说明文档\n3. 产品接口说明文档",
+                    subProcesses: []
+                },
+                {
+                    id: 22, name: "平台详细实施设计", nameEn: "Detailed Implementation Design of the Platform", type: "设计",
+                    personDays: "1周", milestone: "Blueprint confirmation", parallel: "",
+                    description: "基于调研结果，制定平台详细实施设计方案，包括架构设计、模块规划、配置方案等。",
+                    notes: "",
+                    deliverables: "1. Platform Implementation Design Document\n2. LLD（详细设计文档）",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                }
+            ]
+        },
+        {
+            id: 3, number: 3, name: "阶段三：平台实施",
+            description: "多云管理平台各模块的实施、测试与定制化开发",
+            processes: [
+                {
+                    id: 31, name: "多云管理平台各模块实施与交付", nameEn: "Implementation and Delivery of Each Module of the Multi-cloud Management Platform", type: "平台实施",
+                    personDays: "3周+", milestone: "M2: CMP Standard Product Deployment", parallel: "",
+                    description: "客户明确需求后，配置测试环境并逐模块部署多云管理平台，完成标准化产品交付。周期较长。",
+                    notes: "① 客户需提供可部署的测试环境；\n② 里程碑达成：CMP 标准产品在测试环境部署完成并通过初步验证。\n③ 阶段开始后每周五进行内部周会；（建议是每周一？）",
+                    deliverables: "平台",
+                    owner: "",
+                    internalRecord: "需收集客户环境信息：\n① Cluster Information\n② Cluster Installation Schedule",
+                    subProcesses: [
+                        {
+                            id: 311, name: "测试环境 Platform 配置与部署", nameEn: "", type: "配置",
+                            personDays: "1周", milestone: "", parallel: "",
+                            description: "在客户测试环境完成平台基础配置与部署。",
+                            notes: "", deliverables: "", owner: "", internalRecord: ""
+                        },
+                        {
+                            id: 312, name: "Cloud Service Catalog 配置", nameEn: "Cloud Service Catalog Configuration", type: "配置",
+                            personDays: "3周", milestone: "", parallel: "",
+                            description: "完成云服务目录的完整配置，按业务需求交付配置结果。",
+                            notes: "", deliverables: "", owner: "", internalRecord: ""
+                        }
+                    ]
+                },
+                {
+                    id: 32, name: "定制化内容开发和部署", nameEn: "CMP Customization Development and Deployment", type: "平台实施",
+                    personDays: "视需求", milestone: "", parallel: "流程5中后期可同步进行",
+                    description: "基于客户业务需求进行定制化功能开发并部署，补充平台缺失能力。",
+                    notes: "① 海外项目需要考虑平台的颜色风格、Logo 等 UI 定制；\n② 技术开发新功能前需先给出设计方案，内部 review 通过后再开发；\n③ 同步研发进行定制化开发（存在内部平台缺失内容时内部自行补充）。",
+                    deliverables: "",
+                    owner: "",
+                    internalRecord: "定制开发内容的计划和跟踪，研发自己拆任务",
+                    subProcesses: []
+                },
+                {
+                    id: 33, name: "测试、在线试运行 & 持续优化", nameEn: "Testing, Online Trial Operation & Continuous Optimization", type: "测试",
+                    personDays: "2-3周", milestone: "M3: CMP Customization Dev & Deployment", parallel: "与实施中后期同步",
+                    description: "在实施中后期（除了开发过程中的最小单元测试）同步进行完整测试、试运行与持续优化；同步准备正式环境。",
+                    notes: "① 每个 drop 上线前，测试结束后需提供版本更新日志（包括上线了什么新功能、更改了什么配置）；\n② 每次开发提交代码合并前都需要 Grisson 进行 code review（研发部门）。",
+                    deliverables: "版本更新日志（Release Notes）",
+                    owner: "",
+                    internalRecord: "流程5中后期就可以同步开发客户定制化内容；正式环境同步准备。",
+                    subProcesses: []
+                },
+                {
+                    id: 34, name: "正式环境升级", nameEn: "", type: "平台实施",
+                    personDays: "", milestone: "", parallel: "",
+                    description: "", notes: "", deliverables: "", owner: "", internalRecord: "",
+                    subProcesses: []
+                }
+            ]
+        },
+        {
+            id: 4, number: 4, name: "阶段四：上线准备",
+            description: "用户培训及验收测试阶段",
+            processes: [
+                {
+                    id: 41, name: "培训（测试环境）", nameEn: "Training", type: "培训",
+                    personDays: "1周", milestone: "M4: Training", parallel: "",
+                    description: "内部先准备好培训手册及操作手册，再对客户相关人员进行系统使用培训。",
+                    notes: "① 顺序建议：先 UAT 再 Training；\n② Onsite 项目：建议在一周内完成 UAT + Training；\n③ Online 项目：时间可以更灵活、拉长。",
+                    deliverables: "① Training Manual（培训手册）\n② User Manual（用户操作手册）",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                },
+                {
+                    id: 42, name: "UAT 用户验收测试", nameEn: "User Acceptance Testing (UAT)", type: "UAT测试",
+                    personDays: "1-2周", milestone: "M5: UAT", parallel: "",
+                    description: "提前准备验收测试模板，由用户执行验收测试，逐一确认系统满足需求。",
+                    notes: "① 先准备好 UAT Template，再由客户执行；\n② UAT 通过后输出验收报告作为里程碑交付物。\n③ 上生产前出 Test Case，提交客户确认覆盖是否全面；\n④ 由交付人员演示并添加截图，确保每一个 case 都 OK，能全面 cover；",
+                    deliverables: "① UAT Template（验收测试模板）\n② UAT Report（验收报告）",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                }
+            ]
+        },
+        {
+            id: 5, number: 5, name: "阶段五：项目收尾",
+            description: "系统上线、试运行与项目验收阶段",
+            processes: [
+                {
+                    id: 51, name: "内部上线", nameEn: "Internal Launch", type: "上线",
+                    personDays: "—", milestone: "", parallel: "",
+                    description: "系统在内部/测试环境正式上线，完成最终验证。",
+                    notes: "",
+                    deliverables: "",
+                    owner: "",
+                    internalRecord: "① 单节点测试环境，配置好后直接部署；\n② 如需去客户现场部署：先在公司内完整演练一遍（使用 mock 数据）；\n③ 让客户开子账号供测试，内部验证无误后让客户确认；\n④ 一定要完整确认，避免后续在生产环境做较大改动。",
+                    subProcesses: []
+                },
+                {
+                    id: 52, name: "正式上线", nameEn: "Official Launch", type: "上线",
+                    personDays: "—", milestone: "", parallel: "",
+                    description: "系统向客户正式上线，完成生产环境部署及全量回归测试。",
+                    notes: "① 客户环境的变更需提 Change Request，所以尽量在测试环境完全没问题的情况下再上生产，提前确认可上生产的时间窗口；\n② 生产迁移完成后再全量回归测试，确认 UAT 与生产环境一致；\n⑤ 上线完成后：清除系统上的测试数据、更改 root 权限等。\n上线前网络配置（多个系统的配合上线窗口）",
+                    deliverables: "① Deployment Architecture Document\n② Deployment Documentation\n③ 生产回归测试报告",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                },
+                {
+                    id: 53, name: "试运行", nameEn: "", type: "上线",
+                    personDays: "", milestone: "", parallel: "",
+                    description: "试运行+bug修复+优化调整",
+                    notes: "针对客户反馈问题进行多次迭代更新上线",
+                    deliverables: "",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                },
+                {
+                    id: 54, name: "项目验收", nameEn: "Project Acceptance", type: "上线",
+                    personDays: "—", milestone: "", parallel: "",
+                    description: "完成所有交付物的客户确认，项目正式验收结束，合同关闭。",
+                    notes: "",
+                    deliverables: "全部 Deliverables 清单",
+                    owner: "",
+                    internalRecord: "",
+                    subProcesses: []
+                }
+            ]
+        }
+    ],
+    glossary: [
+        { id: 1, term: "POC", def: "Proof of Concept，概念验证。规模较大的客户倾向在售前进行 POC，在该阶段初步确认 CMP 是否能够满足业务需求，随后逐步完善该版本。POC 会直接在客户环境部署专门的 POC Testing 环境。" },
+        { id: 2, term: "SOW", def: "Statement of Work，工作说明书。明确项目交付范围、职责分工及验收标准的合同附件。" },
+        { id: 3, term: "CMP", def: "Cloud Management Platform，多云管理平台，即本项目的核心交付系统。" },
+        { id: 4, term: "Change Request", def: "变更请求。在生产环境做任何变更前需提交的正式申请，需客户审批。" },
+        { id: 5, term: "UAT", def: "User Acceptance Testing，用户验收测试。由客户（非实施方）执行，验证系统是否满足业务需求。" },
+        { id: 6, term: "环境", def: "1. SIT 开发交付验证\n2. UAT 用户测试验证\n3. PROD 生产" }
+    ]
+};
+
+// 使用新存储key，避免旧版本localStorage数据覆盖新底表
+const STORAGE_KEY = 'cmpProjectData_v4';
+let projectData = loadData();
+let editCtx = null; // { mode: 'addProcess'|'editProcess'|'addSub'|'editSub', phaseId, processId, subId }
+let glossaryEditId = null;
+let phaseEditId = null;
+
+function loadData() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(defaultData));
+}
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(projectData)); }
+
+// ============ 渲染 ============
+function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fieldRow(label, value) {
+    if (!value || !String(value).trim()) return '';
+    return `<div class="field-row"><div class="field-label">${label}</div><div class="field-value">${esc(value)}</div></div>`;
+}
+
+function renderTimeline() {
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = '';
+
+    projectData.phases.forEach(phase => {
+        const phaseEl = document.createElement('div');
+        phaseEl.className = 'phase';
+        phaseEl.id = `phase-${phase.id}`;
+        // 保持折叠状态
+        if (collapsedPhases.has(phase.id)) phaseEl.classList.add('collapsed');
+
+        const processesHtml = (phase.processes || []).map((p, idx) => {
+            const num = `${phase.number}.${idx + 1}`;
+            const subsHtml = (p.subProcesses && p.subProcesses.length) ? `
+                <div class="sub-processes">
+                    ${p.subProcesses.map((sp, sIdx) => `
+                        <div class="sub-process-item">
+                            <div class="sub-head">
+                                <div>
+                                    <span class="sub-name"><span class="num">${num}.${sIdx + 1}</span>${esc(sp.name)}</span>
+                                    ${sp.nameEn ? `<span class="sub-name-en">　${esc(sp.nameEn)}</span>` : ''}
+                                </div>
+                                <div class="process-actions">
+                                    <button class="btn-text" onclick="openProcessModal('editSub', ${phase.id}, ${p.id}, ${sp.id})">编辑</button>
+                                    <button class="btn-text" onclick="moveSub(${phase.id}, ${p.id}, ${sp.id}, -1)">↑</button>
+                                    <button class="btn-text" onclick="moveSub(${phase.id}, ${p.id}, ${sp.id}, 1)">↓</button>
+                                    <button class="btn-text danger" onclick="deleteSub(${phase.id}, ${p.id}, ${sp.id})">删除</button>
+                                </div>
+                            </div>
+                            <div class="process-meta">
+                                ${sp.personDays ? `<span><b>人天:</b> ${esc(sp.personDays)}</span>` : ''}
+                                ${sp.owner ? `<span><b>责任人:</b> ${esc(sp.owner)}</span>` : ''}
+                                ${sp.milestone ? `<span class="milestone-tag">${esc(sp.milestone)}</span>` : ''}
+                            </div>
+                            <div class="field-rows">
+                                ${fieldRow('内容说明', sp.description)}
+                                ${fieldRow('注意事项', sp.notes)}
+                                ${fieldRow('交付物', sp.deliverables)}
+                                ${fieldRow('内部记录', sp.internalRecord)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>` : '';
+
+            return `
+                <div class="process-item">
+                    <div class="process-head">
+                        <div class="process-title-area">
+                            <div class="process-name"><span class="num">${num}</span>${esc(p.name)}</div>
+                            ${p.nameEn ? `<div class="process-name-en">${esc(p.nameEn)}</div>` : ''}
+                        </div>
+                        <div class="process-actions">
+                            <button class="btn-text" onclick="openProcessModal('editProcess', ${phase.id}, ${p.id})">编辑</button>
+                            <button class="btn-text" onclick="openProcessModal('addSub', ${phase.id}, ${p.id})">+子流程</button>
+                            <button class="btn-text" onclick="moveProc(${phase.id}, ${p.id}, -1)">↑</button>
+                            <button class="btn-text" onclick="moveProc(${phase.id}, ${p.id}, 1)">↓</button>
+                            <button class="btn-text danger" onclick="deleteProc(${phase.id}, ${p.id})">删除</button>
+                        </div>
+                    </div>
+                    <div class="process-meta">
+                        <span class="tag">${esc(p.type)}</span>
+                        ${p.personDays ? `<span><b>人天:</b> ${esc(p.personDays)}</span>` : ''}
+                        ${p.parallel ? `<span><b>并行/顺序:</b> ${esc(p.parallel)}</span>` : ''}
+                        ${p.owner ? `<span><b>责任人:</b> ${esc(p.owner)}</span>` : ''}
+                        ${p.milestone ? `<span class="milestone-tag">${esc(p.milestone)}</span>` : ''}
+                    </div>
+                    <div class="field-rows">
+                        ${fieldRow('内容说明', p.description)}
+                        ${fieldRow('注意事项', p.notes)}
+                        ${fieldRow('交付物', p.deliverables)}
+                        ${fieldRow('内部记录', p.internalRecord)}
+                    </div>
+                    ${subsHtml}
+                </div>
+            `;
+        }).join('');
+
+        phaseEl.innerHTML = `
+            <div class="phase-header" onclick="togglePhase(${phase.id})">
+                <div class="phase-header-left">
+                    <span class="phase-number">PHASE ${phase.number}</span>
+                    <div>
+                        <div class="phase-title">${esc(phase.name)}</div>
+                        ${phase.description ? `<div class="phase-desc">${esc(phase.description)}</div>` : ''}
+                    </div>
+                </div>
+                <div class="phase-header-right" onclick="event.stopPropagation()">
+                    <button class="btn-text" onclick="openProcessModal('addProcess', ${phase.id})">+流程</button>
+                    <button class="btn-text" onclick="openPhaseModal(${phase.id})">编辑</button>
+                    <button class="btn-text danger" onclick="deletePhase(${phase.id})">删除</button>
+                    <span class="phase-toggle" onclick="togglePhase(${phase.id})">▼</span>
+                </div>
+            </div>
+            <div class="phase-content">${processesHtml || '<div style="padding:14px 0;color:#a4b1bd;font-size:13px;">暂无流程，点击右上角 +流程 添加</div>'}</div>
+        `;
+        timeline.appendChild(phaseEl);
+    });
+
+    renderGlossary();
+    updateStats();
+}
+
+function renderGlossary() {
+    const body = document.getElementById('glossaryBody');
+    const list = projectData.glossary || [];
+    body.innerHTML = list.map(g => `
+        <tr>
+            <td>${esc(g.term)}</td>
+            <td>${esc(g.def)}</td>
+            <td class="g-actions">
+                <button class="btn-text" onclick="openGlossaryModal(${g.id})">编辑</button>
+                <button class="btn-text danger" onclick="deleteGlossary(${g.id})">删除</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="3" style="color:#a4b1bd;">暂无名词</td></tr>';
+    document.getElementById('glossaryCount').textContent = list.length ? `(${list.length})` : '';
+}
+
+function toggleGlossary() {
+    document.getElementById('glossaryCard').classList.toggle('collapsed');
+}
+
+function updateStats() {
+    const phaseCount = projectData.phases.length;
+    let procCount = 0, subCount = 0, milestoneCount = 0;
+    projectData.phases.forEach(ph => (ph.processes || []).forEach(p => {
+        procCount++;
+        if (p.milestone) milestoneCount++;
+        (p.subProcesses || []).forEach(sp => { subCount++; if (sp.milestone) milestoneCount++; });
+    }));
+    document.getElementById('statsContainer').innerHTML = `
+        <div class="stat-card"><span class="stat-number">${phaseCount}</span><span class="stat-label">阶段</span></div>
+        <div class="stat-card"><span class="stat-number">${procCount}</span><span class="stat-label">主流程</span></div>
+        <div class="stat-card"><span class="stat-number">${subCount}</span><span class="stat-label">子流程</span></div>
+        <div class="stat-card"><span class="stat-number">${milestoneCount}</span><span class="stat-label">里程碑</span></div>
+    `;
+}
+
+// ============ 折叠 ============
+const collapsedPhases = new Set();
+function togglePhase(id) {
+    const el = document.getElementById(`phase-${id}`);
+    el.classList.toggle('collapsed');
+    el.classList.contains('collapsed') ? collapsedPhases.add(id) : collapsedPhases.delete(id);
+}
+function toggleAllPhases() {
+    const allCollapsed = projectData.phases.every(p => collapsedPhases.has(p.id));
+    projectData.phases.forEach(p => allCollapsed ? collapsedPhases.delete(p.id) : collapsedPhases.add(p.id));
+    renderTimeline();
+}
+
+// ============ 阶段 CRUD ============
+function openPhaseModal(phaseId) {
+    phaseEditId = phaseId || null;
+    document.getElementById('phaseModalTitle').textContent = phaseId ? '编辑阶段' : '添加阶段';
+    if (phaseId) {
+        const ph = projectData.phases.find(p => p.id === phaseId);
+        document.getElementById('f_phaseName').value = ph.name;
+        document.getElementById('f_phaseDesc').value = ph.description || '';
+    } else {
+        document.getElementById('f_phaseName').value = '';
+        document.getElementById('f_phaseDesc').value = '';
+    }
+    document.getElementById('phaseModal').classList.add('active');
+}
+function savePhaseForm(e) {
+    e.preventDefault();
+    const name = document.getElementById('f_phaseName').value.trim();
+    if (!name) { showToast('阶段名称不能为空'); return; }
+    const desc = document.getElementById('f_phaseDesc').value;
+    if (phaseEditId) {
+        const ph = projectData.phases.find(p => p.id === phaseEditId);
+        ph.name = name; ph.description = desc;
+        showToast('阶段已更新');
+    } else {
+        projectData.phases.push({
+            id: Math.max(0, ...projectData.phases.map(p => p.id)) + 1,
+            number: projectData.phases.length + 1,
+            name, description: desc, processes: []
+        });
+        showToast('阶段已添加');
+    }
+    saveData(); renderTimeline(); closeModal('phaseModal');
+}
+function deletePhase(id) {
+    if (!confirm('确定删除该阶段及其所有流程吗？')) return;
+    projectData.phases = projectData.phases.filter(p => p.id !== id);
+    projectData.phases.forEach((p, i) => p.number = i + 1);
+    collapsedPhases.delete(id);
+    saveData(); renderTimeline(); showToast('阶段已删除');
+}
+
+// ============ 流程/子流程 CRUD（通用模态框）============
+function getProc(phaseId, processId) {
+    const ph = projectData.phases.find(p => p.id === phaseId);
+    return ph ? (ph.processes || []).find(p => p.id === processId) : null;
+}
+
+function openProcessModal(mode, phaseId, processId, subId) {
+    editCtx = { mode, phaseId, processId, subId };
+    const titles = { addProcess: '添加流程', editProcess: '编辑流程', addSub: '添加子流程', editSub: '编辑子流程' };
+    document.getElementById('processModalTitle').textContent = titles[mode];
+
+    let src = { name:'', nameEn:'', type:'准备', personDays:'', milestone:'', parallel:'', description:'', notes:'', deliverables:'', owner:'', internalRecord:'' };
+    if (mode === 'editProcess') src = getProc(phaseId, processId);
+    if (mode === 'editSub') src = getProc(phaseId, processId).subProcesses.find(s => s.id === subId);
+    if (mode === 'addSub') {
+        const parent = getProc(phaseId, processId);
+        src.type = parent ? parent.type : '准备'; // 子流程类型继承主流程
+    }
+
+    document.getElementById('f_name').value = src.name || '';
+    document.getElementById('f_nameEn').value = src.nameEn || '';
+    document.getElementById('f_type').value = src.type || '准备';
+    document.getElementById('f_personDays').value = src.personDays || '';
+    document.getElementById('f_milestone').value = src.milestone || '';
+    document.getElementById('f_parallel').value = src.parallel || '';
+    document.getElementById('f_description').value = src.description || '';
+    document.getElementById('f_notes').value = src.notes || '';
+    document.getElementById('f_deliverables').value = src.deliverables || '';
+    document.getElementById('f_owner').value = src.owner || '';
+    document.getElementById('f_internalRecord').value = src.internalRecord || '';
+    document.getElementById('processModal').classList.add('active');
+}
+
+function saveProcessForm(e) {
+    e.preventDefault();
+    const name = document.getElementById('f_name').value.trim();
+    if (!name) { showToast('名称不能为空'); return; }
+    const vals = {
+        name,
+        nameEn: document.getElementById('f_nameEn').value,
+        type: document.getElementById('f_type').value,
+        personDays: document.getElementById('f_personDays').value,
+        milestone: document.getElementById('f_milestone').value,
+        parallel: document.getElementById('f_parallel').value,
+        description: document.getElementById('f_description').value,
+        notes: document.getElementById('f_notes').value,
+        deliverables: document.getElementById('f_deliverables').value,
+        owner: document.getElementById('f_owner').value,
+        internalRecord: document.getElementById('f_internalRecord').value
+    };
+    const { mode, phaseId, processId, subId } = editCtx;
+    const ph = projectData.phases.find(p => p.id === phaseId);
+
+    if (mode === 'addProcess') {
+        if (!ph.processes) ph.processes = [];
+        ph.processes.push({ id: Math.max(0, ...ph.processes.map(p => p.id)) + 1, ...vals, subProcesses: [] });
+        showToast('流程已添加');
+    } else if (mode === 'editProcess') {
+        Object.assign(getProc(phaseId, processId), vals);
+        showToast('流程已更新');
+    } else if (mode === 'addSub') {
+        const proc = getProc(phaseId, processId);
+        if (!proc.subProcesses) proc.subProcesses = [];
+        proc.subProcesses.push({ id: Math.max(0, ...proc.subProcesses.map(s => s.id)) + 1, ...vals });
+        showToast('子流程已添加');
+    } else if (mode === 'editSub') {
+        const sub = getProc(phaseId, processId).subProcesses.find(s => s.id === subId);
+        Object.assign(sub, vals);
+        showToast('子流程已更新');
+    }
+    saveData(); renderTimeline(); closeModal('processModal');
+}
+
+function deleteProc(phaseId, processId) {
+    if (!confirm('确定删除该流程及其子流程吗？')) return;
+    const ph = projectData.phases.find(p => p.id === phaseId);
+    ph.processes = ph.processes.filter(p => p.id !== processId);
+    saveData(); renderTimeline(); showToast('流程已删除');
+}
+function deleteSub(phaseId, processId, subId) {
+    if (!confirm('确定删除该子流程吗？')) return;
+    const proc = getProc(phaseId, processId);
+    proc.subProcesses = proc.subProcesses.filter(s => s.id !== subId);
+    saveData(); renderTimeline(); showToast('子流程已删除');
+}
+
+// ============ 排序 ============
+function moveInArr(arr, idx, dir) {
+    const ni = idx + dir;
+    if (ni < 0) { showToast('已经在顶部'); return false; }
+    if (ni >= arr.length) { showToast('已经在底部'); return false; }
+    [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
+    return true;
+}
+function moveProc(phaseId, processId, dir) {
+    const ph = projectData.phases.find(p => p.id === phaseId);
+    const idx = ph.processes.findIndex(p => p.id === processId);
+    if (moveInArr(ph.processes, idx, dir)) { saveData(); renderTimeline(); }
+}
+function moveSub(phaseId, processId, subId, dir) {
+    const proc = getProc(phaseId, processId);
+    const idx = proc.subProcesses.findIndex(s => s.id === subId);
+    if (moveInArr(proc.subProcesses, idx, dir)) { saveData(); renderTimeline(); }
+}
+
+// ============ 名词解释 CRUD ============
+function openGlossaryModal(id) {
+    glossaryEditId = id || null;
+    document.getElementById('glossaryModalTitle').textContent = id ? '编辑名词' : '添加名词';
+    if (id) {
+        const g = projectData.glossary.find(x => x.id === id);
+        document.getElementById('f_term').value = g.term;
+        document.getElementById('f_termDef').value = g.def || '';
+    } else {
+        document.getElementById('f_term').value = '';
+        document.getElementById('f_termDef').value = '';
+    }
+    document.getElementById('glossaryModal').classList.add('active');
+}
+function saveGlossaryForm(e) {
+    e.preventDefault();
+    const term = document.getElementById('f_term').value.trim();
+    if (!term) { showToast('名词不能为空'); return; }
+    const def = document.getElementById('f_termDef').value;
+    if (!projectData.glossary) projectData.glossary = [];
+    if (glossaryEditId) {
+        const g = projectData.glossary.find(x => x.id === glossaryEditId);
+        g.term = term; g.def = def;
+        showToast('名词已更新');
+    } else {
+        projectData.glossary.push({ id: Math.max(0, ...projectData.glossary.map(x => x.id)) + 1, term, def });
+        showToast('名词已添加');
+    }
+    saveData(); renderGlossary(); closeModal('glossaryModal');
+}
+function deleteGlossary(id) {
+    if (!confirm('确定删除该名词吗？')) return;
+    projectData.glossary = projectData.glossary.filter(x => x.id !== id);
+    saveData(); renderGlossary(); showToast('名词已删除');
+}
+
+// ============ 导入导出/重置 ============
+function exportData() {
+    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `CMP项目实施计划_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    showToast('JSON已导出');
+}
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (!data.phases || !Array.isArray(data.phases)) throw new Error('格式不正确');
+            if (!data.glossary) data.glossary = [];
+            projectData = data;
+            collapsedPhases.clear();
+            saveData(); renderTimeline();
+            showToast('数据已导入');
+        } catch (err) { showToast('导入失败：文件格式不正确'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+}
+function resetData() {
+    if (!confirm('确定重置为底表默认数据吗？当前页面的所有修改将丢失（建议先导出JSON备份）')) return;
+    projectData = JSON.parse(JSON.stringify(defaultData));
+    collapsedPhases.clear();
+    saveData(); renderTimeline(); showToast('已重置为默认数据');
+}
+
+// ============ 通用 ============
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast'; t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') ['phaseModal','processModal','glossaryModal'].forEach(closeModal);
+});
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+
+renderTimeline();
+</script>
+
+
+</body></html>
