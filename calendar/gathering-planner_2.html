@@ -62,6 +62,14 @@
   .btn-add:hover{filter:brightness(1.06);}
 
   .filters{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center;}
+  @media (max-width:640px){
+    header{transition:padding .25s ease;}
+    .filters{max-height:200px; opacity:1; overflow:hidden; transition:max-height .25s ease, opacity .2s ease, margin-top .25s ease;}
+    .brand span{transition:opacity .2s ease;}
+    header.collapsed{padding-top:14px; padding-bottom:12px;}
+    header.collapsed .filters{max-height:0; opacity:0; margin-top:0; pointer-events:none;}
+    header.collapsed .brand span{display:none;}
+  }
   .search-box{
     background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18); border-radius:999px;
     padding:7px 14px; color:#fff; font-size:13px; min-width:160px;
@@ -770,10 +778,6 @@ function openDetailModal(id){
     ` : ''}
 
     <div id="memorySection" style="display:${p.status==='completed'?'block':'none'}">
-      <div class="section-title">好玩程度</div>
-      <div class="stars" id="starsRow">
-        ${[1,2,3,4,5].map(n=>`<span class="star ${n<=(p.rating||0)?'on':''}" data-n="${n}">★</span>`).join('')}
-      </div>
       <div class="field"><label>回忆一下</label><textarea id="d_memory" placeholder="这次感觉怎么样">${escapeHtml(p.memoryNote||'')}</textarea></div>
     </div>
 
@@ -873,11 +877,6 @@ function openDetailModal(id){
     openDetailModal(id);
   });
 
-  if(document.getElementById('starsRow')){
-    document.getElementById('starsRow').querySelectorAll('.star').forEach(s=>{
-      s.addEventListener('click', ()=>{ syncDetailFields(); p.rating = parseInt(s.dataset.n); openDetailModal(id); });
-    });
-  }
 
   document.getElementById('deletePlanBtn').addEventListener('click', async ()=>{
     if(confirm('确定要删除这个计划吗？')){
@@ -957,6 +956,11 @@ document.getElementById('tabCalendar').addEventListener('click', ()=>switchView(
 document.getElementById('tabAlbum').addEventListener('click', ()=>switchView('album'));
 document.getElementById('searchInput').addEventListener('input', (e)=>{ searchQuery = e.target.value; renderAll(); });
 document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeModal(); });
+
+const headerEl = document.querySelector('header');
+window.addEventListener('scroll', ()=>{
+  headerEl.classList.toggle('collapsed', window.scrollY > 40);
+}, {passive:true});
 
 (async function init(){
   await loadMyName();
