@@ -280,7 +280,30 @@
   <div class="modal" id="modalContent"></div>
 </div>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAOxzjsKxBR7Y3x1CcUO470nCttsDj_gF4",
+    authDomain: "calendar-33a5a.firebaseapp.com",
+    databaseURL: "https://calendar-33a5a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "calendar-33a5a",
+    storageBucket: "calendar-33a5a.firebasestorage.app",
+    messagingSenderId: "108518441596",
+    appId: "1:108518441596:web:78bb8fae9621cdc14e7ff9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const fb = { db, ref, get, set, onValue };
+  if(window.__fbResolve) window.__fbResolve(fb);
+  else window.__fb = fb;
+</script>
+
 <script>
+window.__fbReady = window.__fb ? Promise.resolve(window.__fb) : new Promise(resolve=>{ window.__fbResolve = resolve; });
+
 const TAGS = ['桌游','剧本杀','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影','密室逃脱','其他'];
 const TAG_EMOJI = {'桌游':'🎲','剧本杀':'🕵️','看展':'🖼️','谷子淘货':'🧸','攀岩':'🧗','拳击':'🥊','聚餐':'🍜','旅行':'✈️','演唱会':'🎤','看电影':'🎬','密室逃脱':'🔐','其他':'✨'};
 const STATUS_META = {
@@ -296,20 +319,34 @@ let calCursor = new Date();
 let myName = '';
 
 async function loadMyName(){
-  try{ const r = await window.storage.get('my-name', false); myName = r ? r.value : ''; }
+  try{ myName = localStorage.getItem('my-name') || ''; }
   catch(e){ myName = ''; }
 }
 async function saveMyName(name){
   myName = name;
-  try{ await window.storage.set('my-name', name, false); }catch(e){}
-}
-async function loadPlans(){
-  try{ const r = await window.storage.get('plans-list', true); plans = r ? JSON.parse(r.value) : []; }
-  catch(e){ plans = []; }
+  try{ localStorage.setItem('my-name', name); }catch(e){}
 }
 async function savePlans(){
-  try{ await window.storage.set('plans-list', JSON.stringify(plans), true); }
-  catch(e){ console.error('保存失败', e); }
+  try{
+    const {db, ref, set} = await window.__fbReady;
+    await set(ref(db, 'plans'), plans);
+  }catch(e){ console.error('保存失败', e); }
+}
+function subscribePlans(){
+  return new Promise(resolve=>{
+    (async ()=>{
+      const {db, ref, onValue} = await window.__fbReady;
+      let first = true;
+      onValue(ref(db, 'plans'), snap=>{
+        plans = snap.exists() ? snap.val() : [];
+        if(first){ first = false; resolve(); }
+        else renderAll();
+      }, err=>{
+        console.error('同步失败', err);
+        if(first){ first = false; plans = []; resolve(); }
+      });
+    })();
+  });
 }
 
 function uid(){ return 'p_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
@@ -905,7 +942,7 @@ document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.
 
 (async function init(){
   await loadMyName();
-  await loadPlans();
+  await subscribePlans();
   renderAll();
 })();
 </script>
