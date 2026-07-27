@@ -845,6 +845,7 @@ function openDetailModal(id){
 
     <div class="form-actions">
       <button class="btn-primary" id="saveDetail">保存修改</button>
+      <button class="btn-secondary" id="copyTextBtn">📋 复制文字</button>
       <button class="btn-secondary" id="exportBtn">📤 导出分享图</button>
       <button class="btn-secondary" onclick="closeModal()">关闭</button>
       <button class="btn-danger" id="deletePlanBtn" style="margin-left:auto;">删除这个计划</button>
@@ -940,6 +941,7 @@ function openDetailModal(id){
     }
   });
 
+  document.getElementById('copyTextBtn').addEventListener('click', ()=> copyPlanText(id));
   document.getElementById('exportBtn').addEventListener('click', ()=> exportShareCard(id));
 
   document.getElementById('saveDetail').addEventListener('click', async ()=>{
@@ -966,6 +968,27 @@ function loadHtml2Canvas(){
     });
   }
   return html2canvasLoadPromise;
+}
+
+async function copyPlanText(id){
+  const p = plans.find(x=>x.id===id);
+  if(!p) return;
+  const lines = [];
+  lines.push(`${TAG_EMOJI[p.tag]||'✨'} ${p.title}`);
+  lines.push(`📅 ${p.date||'日期待定'}${p.time?(' '+p.time):''}`);
+  if(p.location) lines.push(`📍 ${p.location}`);
+  if(p.participants && p.participants.length) lines.push(`👥 ${p.participants.join('、')}`);
+  if(p.budget) lines.push(`💰 人均预算 ${p.budget}`);
+  if(p.notes) lines.push(`📝 ${p.notes}`);
+  if(p.status==='completed' && p.rating) lines.push(`${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}`);
+  lines.push('—— 来自组局本');
+  const text = lines.join('\n');
+  try{
+    await navigator.clipboard.writeText(text);
+    alert('已复制，去粘贴发给大家吧');
+  }catch(e){
+    prompt('复制失败，手动复制这段文字：', text);
+  }
 }
 
 async function exportShareCard(id){
