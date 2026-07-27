@@ -325,7 +325,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+  import { getDatabase, ref, get, set, remove, onValue } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAOxzjsKxBR7Y3x1CcUO470nCttsDj_gF4",
@@ -339,7 +339,7 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const fb = { db, ref, get, set, onValue };
+  const fb = { db, ref, get, set, remove, onValue };
   if(window.__fbResolve) window.__fbResolve(fb);
   else window.__fb = fb;
 </script>
@@ -370,17 +370,32 @@ async function saveMyName(name){
   myName = name;
   try{ localStorage.setItem('my-name', name); }catch(e){}
 }
-async function savePlans(){
+async function saveSinglePlan(p){
   try{
     const {db, ref, set} = await window.__fbReady;
-    await set(ref(db, 'plans'), plans);
-  }catch(e){ console.error('保存失败', e); }
+    await set(ref(db, 'plans/' + p.id), p);
+    return true;
+  }catch(e){ console.error('保存失败', e); return false; }
+}
+async function deletePlanRemote(id){
+  try{
+    const {db, ref, remove} = await window.__fbReady;
+    await remove(ref(db, 'plans/' + id));
+    return true;
+  }catch(e){ console.error('删除失败', e); return false; }
 }
 function subscribePlans(){
   (async ()=>{
-    const {db, ref, onValue} = await window.__fbReady;
-    onValue(ref(db, 'plans'), snap=>{
-      plans = snap.exists() ? snap.val() : [];
+    const {db, ref, set, onValue} = await window.__fbReady;
+    onValue(ref(db, 'plans'), async snap=>{
+      const val = snap.val();
+      if(Array.isArray(val)){
+        const keyed = {};
+        val.forEach(p=>{ if(p && p.id) keyed[p.id] = p; });
+        await set(ref(db, 'plans'), keyed);
+        return;
+      }
+      plans = val ? Object.values(val) : [];
       plansLoaded = true;
       renderAll();
     }, err=>{
@@ -512,7 +527,8 @@ async function quickVote(id){
   p.interested = p.interested || [];
   const idx = p.interested.indexOf(name);
   if(idx>=0) p.interested.splice(idx,1); else p.interested.push(name);
-  await savePlans();
+  const ok = await saveSinglePlan(p);
+  if(!ok) alert('保存失败了，检查一下网络，稍后再试一次？');
   renderAll();
 }
 
@@ -749,8 +765,8 @@ async function submitAddPlan(){
     memoryNote: '',
     createdAt: Date.now()
   };
-  plans.push(plan);
-  await savePlans();
+  const ok = await saveSinglePlan(plan);
+  if(!ok){ alert('保存失败了，检查一下网络，稍后再试一次？'); return; }
   closeModal();
   renderAll();
 }
@@ -916,8 +932,9 @@ function openDetailModal(id){
 
   document.getElementById('deletePlanBtn').addEventListener('click', async ()=>{
     if(confirm('确定要删除这个计划吗？')){
+      const ok = await deletePlanRemote(id);
+      if(!ok){ alert('删除失败了，检查一下网络，稍后再试一次？'); return; }
       plans = plans.filter(x=>x.id!==id);
-      await savePlans();
       closeModal();
       renderAll();
     }
@@ -927,7 +944,8 @@ function openDetailModal(id){
 
   document.getElementById('saveDetail').addEventListener('click', async ()=>{
     syncDetailFields();
-    await savePlans();
+    const ok = await saveSinglePlan(p);
+    if(!ok){ alert('保存失败了，检查一下网络，稍后再试一次？'); return; }
     closeModal();
     renderAll();
   });
