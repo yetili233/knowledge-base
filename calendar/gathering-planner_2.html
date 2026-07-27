@@ -69,6 +69,34 @@
     header.collapsed{padding-top:14px; padding-bottom:12px;}
     header.collapsed .filters{max-height:0; opacity:0; margin-top:0; pointer-events:none;}
     header.collapsed .brand span{display:none;}
+    .view-toggle{display:none;}
+    .btn-add{display:none;}
+    main{padding-bottom:88px;}
+  }
+
+  .mobile-tabbar{display:none;}
+  .mobile-fab{display:none;}
+  @media (max-width:640px){
+    .mobile-tabbar{
+      display:flex; position:fixed; left:0; right:0; bottom:0; z-index:30;
+      background:var(--ink); box-shadow:0 -4px 14px rgba(0,0,0,0.18);
+      padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+    }
+    .mtab{
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+      background:none; border:none; color:#8b96b8; padding:6px 4px; border-radius:12px;
+      font-family:'Noto Sans SC'; cursor:pointer;
+    }
+    .mtab-icon{font-size:20px; line-height:1;}
+    .mtab-label{font-size:11px; font-weight:600;}
+    .mtab.active{background:rgba(255,255,255,0.12); color:#fff;}
+    .mobile-fab{
+      display:flex; align-items:center; justify-content:center;
+      position:fixed; right:18px; bottom:74px; z-index:31;
+      width:56px; height:56px; border-radius:50%;
+      background:var(--coral); color:#fff; border:none; font-size:26px; font-weight:700;
+      box-shadow:0 6px 16px rgba(232,96,60,0.45); cursor:pointer;
+    }
   }
   .search-box{
     background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18); border-radius:999px;
@@ -276,6 +304,13 @@
     <div id="tagFilterRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
   </div>
 </header>
+
+<nav class="mobile-tabbar" id="mobileTabbar">
+  <button class="mtab active" data-view="kanban"><span class="mtab-icon">📋</span><span class="mtab-label">看板</span></button>
+  <button class="mtab" data-view="calendar"><span class="mtab-icon">📅</span><span class="mtab-label">日历</span></button>
+  <button class="mtab" data-view="album"><span class="mtab-icon">🖼️</span><span class="mtab-label">相册</span></button>
+</nav>
+<button class="mobile-fab" id="mobileFab">＋</button>
 
 <main>
   <div id="kanbanView" class="kanban"></div>
@@ -614,6 +649,7 @@ function switchView(view){
   document.getElementById('tabKanban').classList.toggle('active', view==='kanban');
   document.getElementById('tabCalendar').classList.toggle('active', view==='calendar');
   document.getElementById('tabAlbum').classList.toggle('active', view==='album');
+  document.querySelectorAll('.mtab').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
   document.getElementById('kanbanView').style.display = view==='kanban' ? 'grid':'none';
   document.getElementById('calendarView').style.display = view==='calendar' ? 'block':'none';
   document.getElementById('albumView').style.display = view==='album' ? 'block':'none';
@@ -950,6 +986,10 @@ function closeModal(){
 
 /* ---------- Init ---------- */
 document.getElementById('btnAdd').addEventListener('click', openAddModal);
+document.getElementById('mobileFab').addEventListener('click', openAddModal);
+document.querySelectorAll('.mtab').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+});
 document.getElementById('btnStats').addEventListener('click', openStatsModal);
 document.getElementById('tabKanban').addEventListener('click', ()=>switchView('kanban'));
 document.getElementById('tabCalendar').addEventListener('click', ()=>switchView('calendar'));
