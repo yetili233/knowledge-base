@@ -6,7 +6,6 @@
 <title>组局本</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     --ink:#1F2A44;
@@ -318,6 +317,7 @@ let activeTags = new Set();
 let searchQuery = '';
 let calCursor = new Date();
 let myName = '';
+let plansLoaded = false;
 
 async function loadMyName(){
   try{ myName = localStorage.getItem('my-name') || ''; }
@@ -334,20 +334,18 @@ async function savePlans(){
   }catch(e){ console.error('保存失败', e); }
 }
 function subscribePlans(){
-  return new Promise(resolve=>{
-    (async ()=>{
-      const {db, ref, onValue} = await window.__fbReady;
-      let first = true;
-      onValue(ref(db, 'plans'), snap=>{
-        plans = snap.exists() ? snap.val() : [];
-        if(first){ first = false; resolve(); }
-        else renderAll();
-      }, err=>{
-        console.error('同步失败', err);
-        if(first){ first = false; plans = []; resolve(); }
-      });
-    })();
-  });
+  (async ()=>{
+    const {db, ref, onValue} = await window.__fbReady;
+    onValue(ref(db, 'plans'), snap=>{
+      plans = snap.exists() ? snap.val() : [];
+      plansLoaded = true;
+      renderAll();
+    }, err=>{
+      console.error('同步失败', err);
+      plansLoaded = true;
+      renderAll();
+    });
+  })();
 }
 
 function uid(){ return 'p_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
@@ -491,7 +489,7 @@ function renderKanban(){
         <h2>${c.title}</h2>
         <span class="count">${list.length}</span>
       </div>
-      ${list.length? list.map(cardHTML).join('') : `<div class="empty-hint">还没有计划～</div>`}
+      ${list.length? list.map(cardHTML).join('') : `<div class="empty-hint">${plansLoaded?'还没有计划～':'加载中...'}</div>`}
     </div>`;
   }).join('');
   el.querySelectorAll('.card').forEach(card=>{
@@ -572,7 +570,7 @@ function cardBodyOnly(p){
 function renderAlbum(){
   const el = document.getElementById('albumView');
   const completed = sortPlans(plans.filter(p=>p.status==='completed' && matchesFilter(p))).reverse();
-  el.innerHTML = `<div class="album-grid">${completed.map(albumCardHTML).join('') || '<div class="empty-hint">还没有完成的回忆～快去玩一次吧</div>'}</div>`;
+  el.innerHTML = `<div class="album-grid">${completed.map(albumCardHTML).join('') || `<div class="empty-hint">${plansLoaded?'还没有完成的回忆～快去玩一次吧':'加载中...'}</div>`}</div>`;
   el.querySelectorAll('.album-card').forEach(c=> c.addEventListener('click', ()=> openDetailModal(c.dataset.id)));
 }
 function albumCardHTML(p){
@@ -902,9 +900,26 @@ function openDetailModal(id){
   document.getElementById('overlay').classList.add('show');
 }
 
+let html2canvasLoadPromise = null;
+function loadHtml2Canvas(){
+  if(window.html2canvas) return Promise.resolve();
+  if(!html2canvasLoadPromise){
+    html2canvasLoadPromise = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  return html2canvasLoadPromise;
+}
+
 async function exportShareCard(id){
   const p = plans.find(x=>x.id===id);
   if(!p) return;
+  try{ await loadHtml2Canvas(); }
+  catch(e){ alert('导出功能加载失败，检查一下网络再试试？'); return; }
   const temp = document.createElement('div');
   temp.style.cssText = 'position:fixed; left:-9999px; top:0; width:360px;';
   temp.innerHTML = `
@@ -945,8 +960,8 @@ document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.
 
 (async function init(){
   await loadMyName();
-  await subscribePlans();
   renderAll();
+  subscribePlans();
 })();
 </script>
 </body>
