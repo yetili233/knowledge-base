@@ -264,6 +264,11 @@
   .chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;}
   .name-chip{background:var(--mustard-soft); color:#7A5A17; padding:3px 10px; border-radius:999px; font-size:12px; display:flex; align-items:center; gap:5px;}
   .name-chip button{background:none; border:none; cursor:pointer; color:#7A5A17; font-size:12px; padding:0;}
+  .member-chip{
+    padding:7px 15px; border-radius:999px; font-size:13px; font-weight:600; cursor:pointer;
+    border:1.5px solid var(--line); background:#fff; color:var(--ink-soft);
+  }
+  .member-chip.active{background:var(--mustard-soft); border-color:var(--mustard); color:#7A5A17;}
   .add-inline{display:flex; gap:8px;}
   .add-inline input{flex:1;}
   .add-inline button{
@@ -348,6 +353,7 @@
 window.__fbReady = window.__fb ? Promise.resolve(window.__fb) : new Promise(resolve=>{ window.__fbResolve = resolve; });
 
 const TAGS = ['桌游','剧本杀','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影','密室逃脱','其他'];
+const GROUP_MEMBERS = ['欧尼','yeti','qq','jj'];
 const TAG_EMOJI = {'桌游':'🎲','剧本杀':'🕵️','看展':'🖼️','谷子淘货':'🧸','攀岩':'🧗','拳击':'🥊','聚餐':'🍜','旅行':'✈️','演唱会':'🎤','看电影':'🎬','密室逃脱':'🔐','其他':'✨'};
 const STATUS_META = {
   proposed:{label:'待定', color:'#D9A441'},
@@ -817,11 +823,7 @@ function openDetailModal(id){
 
     <div class="section-title">参与的人</div>
     <div class="chip-row" id="participantChips">
-      ${(p.participants||[]).map(n=>`<span class="name-chip">${escapeHtml(n)} <button data-name="${escapeHtml(n)}" class="rmParticipant">✕</button></span>`).join('')}
-    </div>
-    <div class="add-inline">
-      <input id="newParticipant" placeholder="填个名字，比如 ${escapeHtml(myName)||'你的名字'}">
-      <button id="addParticipantBtn">我要去！</button>
+      ${GROUP_MEMBERS.map(n=>`<button type="button" class="member-chip ${(p.participants||[]).includes(n)?'active':''}" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('')}
     </div>
 
     ${(p.interested&&p.interested.length) ? `
@@ -899,23 +901,15 @@ function openDetailModal(id){
     });
   });
 
-  modal.querySelectorAll('.rmParticipant').forEach(btn=>{
+  modal.querySelectorAll('.member-chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       syncDetailFields();
-      p.participants = (p.participants||[]).filter(n=>n!==btn.dataset.name);
+      const name = btn.dataset.name;
+      p.participants = p.participants || [];
+      const idx = p.participants.indexOf(name);
+      if(idx>=0) p.participants.splice(idx,1); else p.participants.push(name);
       openDetailModal(id);
     });
-  });
-
-  document.getElementById('addParticipantBtn').addEventListener('click', ()=>{
-    const inp = document.getElementById('newParticipant');
-    const name = inp.value.trim();
-    if(!name) return;
-    syncDetailFields();
-    p.participants = p.participants || [];
-    if(!p.participants.includes(name)) p.participants.push(name);
-    saveMyName(name);
-    openDetailModal(id);
   });
 
   document.getElementById('addCommentBtn').addEventListener('click', ()=>{
