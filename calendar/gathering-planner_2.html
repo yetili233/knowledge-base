@@ -139,6 +139,8 @@
     transition:transform .12s ease;
   }
   .card:hover{transform:translateY(-2px);}
+  .card.status-completed{filter:grayscale(0.65); opacity:0.8;}
+  .card.status-completed:hover{filter:grayscale(0.35); opacity:0.95;}
   .stub{
     width:64px; flex:none; background:var(--ink); color:#fff; display:flex; flex-direction:column;
     align-items:center; justify-content:center; padding:8px 4px; position:relative;
@@ -190,7 +192,13 @@
   }
   .cal-cell.empty{background:transparent; border:none;}
   .cal-cell.today{outline:2px solid var(--coral);}
+  .cal-daynum-row{display:flex; align-items:center; justify-content:space-between;}
   .cal-daynum{font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:var(--ink-soft);}
+  .cal-add-btn{
+    background:none; border:none; color:var(--ink-soft); font-size:14px; font-weight:700; cursor:pointer;
+    padding:0 2px; line-height:1; opacity:0.45;
+  }
+  .cal-add-btn:hover{opacity:1; color:var(--coral);}
   .cal-events{display:flex; flex-direction:column; gap:3px; margin-top:5px;}
   .cal-event{
     font-size:11px; line-height:1.3; padding:2px 5px; border-radius:5px; background:var(--bg);
@@ -354,6 +362,7 @@ window.__fbReady = window.__fb ? Promise.resolve(window.__fb) : new Promise(reso
 
 const TAGS = ['桌游','剧本杀','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影','密室逃脱','其他'];
 const GROUP_MEMBERS = ['欧尼','yeti','qq','jj'];
+const WEEKDAY_NAMES = ['周日','周一','周二','周三','周四','周五','周六'];
 const TAG_EMOJI = {'桌游':'🎲','剧本杀':'🕵️','看展':'🖼️','谷子淘货':'🧸','攀岩':'🧗','拳击':'🥊','聚餐':'🍜','旅行':'✈️','演唱会':'🎤','看电影':'🎬','密室逃脱':'🔐','其他':'✨'};
 const STATUS_META = {
   proposed:{label:'待定', color:'#D9A441'},
@@ -494,9 +503,9 @@ function cardHTML(p){
   const stampMeta = STATUS_META[p.status];
   const participants = (p.participants||[]);
   return `
-  <div class="card" data-id="${p.id}">
+  <div class="card status-${p.status}" data-id="${p.id}">
     <div class="stub">
-      ${p.date ? `<div class="day mono">${stub.day}</div><div class="mon">${stub.mon}</div>` : `<div class="tbd">日期<br>待定</div>`}
+      ${p.recurring ? `<div class="day mono" style="font-size:16px;">🔁</div><div class="mon">${WEEKDAY_NAMES[p.recurWeekday]}</div>` : (p.date ? `<div class="day mono">${stub.day}</div><div class="mon">${stub.mon}</div>` : `<div class="tbd">日期<br>待定</div>`)}
       <div class="perforation"></div>
     </div>
     <div class="card-body">
@@ -578,12 +587,13 @@ function renderCalendar(){
   for(let i=0;i<startDow;i++) cells += `<div class="cal-cell empty"></div>`;
   for(let d=1; d<=daysInMonth; d++){
     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayPlans = sortPlans(plans.filter(p=>p.date===dateStr && matchesFilter(p)));
+    const weekday = new Date(y,m,d).getDay();
+    const dayPlans = sortPlans(plans.filter(p=>planIsOnDate(p, dateStr, weekday) && matchesFilter(p)));
     const shown = dayPlans.slice(0,3);
-    const events = shown.map(p=>`<div class="cal-event" style="border-left-color:${STATUS_META[p.status].color}" data-id="${p.id}">${p.time?`<span class="cal-event-time">${escapeHtml(p.time)}</span>`:''}${escapeHtml(p.title)}</div>`).join('');
+    const events = shown.map(p=>`<div class="cal-event" style="border-left-color:${STATUS_META[p.status].color}" data-id="${p.id}">${p.recurring?'🔁 ':''}${p.time?`<span class="cal-event-time">${escapeHtml(p.time)}</span>`:''}${escapeHtml(p.title)}</div>`).join('');
     const more = dayPlans.length>3 ? `<div class="cal-event-more">+${dayPlans.length-3} 更多</div>` : '';
     cells += `<div class="cal-cell ${dayPlans.length?'cal-cell-list':''} ${dateStr===todayStr?'today':''}" data-date="${dateStr}">
-      <div class="cal-daynum">${d}</div>
+      <div class="cal-daynum-row"><span class="cal-daynum">${d}</span><button type="button" class="cal-add-btn" data-date="${dateStr}">＋</button></div>
       <div class="cal-events">${events}${more}</div>
     </div>`;
   }
@@ -609,19 +619,27 @@ function renderCalendar(){
   el.querySelectorAll('.cal-event').forEach(ev=>{
     ev.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailModal(ev.dataset.id); });
   });
+  el.querySelectorAll('.cal-add-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); openAddModal(btn.dataset.date); });
+  });
 }
 
 function openDayList(dateStr){
-  const dayPlans = plans.filter(p=>p.date===dateStr);
+  const weekday = new Date(dateStr+'T00:00:00').getDay();
+  const dayPlans = plans.filter(p=>planIsOnDate(p, dateStr, weekday));
   const modal = document.getElementById('modalContent');
   modal.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2 class="display">${dateStr} 的计划</h2>
-    ${dayPlans.map(p=>`<div class="card" style="margin-bottom:10px;" data-id="${p.id}">${cardBodyOnly(p)}</div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">这天还没有计划</p>'}
+    ${dayPlans.map(p=>`<div class="card status-${p.status}" style="margin-bottom:10px;" data-id="${p.id}">${cardBodyOnly(p)}</div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">这天还没有计划</p>'}
+    <div class="form-actions">
+      <button class="btn-primary" id="addForThisDay">＋ 加一个计划</button>
+    </div>
   `;
   modal.querySelectorAll('.card').forEach(c=>{
     c.addEventListener('click', ()=> openDetailModal(c.dataset.id));
   });
+  document.getElementById('addForThisDay').addEventListener('click', ()=> openAddModal(dateStr));
   document.getElementById('overlay').classList.add('show');
 }
 function cardBodyOnly(p){
@@ -630,6 +648,12 @@ function cardBodyOnly(p){
     <p class="card-title">${escapeHtml(p.title)}</p>
     <div class="card-meta">${p.location?`<span>📍 ${escapeHtml(p.location)}</span>`:''} ${p.time?`<span>🕒 ${escapeHtml(p.time)}</span>`:''}</div>
   </div>`;
+}
+
+function planIsOnDate(p, dateStr, weekday){
+  if(p.date===dateStr) return true;
+  if(p.recurring && p.recurWeekday===weekday) return true;
+  return false;
 }
 
 function renderAlbum(){
@@ -710,7 +734,7 @@ function openStatsModal(){
 }
 
 /* ---------- Add Modal ---------- */
-function openAddModal(){
+function openAddModal(prefillDate){
   const modal = document.getElementById('modalContent');
   modal.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -722,9 +746,13 @@ function openAddModal(){
       </div>
       <div class="field"><label>地点</label><input id="f_location" placeholder="在哪儿玩"></div>
     </div>
-    <div class="checkbox-row"><input type="checkbox" id="f_notb" checked> <label for="f_notb" style="margin:0;">日期已经定了</label></div>
+    <div class="checkbox-row"><input type="checkbox" id="f_recurring"> <label for="f_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
+    <div class="checkbox-row" id="f_notbRow"><input type="checkbox" id="f_notb" checked> <label for="f_notb" style="margin:0;">日期已经定了</label></div>
     <div class="row2">
-      <div class="field"><label>日期</label><input type="date" id="f_date"></div>
+      <div class="field" id="f_dateField"><label>日期</label><input type="date" id="f_date" value="${prefillDate||''}"></div>
+      <div class="field" id="f_weekdayField" style="display:none;"><label>每周固定在</label>
+        <select id="f_weekday">${WEEKDAY_NAMES.map((wd,i)=>`<option value="${i}">${wd}</option>`).join('')}</select>
+      </div>
       <div class="field"><label>时间（可选）</label><input id="f_time" placeholder="例如 14:00"></div>
     </div>
     <div class="row2">
@@ -739,7 +767,17 @@ function openAddModal(){
   `;
   const notbCheck = document.getElementById('f_notb');
   const dateInput = document.getElementById('f_date');
+  const recurringCheck = document.getElementById('f_recurring');
+  const dateField = document.getElementById('f_dateField');
+  const weekdayField = document.getElementById('f_weekdayField');
+  const notbRow = document.getElementById('f_notbRow');
   notbCheck.addEventListener('change', ()=>{ dateInput.disabled = !notbCheck.checked; if(!notbCheck.checked) dateInput.value=''; });
+  recurringCheck.addEventListener('change', ()=>{
+    const on = recurringCheck.checked;
+    dateField.style.display = on ? 'none' : '';
+    weekdayField.style.display = on ? '' : 'none';
+    notbRow.style.display = on ? 'none' : '';
+  });
   document.getElementById('submitAdd').addEventListener('click', submitAddPlan);
   document.getElementById('overlay').classList.add('show');
 }
@@ -747,8 +785,10 @@ function openAddModal(){
 async function submitAddPlan(){
   const title = document.getElementById('f_title').value.trim();
   if(!title){ alert('先给活动起个名字吧'); return; }
+  const isRecurring = document.getElementById('f_recurring').checked;
   const hasDate = document.getElementById('f_notb').checked;
-  const date = hasDate ? document.getElementById('f_date').value : '';
+  const date = (!isRecurring && hasDate) ? document.getElementById('f_date').value : '';
+  const recurWeekday = isRecurring ? parseInt(document.getElementById('f_weekday').value) : null;
   const proposer = document.getElementById('f_proposer').value.trim();
   if(proposer) saveMyName(proposer);
   const plan = {
@@ -757,11 +797,13 @@ async function submitAddPlan(){
     tag: document.getElementById('f_tag').value,
     location: document.getElementById('f_location').value.trim(),
     date: date,
+    recurring: isRecurring,
+    recurWeekday: recurWeekday,
     time: document.getElementById('f_time').value.trim(),
     proposer,
     budget: document.getElementById('f_budget').value.trim(),
     notes: document.getElementById('f_notes').value.trim(),
-    status: date ? 'upcoming' : 'proposed',
+    status: (date || isRecurring) ? 'upcoming' : 'proposed',
     participants: proposer ? [proposer] : [],
     interested: [],
     actualCost: '',
@@ -792,8 +834,12 @@ function openDetailModal(id){
       <button class="status-btn ${p.status==='completed'?'sel-completed':''}" data-s="completed">已完成</button>
     </div>
 
+    <div class="checkbox-row"><input type="checkbox" id="d_recurring" ${p.recurring?'checked':''}> <label for="d_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
     <div class="row2">
-      <div class="field"><label>日期</label><input type="date" id="d_date" value="${p.date||''}"></div>
+      <div class="field" id="d_dateField" style="display:${p.recurring?'none':''};"><label>日期</label><input type="date" id="d_date" value="${p.date||''}"></div>
+      <div class="field" id="d_weekdayField" style="display:${p.recurring?'':'none'};"><label>每周固定在</label>
+        <select id="d_weekday">${WEEKDAY_NAMES.map((wd,i)=>`<option value="${i}" ${p.recurWeekday===i?'selected':''}>${wd}</option>`).join('')}</select>
+      </div>
       <div class="field"><label>时间</label><input id="d_time" value="${escapeHtml(p.time||'')}"></div>
     </div>
     <div class="row2">
@@ -855,7 +901,14 @@ function openDetailModal(id){
   `;
 
   function syncDetailFields(){
-    p.date = document.getElementById('d_date').value;
+    p.recurring = document.getElementById('d_recurring').checked;
+    if(p.recurring){
+      p.date = '';
+      p.recurWeekday = parseInt(document.getElementById('d_weekday').value);
+    }else{
+      p.date = document.getElementById('d_date').value;
+      p.recurWeekday = null;
+    }
     p.time = document.getElementById('d_time').value.trim();
     p.location = document.getElementById('d_location').value.trim();
     p.tag = document.getElementById('d_tag').value;
@@ -866,6 +919,12 @@ function openDetailModal(id){
     p.notes = document.getElementById('d_notes').value.trim();
     if(document.getElementById('d_memory')) p.memoryNote = document.getElementById('d_memory').value.trim();
   }
+
+  document.getElementById('d_recurring').addEventListener('change', (e)=>{
+    const on = e.target.checked;
+    document.getElementById('d_dateField').style.display = on ? 'none' : '';
+    document.getElementById('d_weekdayField').style.display = on ? '' : 'none';
+  });
 
   document.getElementById('coverUploadBtn').addEventListener('click', ()=>{
     document.getElementById('d_cover_file').click();
@@ -1020,8 +1079,8 @@ function closeModal(){
 }
 
 /* ---------- Init ---------- */
-document.getElementById('btnAdd').addEventListener('click', openAddModal);
-document.getElementById('mobileFab').addEventListener('click', openAddModal);
+document.getElementById('btnAdd').addEventListener('click', ()=> openAddModal());
+document.getElementById('mobileFab').addEventListener('click', ()=> openAddModal());
 document.querySelectorAll('.mtab').forEach(btn=>{
   btn.addEventListener('click', ()=> switchView(btn.dataset.view));
 });
