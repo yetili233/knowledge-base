@@ -650,9 +650,17 @@ function cardBodyOnly(p){
   </div>`;
 }
 
+function dateStrPlusMonths(n){
+  const d = new Date();
+  d.setMonth(d.getMonth()+n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function planIsOnDate(p, dateStr, weekday){
   if(p.date===dateStr) return true;
-  if(p.recurring && p.recurWeekday===weekday) return true;
+  if(p.recurring && p.recurWeekday===weekday){
+    if(p.recurUntil && dateStr > p.recurUntil) return false;
+    return true;
+  }
   return false;
 }
 
@@ -746,7 +754,8 @@ function openAddModal(prefillDate){
       </div>
       <div class="field"><label>地点</label><input id="f_location" placeholder="在哪儿玩"></div>
     </div>
-    <div class="checkbox-row"><input type="checkbox" id="f_recurring"> <label for="f_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
+    <div class="checkbox-row" style="margin-bottom:4px;"><input type="checkbox" id="f_recurring"> <label for="f_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
+    <p style="font-size:11px; color:var(--ink-soft); margin:0 0 12px;">长期活动只会自动生效 2 个月，到期前打开这条计划保存一下就能再续 2 个月</p>
     <div class="checkbox-row" id="f_notbRow"><input type="checkbox" id="f_notb" checked> <label for="f_notb" style="margin:0;">日期已经定了</label></div>
     <div class="row2">
       <div class="field" id="f_dateField"><label>日期</label><input type="date" id="f_date" value="${prefillDate||''}"></div>
@@ -799,6 +808,7 @@ async function submitAddPlan(){
     date: date,
     recurring: isRecurring,
     recurWeekday: recurWeekday,
+    recurUntil: isRecurring ? dateStrPlusMonths(2) : null,
     time: document.getElementById('f_time').value.trim(),
     proposer,
     budget: document.getElementById('f_budget').value.trim(),
@@ -834,7 +844,8 @@ function openDetailModal(id){
       <button class="status-btn ${p.status==='completed'?'sel-completed':''}" data-s="completed">已完成</button>
     </div>
 
-    <div class="checkbox-row"><input type="checkbox" id="d_recurring" ${p.recurring?'checked':''}> <label for="d_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
+    <div class="checkbox-row" style="margin-bottom:4px;"><input type="checkbox" id="d_recurring" ${p.recurring?'checked':''}> <label for="d_recurring" style="margin:0;">长期活动（比如"每周六"，每周自动重复）</label></div>
+    <p style="font-size:11px; color:var(--ink-soft); margin:0 0 12px;">${p.recurring && p.recurUntil ? `会持续到 ${p.recurUntil}，到期前保存一下这条计划就能再续 2 个月` : '长期活动只会自动生效 2 个月，到期前打开这条计划保存一下就能再续 2 个月'}</p>
     <div class="row2">
       <div class="field" id="d_dateField" style="display:${p.recurring?'none':''};"><label>日期</label><input type="date" id="d_date" value="${p.date||''}"></div>
       <div class="field" id="d_weekdayField" style="display:${p.recurring?'':'none'};"><label>每周固定在</label>
@@ -905,9 +916,11 @@ function openDetailModal(id){
     if(p.recurring){
       p.date = '';
       p.recurWeekday = parseInt(document.getElementById('d_weekday').value);
+      p.recurUntil = dateStrPlusMonths(2);
     }else{
       p.date = document.getElementById('d_date').value;
       p.recurWeekday = null;
+      p.recurUntil = null;
     }
     p.time = document.getElementById('d_time').value.trim();
     p.location = document.getElementById('d_location').value.trim();
