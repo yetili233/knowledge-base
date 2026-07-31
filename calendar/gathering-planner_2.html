@@ -590,7 +590,7 @@ function renderCalendar(){
     const weekday = new Date(y,m,d).getDay();
     const dayPlans = sortPlans(plans.filter(p=>planIsOnDate(p, dateStr, weekday) && matchesFilter(p)));
     const shown = dayPlans.slice(0,3);
-    const events = shown.map(p=>`<div class="cal-event" style="border-left-color:${STATUS_META[p.status].color}" data-id="${p.id}">${p.recurring?'🔁 ':''}${p.time?`<span class="cal-event-time">${escapeHtml(p.time)}</span>`:''}${escapeHtml(p.title)}</div>`).join('');
+    const events = shown.map(p=>`<div class="cal-event" style="border-left-color:${STATUS_META[p.status].color}" data-id="${p.id}" data-occurrence="${dateStr}">${p.recurring?'🔁 ':''}${p.time?`<span class="cal-event-time">${escapeHtml(p.time)}</span>`:''}${escapeHtml(p.title)}</div>`).join('');
     const more = dayPlans.length>3 ? `<div class="cal-event-more">+${dayPlans.length-3} 更多</div>` : '';
     cells += `<div class="cal-cell ${dayPlans.length?'cal-cell-list':''} ${dateStr===todayStr?'today':''}" data-date="${dateStr}">
       <div class="cal-daynum-row"><span class="cal-daynum">${d}</span><button type="button" class="cal-add-btn" data-date="${dateStr}">＋</button></div>
@@ -617,7 +617,7 @@ function renderCalendar(){
     cell.addEventListener('click', ()=> openDayList(cell.dataset.date));
   });
   el.querySelectorAll('.cal-event').forEach(ev=>{
-    ev.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailModal(ev.dataset.id); });
+    ev.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailModal(ev.dataset.id, ev.dataset.occurrence); });
   });
   el.querySelectorAll('.cal-add-btn').forEach(btn=>{
     btn.addEventListener('click', (e)=>{ e.stopPropagation(); openAddModal(btn.dataset.date); });
@@ -631,13 +631,13 @@ function openDayList(dateStr){
   modal.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2 class="display">${dateStr} 的计划</h2>
-    ${dayPlans.map(p=>`<div class="card status-${p.status}" style="margin-bottom:10px;" data-id="${p.id}">${cardBodyOnly(p)}</div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">这天还没有计划</p>'}
+    ${dayPlans.map(p=>`<div class="card status-${p.status}" style="margin-bottom:10px;" data-id="${p.id}" data-occurrence="${dateStr}">${cardBodyOnly(p)}</div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">这天还没有计划</p>'}
     <div class="form-actions">
       <button class="btn-primary" id="addForThisDay">＋ 加一个计划</button>
     </div>
   `;
   modal.querySelectorAll('.card').forEach(c=>{
-    c.addEventListener('click', ()=> openDetailModal(c.dataset.id));
+    c.addEventListener('click', ()=> openDetailModal(c.dataset.id, c.dataset.occurrence));
   });
   document.getElementById('addForThisDay').addEventListener('click', ()=> openAddModal(dateStr));
   document.getElementById('overlay').classList.add('show');
@@ -657,8 +657,14 @@ function dateStrPlusMonths(n){
 }
 function planIsOnDate(p, dateStr, weekday){
   if(p.date===dateStr) return true;
-  if(p.recurring && p.recurWeekday===weekday){
+  if(!p.recurring) return false;
+  const exceptions = p.recurExceptions || {};
+  for(const origDate in exceptions){
+    if(exceptions[origDate] && exceptions[origDate].date === dateStr) return true;
+  }
+  if(p.recurWeekday===weekday){
     if(p.recurUntil && dateStr > p.recurUntil) return false;
+    if(exceptions[dateStr]) return false;
     return true;
   }
   return false;
@@ -830,13 +836,28 @@ async function submitAddPlan(){
 }
 
 /* ---------- Detail Modal ---------- */
-function openDetailModal(id){
+function openDetailModal(id, occurrenceDate){
   const p = plans.find(x=>x.id===id);
   if(!p) return;
+  const isSingleOccurrence = !!(p.recurring && occurrenceDate);
+  const exc = (p.recurExceptions && p.recurExceptions[occurrenceDate]) || null;
   const modal = document.getElementById('modalContent');
   modal.innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2 class="display">${escapeHtml(p.title)}</h2>
+
+    ${isSingleOccurrence ? `
+    <div class="section-title" style="margin-top:0; border-top:none; padding-top:0;">仅调整本次（原定 ${occurrenceDate}）</div>
+    <div class="row2">
+      <div class="field"><label>把这一次改到</label><input type="date" id="d_excDate" value="${(exc&&exc.date)||occurrenceDate}"></div>
+      <div class="field"><label>&nbsp;</label><button type="button" class="btn-secondary" id="applyExceptionBtn" style="width:100%;">只改这一次</button></div>
+    </div>
+    <div class="form-actions" style="margin-top:0; margin-bottom:6px;">
+      <button type="button" class="btn-danger" id="skipExceptionBtn">这次跳过不举行</button>
+      ${exc ? `<button type="button" class="btn-secondary" id="clearExceptionBtn">恢复正常</button>` : ''}
+    </div>
+    <div class="section-title">整个长期活动（改这里会影响以后每一周）</div>
+    ` : ''}
 
     <div class="status-btns">
       <button class="status-btn ${p.status==='proposed'?'sel-proposed':''}" data-s="proposed">待定</button>
@@ -1006,6 +1027,36 @@ function openDetailModal(id){
       renderAll();
     }
   });
+
+  if(isSingleOccurrence){
+    document.getElementById('applyExceptionBtn').addEventListener('click', async ()=>{
+      const newDate = document.getElementById('d_excDate').value;
+      if(!newDate) return;
+      p.recurExceptions = p.recurExceptions || {};
+      p.recurExceptions[occurrenceDate] = {date: newDate};
+      const ok = await saveSinglePlan(p);
+      if(!ok){ alert('保存失败了，检查一下网络，稍后再试一次？'); return; }
+      closeModal();
+      renderAll();
+    });
+    document.getElementById('skipExceptionBtn').addEventListener('click', async ()=>{
+      if(!confirm(`确定这次（${occurrenceDate}）跳过不举行吗？`)) return;
+      p.recurExceptions = p.recurExceptions || {};
+      p.recurExceptions[occurrenceDate] = {skip:true};
+      const ok = await saveSinglePlan(p);
+      if(!ok){ alert('保存失败了，检查一下网络，稍后再试一次？'); return; }
+      closeModal();
+      renderAll();
+    });
+    const clearBtn = document.getElementById('clearExceptionBtn');
+    if(clearBtn) clearBtn.addEventListener('click', async ()=>{
+      if(p.recurExceptions) delete p.recurExceptions[occurrenceDate];
+      const ok = await saveSinglePlan(p);
+      if(!ok){ alert('保存失败了，检查一下网络，稍后再试一次？'); return; }
+      closeModal();
+      renderAll();
+    });
+  }
 
   document.getElementById('copyTextBtn').addEventListener('click', ()=> copyPlanText(id));
   document.getElementById('exportBtn').addEventListener('click', ()=> exportShareCard(id));
