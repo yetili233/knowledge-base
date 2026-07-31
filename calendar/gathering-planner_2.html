@@ -139,8 +139,8 @@
     transition:transform .12s ease;
   }
   .card:hover{transform:translateY(-2px);}
-  .card.status-completed{filter:grayscale(0.65); opacity:0.8;}
-  .card.status-completed:hover{filter:grayscale(0.35); opacity:0.95;}
+  .card.status-completed{background:var(--sage-soft); opacity:0.9;}
+  .card.status-completed:hover{opacity:1;}
   .stub{
     width:64px; flex:none; background:var(--ink); color:#fff; display:flex; flex-direction:column;
     align-items:center; justify-content:center; padding:8px 4px; position:relative;
@@ -363,6 +363,7 @@ window.__fbReady = window.__fb ? Promise.resolve(window.__fb) : new Promise(reso
 const TAGS = ['桌游','剧本杀','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影','密室逃脱','其他'];
 const GROUP_MEMBERS = ['欧尼','yeti','qq','jj'];
 const WEEKDAY_NAMES = ['周日','周一','周二','周三','周四','周五','周六'];
+const COMMENTS_ENABLED = false;
 const TAG_EMOJI = {'桌游':'🎲','剧本杀':'🕵️','看展':'🖼️','谷子淘货':'🧸','攀岩':'🧗','拳击':'🥊','聚餐':'🍜','旅行':'✈️','演唱会':'🎤','看电影':'🎬','密室逃脱':'🔐','其他':'✨'};
 const STATUS_META = {
   proposed:{label:'待定', color:'#D9A441'},
@@ -524,7 +525,7 @@ function cardHTML(p){
         <span class="tag-pill">${p.tag||'其他'}</span>
         <div class="avatars">${participants.slice(0,3).map(n=>`<span class="avatar-chip">${escapeHtml(n)}</span>`).join('')}${participants.length>3?`<span class="avatar-chip">+${participants.length-3}</span>`:''}</div>
         ${p.status==='proposed' ? `<button class="quick-vote" data-id="${p.id}">🙋 ${(p.interested||[]).length}人有空</button>` : ''}
-        <span class="comment-count">💭 ${(p.comments||[]).length}</span>
+        ${COMMENTS_ENABLED ? `<span class="comment-count">💭 ${(p.comments||[]).length}</span>` : ''}
       </div>
     </div>
   </div>`;
@@ -913,6 +914,7 @@ function openDetailModal(id, occurrenceDate){
       <div class="field"><label>回忆一下</label><textarea id="d_memory" placeholder="这次感觉怎么样">${escapeHtml(p.memoryNote||'')}</textarea></div>
     </div>
 
+    ${COMMENTS_ENABLED ? `
     <div class="section-title">留言 / 讨论</div>
     <div id="commentsList">
       ${(p.comments||[]).map(c=>`<div class="comment"><span class="time">${c.time}</span><b>${escapeHtml(c.name||'匿名')}：</b>${escapeHtml(c.text)}</div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft);">还没有留言，来说两句吧</p>'}
@@ -922,6 +924,7 @@ function openDetailModal(id, occurrenceDate){
       <input id="newCommentText" placeholder="说点什么...">
       <button id="addCommentBtn">发送</button>
     </div>
+    ` : ''}
 
     <div class="form-actions">
       <button class="btn-primary" id="saveDetail">保存修改</button>
@@ -1005,17 +1008,19 @@ function openDetailModal(id, occurrenceDate){
     });
   });
 
-  document.getElementById('addCommentBtn').addEventListener('click', ()=>{
-    const name = document.getElementById('newCommentName').value.trim() || '匿名';
-    const text = document.getElementById('newCommentText').value.trim();
-    if(!text) return;
-    syncDetailFields();
-    p.comments = p.comments || [];
-    const now = new Date();
-    p.comments.push({name, text, time:`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`});
-    saveMyName(name);
-    openDetailModal(id);
-  });
+  if(COMMENTS_ENABLED){
+    document.getElementById('addCommentBtn').addEventListener('click', ()=>{
+      const name = document.getElementById('newCommentName').value.trim() || '匿名';
+      const text = document.getElementById('newCommentText').value.trim();
+      if(!text) return;
+      syncDetailFields();
+      p.comments = p.comments || [];
+      const now = new Date();
+      p.comments.push({name, text, time:`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`});
+      saveMyName(name);
+      openDetailModal(id);
+    });
+  }
 
 
   document.getElementById('deletePlanBtn').addEventListener('click', async ()=>{
