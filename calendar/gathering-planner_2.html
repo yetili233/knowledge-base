@@ -314,7 +314,8 @@
   </div>
   <div class="filters">
     <input class="search-box" id="searchInput" placeholder="搜索活动 / 地点...">
-    <div id="tagFilterRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    <button class="tag-chip" id="toggleTagsBtn">🏷️ 标签</button>
+    <div id="tagFilterRow" style="display:none; gap:8px; flex-wrap:wrap;"></div>
   </div>
 </header>
 
@@ -360,7 +361,9 @@
 <script>
 window.__fbReady = window.__fb ? Promise.resolve(window.__fb) : new Promise(resolve=>{ window.__fbResolve = resolve; });
 
-const TAGS = ['桌游','剧本杀','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影','密室逃脱','其他'];
+const BASE_TAGS = ['桌游','看展','谷子淘货','攀岩','拳击','聚餐','旅行','演唱会','看电影'];
+let customTags = [];
+function allTags(){ return [...BASE_TAGS, ...customTags, '其他']; }
 const GROUP_MEMBERS = ['欧尼','yeti','qq','jj'];
 const WEEKDAY_NAMES = ['周日','周一','周二','周三','周四','周五','周六'];
 const COMMENTS_ENABLED = false;
@@ -420,6 +423,38 @@ function subscribePlans(){
       renderAll();
     });
   })();
+}
+
+function subscribeCustomTags(){
+  (async ()=>{
+    const {db, ref, onValue} = await window.__fbReady;
+    onValue(ref(db, 'customTags'), snap=>{
+      const val = snap.val();
+      customTags = Array.isArray(val) ? val : (val ? Object.values(val) : []);
+      renderAll();
+    }, err=> console.error('标签同步失败', err));
+  })();
+}
+async function addCustomTag(name){
+  name = name.trim();
+  if(!name || allTags().includes(name)) return false;
+  customTags.push(name);
+  try{
+    const {db, ref, set} = await window.__fbReady;
+    await set(ref(db, 'customTags'), customTags);
+    return true;
+  }catch(e){ console.error('保存标签失败', e); customTags.pop(); return false; }
+}
+async function removeCustomTag(name){
+  const idx = customTags.indexOf(name);
+  if(idx<0) return true;
+  const backup = customTags.slice();
+  customTags.splice(idx,1);
+  try{
+    const {db, ref, set} = await window.__fbReady;
+    await set(ref(db, 'customTags'), customTags);
+    return true;
+  }catch(e){ console.error('删除标签失败', e); customTags = backup; return false; }
 }
 
 function uid(){ return 'p_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
@@ -488,15 +523,21 @@ function sortPlans(list){
 }
 
 function renderTagFilters(){
+  const toggleBtn = document.getElementById('toggleTagsBtn');
+  toggleBtn.textContent = `🏷️ 标签${activeTags.size?`（${activeTags.size}）`:''}`;
+  toggleBtn.classList.toggle('active', activeTags.size>0);
+
   const row = document.getElementById('tagFilterRow');
-  row.innerHTML = TAGS.map(t=>`<button class="tag-chip ${activeTags.has(t)?'active':''}" data-tag="${t}">${t}</button>`).join('');
-  row.querySelectorAll('.tag-chip').forEach(btn=>{
+  row.innerHTML = allTags().map(t=>`<button class="tag-chip ${activeTags.has(t)?'active':''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')
+    + `<button class="tag-chip" id="addTagChipBtn" style="border-style:dashed;">＋ 添加标签</button>`;
+  row.querySelectorAll('.tag-chip[data-tag]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const t = btn.dataset.tag;
       if(activeTags.has(t)) activeTags.delete(t); else activeTags.add(t);
       renderAll();
     });
   });
+  document.getElementById('addTagChipBtn').addEventListener('click', openAddTagModal);
 }
 
 function cardHTML(p){
@@ -748,6 +789,43 @@ function openStatsModal(){
   document.getElementById('overlay').classList.add('show');
 }
 
+/* ---------- Add Tag Modal ---------- */
+function openAddTagModal(){
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="display">添加标签</h2>
+    <div class="field"><label>标签名称</label><input id="newTagName" placeholder="比如：露营、看球..." maxlength="8"></div>
+    <div class="form-actions">
+      <button class="btn-primary" id="submitNewTag">添加</button>
+      <button class="btn-secondary" onclick="closeModal()">取消</button>
+    </div>
+    ${customTags.length ? `
+    <div class="section-title">已添加的自定义标签</div>
+    <div class="chip-row">${customTags.map(t=>`<span class="name-chip">${escapeHtml(t)} <button data-tag="${escapeHtml(t)}" class="rmCustomTag">✕</button></span>`).join('')}</div>
+    ` : ''}
+  `;
+  document.getElementById('submitNewTag').addEventListener('click', async ()=>{
+    const name = document.getElementById('newTagName').value.trim();
+    if(!name) return;
+    if(allTags().includes(name)){ alert('这个标签已经有了'); return; }
+    const ok = await addCustomTag(name);
+    if(!ok){ alert('添加失败，检查一下网络再试试？'); return; }
+    closeModal();
+    renderAll();
+  });
+  modal.querySelectorAll('.rmCustomTag').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm(`删除标签"${btn.dataset.tag}"吗？（不影响已经用了这个标签的计划，只是以后选不到了）`)) return;
+      const ok = await removeCustomTag(btn.dataset.tag);
+      if(!ok){ alert('删除失败，检查一下网络再试试？'); return; }
+      openAddTagModal();
+      renderAll();
+    });
+  });
+  document.getElementById('overlay').classList.add('show');
+}
+
 /* ---------- Add Modal ---------- */
 function openAddModal(prefillDate){
   const modal = document.getElementById('modalContent');
@@ -757,7 +835,7 @@ function openAddModal(prefillDate){
     <div class="field"><label>活动名称</label><input id="f_title" placeholder="例如：周末剧本杀"></div>
     <div class="row2">
       <div class="field"><label>类型</label>
-        <select id="f_tag">${TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+        <select id="f_tag">${allTags().map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('')}</select>
       </div>
       <div class="field"><label>地点</label><input id="f_location" placeholder="在哪儿玩"></div>
     </div>
@@ -878,7 +956,7 @@ function openDetailModal(id, occurrenceDate){
     <div class="row2">
       <div class="field"><label>地点</label><input id="d_location" value="${escapeHtml(p.location||'')}"></div>
       <div class="field"><label>类型</label>
-        <select id="d_tag">${TAGS.map(t=>`<option value="${t}" ${t===p.tag?'selected':''}>${t}</option>`).join('')}</select>
+        <select id="d_tag">${allTags().map(t=>`<option value="${escapeHtml(t)}" ${t===p.tag?'selected':''}>${escapeHtml(t)}</option>`).join('')}${(p.tag && !allTags().includes(p.tag)) ? `<option value="${escapeHtml(p.tag)}" selected>${escapeHtml(p.tag)}</option>` : ''}</select>
       </div>
     </div>
     <div class="row2">
@@ -1158,6 +1236,11 @@ document.getElementById('tabKanban').addEventListener('click', ()=>switchView('k
 document.getElementById('tabCalendar').addEventListener('click', ()=>switchView('calendar'));
 document.getElementById('tabAlbum').addEventListener('click', ()=>switchView('album'));
 document.getElementById('searchInput').addEventListener('input', (e)=>{ searchQuery = e.target.value; renderAll(); });
+let tagsPanelOpen = false;
+document.getElementById('toggleTagsBtn').addEventListener('click', ()=>{
+  tagsPanelOpen = !tagsPanelOpen;
+  document.getElementById('tagFilterRow').style.display = tagsPanelOpen ? 'flex' : 'none';
+});
 document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeModal(); });
 
 const headerEl = document.querySelector('header');
@@ -1169,6 +1252,7 @@ window.addEventListener('scroll', ()=>{
   await loadMyName();
   renderAll();
   subscribePlans();
+  subscribeCustomTags();
 })();
 </script>
 </body>
