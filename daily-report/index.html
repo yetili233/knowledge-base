@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日报 & 待办</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>日报 & 待办</h1>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="report">日报记录</button>
+        <button class="tab-btn" data-tab="todo">待办事项</button>
+      </div>
+    </header>
+
+    <!-- ============ 日报 ============ -->
+    <section id="report-panel" class="panel active">
+      <div class="card editor-card">
+        <div class="editor-row">
+          <label for="report-date">日期</label>
+          <input type="date" id="report-date">
+          <button id="insert-template-btn" class="btn-ghost">插入模板</button>
+        </div>
+        <textarea id="report-content" placeholder="今天做了什么...&#10;&#10;可以点击上方「插入模板」按钮，快速生成「今日主要任务 / 完成情况 / 明日计划」结构。"></textarea>
+        <div class="editor-actions">
+          <span id="report-edit-hint" class="hint"></span>
+          <button id="save-report-btn" class="btn-primary">保存日报</button>
+        </div>
+      </div>
+
+      <div class="list-header">
+        <h2>历史日报</h2>
+        <input type="text" id="report-search" placeholder="搜索日报内容...">
+      </div>
+      <div id="report-list" class="list"></div>
+    </section>
+
+    <!-- ============ 日报详情弹窗 ============ -->
+    <div id="report-detail-overlay" class="detail-overlay">
+      <div class="detail-modal">
+        <div class="detail-header">
+          <span id="detail-date" class="detail-date"></span>
+          <button id="detail-close-btn" class="btn-ghost">关闭</button>
+        </div>
+        <div id="detail-content" class="detail-content"></div>
+        <div class="detail-actions">
+          <button id="detail-edit-btn" class="btn-ghost">编辑</button>
+          <button id="detail-delete-btn" class="btn-ghost delete-btn">删除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 待办 ============ -->
+    <section id="todo-panel" class="panel">
+      <div class="card editor-card">
+        <div class="editor-row">
+          <input type="text" id="todo-input" placeholder="添加一条待办事项，回车即可添加">
+          <button id="add-todo-btn" class="btn-primary">添加</button>
+        </div>
+      </div>
+
+      <div class="list-header">
+        <h2>待办列表</h2>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="active">未完成</button>
+          <button class="filter-btn" data-filter="done">已完成</button>
+        </div>
+      </div>
+      <div id="todo-list" class="list"></div>
+      <div id="todo-stats" class="stats"></div>
+    </section>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
