@@ -48,16 +48,28 @@
 
   main{max-width:1100px; margin:0 auto; padding:0 20px;}
 
-  /* ---------- Table (desktop) ---------- */
-  .board{width:100%; border-collapse:separate; border-spacing:0 16px;}
-  .board thead th{
-    text-align:left; font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
-    color:var(--muted); padding:0 16px 8px; font-weight:600;
+  /* ---------- Comparison table ---------- */
+  .tablewrap{
+    overflow-x:auto; background:var(--panel); border:1px solid var(--panel-line); border-radius:16px;
+    box-shadow:0 10px 26px rgba(58,33,69,0.14);
   }
-  .board tbody tr{background:var(--panel); box-shadow:0 10px 26px rgba(58,33,69,0.14);}
-  .board tbody td{padding:20px 16px; border-top:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); vertical-align:top;}
-  .board tbody td:first-child{border-left:1px solid var(--panel-line); border-radius:14px 0 0 14px;}
-  .board tbody td:last-child{border-right:1px solid var(--panel-line); border-radius:0 14px 14px 0;}
+  .board{width:100%; border-collapse:collapse; min-width:640px;}
+  .board thead th{
+    padding:22px 16px 16px; border-bottom:1px solid var(--panel-line); text-align:center; vertical-align:top;
+  }
+  .board thead th:first-child{width:110px;}
+  .board tbody th{
+    text-align:left; padding:10px 16px; font-size:12px; color:var(--muted); font-weight:500;
+    border-bottom:1px solid var(--panel-line); white-space:nowrap;
+  }
+  .board tbody td{
+    text-align:center; padding:10px 16px; font-size:13px; border-bottom:1px solid var(--panel-line); vertical-align:middle;
+  }
+  .board tbody tr:last-child th, .board tbody tr:last-child td{border-bottom:none;}
+  .section-row th, .section-row td{
+    background:rgba(58,33,69,0.035); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--muted); font-weight:700; padding:8px 16px;
+  }
 
   .code-badge{
     display:inline-flex; align-items:center; justify-content:center;
@@ -68,37 +80,18 @@
   }
   .nickname{font-size:12px; color:var(--muted); margin-top:6px;}
 
-  .stat-line{display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;}
-  .stat{font-size:13px;}
-  .stat b{font-family:'JetBrains Mono'; font-size:15px; color:var(--coral);}
   .mbti-badge{
     display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono';
     font-weight:700; font-size:12px; color:#FFFFFF;
   }
-  .tag-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
-  .tag{background:rgba(140,82,255,0.08); border:1px solid var(--panel-line); padding:3px 10px; border-radius:999px; font-size:11px; color:#6B4776;}
 
-  .req-block{font-size:13px; line-height:1.9;}
-  .req-block .label{color:var(--muted); font-size:13px; margin-right:6px;}
-  .req-block .empty{color:#B8A2C0; font-style:italic;}
+  .empty{color:#C4AFCB; font-style:italic;}
   .dealbreaker-tag{color:var(--coral); font-weight:600;}
-
-  /* ---------- Mobile card fallback ---------- */
-  @media (max-width: 760px){
-    .board thead{display:none;}
-    .board, .board tbody, .board tbody tr, .board tbody td{display:block; width:100%;}
-    .board tbody tr{border-radius:16px; padding:18px; margin-bottom:18px;}
-    .board tbody td{border:none !important; padding:6px 0;}
-    .board tbody td::before{
-      content:attr(data-label); display:block; font-size:10px; letter-spacing:1.5px;
-      color:#B499BE; text-transform:uppercase; margin-bottom:4px;
-    }
-  }
 
   footer{text-align:center; color:var(--muted); font-size:12px; margin-top:40px;}
 
   /* ---------- Add / edit / delete controls ---------- */
-  .row-actions{display:flex; gap:8px; margin-top:10px;}
+  .row-actions{display:flex; justify-content:center; gap:8px; margin-top:10px;}
   .icon-btn{
     width:28px; height:28px; border-radius:50%; border:1px solid var(--panel-line);
     background:rgba(58,33,69,0.05); color:var(--ink); cursor:pointer;
@@ -168,21 +161,15 @@
 </header>
 
 <main>
-  <table class="board" id="board">
-    <thead>
-      <tr>
-        <th style="width:8%">编号</th>
-        <th style="width:20%">基本信息</th>
-        <th style="width:20%">人设 / 标签</th>
-        <th style="width:26%">择偶要求</th>
-        <th style="width:26%">更多信息</th>
-      </tr>
-    </thead>
-    <tbody id="boardBody"></tbody>
-  </table>
+  <div class="tablewrap">
+    <table class="board" id="board">
+      <thead id="boardHead"></thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+  </div>
 </main>
 
-<footer>数据已接入数据库，点右下角「+」新增，每行「编号」下方可编辑 / 删除</footer>
+<footer>数据已接入数据库，点右下角「+」新增，每人头像下方可编辑 / 删除</footer>
 
 <button class="fab" id="addBtn" title="新增一位">+</button>
 <button class="fab-secondary" id="manageFieldsBtn" title="管理字段">⚙</button>
@@ -289,74 +276,77 @@ function age(birthYear){
   return new Date().getFullYear() - parseInt(birthYear);
 }
 function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function listOrEmpty(arr, cls){
-  if(!arr || arr.length===0) return '';
-  return arr.map(x=>`<span class="tag ${cls||''}">${esc(x)}</span>`).join('');
-}
-function lineOrEmpty(text){
-  return text ? esc(text) : '<span class="empty">未填写</span>';
+
+function mbtiPill(p){
+  const color = MBTI_COLOR[mbtiGroup(p.mbti)];
+  return `<span class="mbti-badge" style="background:${color}">${esc(p.mbti)}</span>`;
 }
 
-function customFieldsHTML(p){
-  const parts = CUSTOM_FIELDS
-    .filter(f => p.custom && p.custom[f.id])
-    .map(f => `<div><span class="label">${esc(f.label)}</span>${esc(p.custom[f.id])}</div>`);
-  return parts.length ? parts.join('') : '<span class="empty">暂无</span>';
+/* 属性做行、每个人做一列的对比表：每一项是一行，section 是分组小标题 */
+const ROWS = [
+  { section: '基本信息' },
+  { label:'年龄', get:p => age(p.birthYear) ? `${age(p.birthYear)}岁 (${esc(p.birthYear)})` : '' },
+  { label:'身高', get:p => p.height ? `${esc(p.height)}cm` : '' },
+  { label:'MBTI', get:p => p.mbti ? mbtiPill(p) : '' },
+  { label:'星座', get:p => p.zodiac ? esc(p.zodiac) : '' },
+  { label:'城市', get:p => p.city ? esc(p.city) : '' },
+  { label:'职业', get:p => p.job ? esc(p.job) : '' },
+  { section:'标签 / 兴趣' },
+  { label:'人设标签', get:p => (p.tags && p.tags.length) ? p.tags.map(esc).join(' / ') : '' },
+  { label:'兴趣', get:p => (p.interests && p.interests.length) ? p.interests.map(esc).join(' / ') : '' },
+  { section:'择偶要求' },
+  { label:'年龄段', get:p => p.reqAgeRange ? esc(p.reqAgeRange) : '' },
+  { label:'身高下限', get:p => p.reqHeightMin ? `${esc(p.reqHeightMin)}+` : '' },
+  { label:'气质', get:p => p.reqVibe ? esc(p.reqVibe) : '' },
+  { label:'加分', get:p => (p.bonus && p.bonus.length) ? p.bonus.map(esc).join(' / ') : '' },
+  { label:'雷区', get:p => (p.dealbreaker && p.dealbreaker.length) ? `<span class="dealbreaker-tag">${p.dealbreaker.map(esc).join(' / ')}</span>` : '' },
+];
+
+function sectionRow(label){
+  return `<tr class="section-row"><th>${label}</th>${PROFILES.map(()=>'<td></td>').join('')}</tr>`;
+}
+function dataRow(label, getValue){
+  const cells = PROFILES.map(p => {
+    const v = getValue(p);
+    return `<td>${v || '<span class="empty">—</span>'}</td>`;
+  }).join('');
+  return `<tr><th>${label}</th>${cells}</tr>`;
 }
 
-function renderRow(p){
-  const grp = mbtiGroup(p.mbti);
-  const color = MBTI_COLOR[grp];
-  const reqParts = [];
-  if(p.reqAgeRange) reqParts.push(`<div><span class="label">年龄</span>${esc(p.reqAgeRange)}</div>`);
-  if(p.reqHeightMin) reqParts.push(`<div><span class="label">身高</span>${esc(p.reqHeightMin)}+</div>`);
-  if(p.reqVibe) reqParts.push(`<div><span class="label">气质</span>${esc(p.reqVibe)}</div>`);
-  if(p.bonus && p.bonus.length) reqParts.push(`<div><span class="label">加分</span>${p.bonus.map(esc).join(' / ')}</div>`);
-  if(p.dealbreaker && p.dealbreaker.length) reqParts.push(`<div><span class="label">雷区</span><span class="dealbreaker-tag">${p.dealbreaker.map(esc).join(' / ')}</span></div>`);
-  const reqHTML = reqParts.length ? reqParts.join('') : '<span class="empty">暂无具体要求</span>';
-
-  const tagHTML = listOrEmpty(p.tags) + listOrEmpty(p.interests);
-
-  return `
-  <tr>
-    <td data-label="编号">
-      <span class="code-badge">${esc(p.code)}</span>
-      ${p.nickname ? `<div class="nickname">${esc(p.nickname)}</div>` : ''}
-      <div class="row-actions">
-        <button class="icon-btn edit-btn" data-id="${p.id}" title="编辑">✎</button>
-        <button class="icon-btn danger delete-btn" data-id="${p.id}" title="删除">✕</button>
-      </div>
-    </td>
-    <td data-label="基本信息">
-      <div class="stat-line">
-        ${age(p.birthYear)?`<span class="stat"><b>${age(p.birthYear)}</b>岁 (${esc(p.birthYear)})</span>`:''}
-        ${p.height?`<span class="stat"><b>${esc(p.height)}</b>cm</span>`:''}
-        ${p.mbti?`<span class="mbti-badge" style="background:${color}">${esc(p.mbti)}</span>`:''}
-      </div>
-      ${(() => {
-        const meta = [p.zodiac && esc(p.zodiac), p.city && `📍${esc(p.city)}`, p.job && `💼${esc(p.job)}`].filter(Boolean);
-        return meta.length ? `<div class="nickname">${meta.join(' · ')}</div>` : '';
-      })()}
-    </td>
-    <td data-label="人设/标签">
-      <div class="tag-row">${tagHTML || '<span class="empty">暂无</span>'}</div>
-    </td>
-    <td data-label="择偶要求">
-      <div class="req-block">${reqHTML}</div>
-    </td>
-    <td data-label="更多信息">
-      <div class="req-block">${customFieldsHTML(p)}</div>
-    </td>
+function buildHead(){
+  document.getElementById('boardHead').innerHTML = `<tr>
+    <th></th>
+    ${PROFILES.map(p => `
+      <th>
+        <span class="code-badge">${esc(p.code)}</span>
+        ${p.nickname ? `<div class="nickname">${esc(p.nickname)}</div>` : ''}
+        <div class="row-actions">
+          <button class="icon-btn edit-btn" data-id="${p.id}" title="编辑">✎</button>
+          <button class="icon-btn danger delete-btn" data-id="${p.id}" title="删除">✕</button>
+        </div>
+      </th>`).join('')}
   </tr>`;
 }
 
+function buildBody(){
+  const rows = ROWS.map(r => r.section ? sectionRow(r.section) : dataRow(r.label, r.get));
+  if(CUSTOM_FIELDS.length){
+    rows.push(sectionRow('更多信息'));
+    for(const f of CUSTOM_FIELDS){
+      rows.push(dataRow(esc(f.label), p => p.custom && p.custom[f.id] ? esc(p.custom[f.id]) : ''));
+    }
+  }
+  document.getElementById('boardBody').innerHTML = rows.join('');
+}
+
 function render(){
-  document.getElementById('boardBody').innerHTML = PROFILES.map(renderRow).join('');
+  buildHead();
+  buildBody();
 }
 
 /* ---------- Realtime Database wiring ---------- */
 const dbStatus = document.getElementById('dbStatus');
-const boardBody = document.getElementById('boardBody');
+const boardTable = document.getElementById('board');
 
 (async function seedIfEmpty(){
   try{
@@ -461,7 +451,7 @@ profileForm.addEventListener('submit', async e => {
   }
 });
 
-boardBody.addEventListener('click', async e => {
+boardTable.addEventListener('click', async e => {
   const editBtn = e.target.closest('.edit-btn');
   const deleteBtn = e.target.closest('.delete-btn');
   if(editBtn){
