@@ -202,7 +202,6 @@
         <div class="field"><label>星座</label><input name="zodiac"></div>
         <div class="field"><label>坐标城市</label><input name="city"></div>
         <div class="field"><label>职业方向</label><input name="job"></div>
-        <div class="field full"><label>人设标签（逗号分隔）</label><input name="tags"></div>
         <div class="field full"><label>兴趣关键词（逗号分隔）</label><input name="interests"></div>
         <div class="field"><label>期望年龄段</label><input name="reqAgeRange" placeholder="例如 90-97"></div>
         <div class="field"><label>期望身高下限</label><input name="reqHeightMin"></div>
@@ -244,11 +243,11 @@ const customFieldsRef = ref(db, 'customFields');
    之后所有增删改都直接发生在数据库里，这个数组不会再被使用 */
 const SEED_PROFILES = [
   { code:'A', nickname:'', birthYear:'1999', height:155, mbti:'ENFP', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'06-95', reqHeightMin:178, reqVibe:'乖萌', bonus:['闷骚'], dealbreaker:[] },
+    interests:[], reqAgeRange:'06-95', reqHeightMin:178, reqVibe:'乖萌', bonus:['闷骚'], dealbreaker:[] },
   { code:'B', nickname:'', birthYear:'1999', height:160, mbti:'ENTJ', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'06-97', reqHeightMin:180, reqVibe:'帅', bonus:[], dealbreaker:[] },
+    interests:[], reqAgeRange:'06-97', reqHeightMin:180, reqVibe:'帅', bonus:[], dealbreaker:[] },
   { code:'C', nickname:'', birthYear:'2000', height:165, mbti:'ESFP', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'', reqHeightMin:'', reqVibe:'', bonus:[], dealbreaker:[] }
+    interests:[], reqAgeRange:'', reqHeightMin:'', reqVibe:'', bonus:[], dealbreaker:[] }
 ];
 
 /* 首次运行时的默认自定义字段，之后所有增删字段都直接发生在数据库里 */
@@ -291,8 +290,6 @@ const ROWS = [
   { label:'星座', get:p => p.zodiac ? esc(p.zodiac) : '' },
   { label:'城市', get:p => p.city ? esc(p.city) : '' },
   { label:'职业', get:p => p.job ? esc(p.job) : '' },
-  { section:'标签 / 兴趣' },
-  { label:'人设标签', get:p => (p.tags && p.tags.length) ? p.tags.map(esc).join(' / ') : '' },
   { label:'兴趣', get:p => (p.interests && p.interests.length) ? p.interests.map(esc).join(' / ') : '' },
   { section:'择偶要求' },
   { label:'年龄段', get:p => p.reqAgeRange ? esc(p.reqAgeRange) : '' },
@@ -393,7 +390,7 @@ const modalTitle = document.getElementById('modalTitle');
 const profileForm = document.getElementById('profileForm');
 let editingId = null;
 
-const LIST_FIELDS = ['tags','interests','bonus','dealbreaker'];
+const LIST_FIELDS = ['interests','bonus','dealbreaker'];
 const customFieldsContainer = document.getElementById('customFieldsContainer');
 
 function openModal(profile){
