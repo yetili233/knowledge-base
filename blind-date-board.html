@@ -79,9 +79,8 @@
   .tag{background:rgba(140,82,255,0.08); border:1px solid var(--panel-line); padding:3px 10px; border-radius:999px; font-size:11px; color:#6B4776;}
 
   .req-block{font-size:13px; line-height:1.9;}
-  .req-block .label{color:var(--muted); font-size:11px; letter-spacing:0.5px; margin-right:6px;}
+  .req-block .label{color:var(--muted); font-size:13px; margin-right:6px;}
   .req-block .empty{color:#B8A2C0; font-style:italic;}
-  .bonus-tag{color:var(--nf); font-weight:600;}
   .dealbreaker-tag{color:var(--coral); font-weight:600;}
 
   /* ---------- Mobile card fallback ---------- */
@@ -312,7 +311,7 @@ function renderRow(p){
   if(p.reqAgeRange) reqParts.push(`<div><span class="label">年龄</span>${esc(p.reqAgeRange)}</div>`);
   if(p.reqHeightMin) reqParts.push(`<div><span class="label">身高</span>${esc(p.reqHeightMin)}+</div>`);
   if(p.reqVibe) reqParts.push(`<div><span class="label">气质</span>${esc(p.reqVibe)}</div>`);
-  if(p.bonus && p.bonus.length) reqParts.push(`<div><span class="label">加分</span><span class="bonus-tag">${p.bonus.map(esc).join(' / ')}</span></div>`);
+  if(p.bonus && p.bonus.length) reqParts.push(`<div><span class="label">加分</span>${p.bonus.map(esc).join(' / ')}</div>`);
   if(p.dealbreaker && p.dealbreaker.length) reqParts.push(`<div><span class="label">雷区</span><span class="dealbreaker-tag">${p.dealbreaker.map(esc).join(' / ')}</span></div>`);
   const reqHTML = reqParts.length ? reqParts.join('') : '<span class="empty">暂无具体要求</span>';
 
