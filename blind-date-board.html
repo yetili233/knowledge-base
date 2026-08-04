@@ -173,7 +173,7 @@
   </table>
 </main>
 
-<footer>数据已接入 Firestore 数据库，点右下角「+」新增，每行「编号」下方可编辑 / 删除</footer>
+<footer>数据已接入数据库，点右下角「+」新增，每行「编号」下方可编辑 / 删除</footer>
 
 <button class="fab" id="addBtn" title="新增一位">+</button>
 <div class="db-status" id="dbStatus">连接数据库中…</div>
@@ -211,13 +211,13 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
 import {
-  getFirestore, collection, query, orderBy, onSnapshot,
-  addDoc, updateDoc, deleteDoc, doc, getDocs
-} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+  getDatabase, ref, push, update, remove, onValue, get
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCU2RWRACUiDTBduSYgG9meF75hecuwFyk",
   authDomain: "date-a7ab3.firebaseapp.com",
+  databaseURL: "https://date-a7ab3-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "date-a7ab3",
   storageBucket: "date-a7ab3.firebasestorage.app",
   messagingSenderId: "1079366372169",
@@ -225,8 +225,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const profilesCol = collection(db, 'profiles');
+const db = getDatabase(app);
+const profilesRef = ref(db, 'profiles');
 
 /* 首次运行时，如果 profiles 集合还是空的，把下面这几条种子数据写进去，
    之后所有增删改都直接发生在数据库里，这个数组不会再被使用 */
@@ -317,16 +317,15 @@ function render(){
   document.getElementById('boardBody').innerHTML = PROFILES.map(renderRow).join('');
 }
 
-/* ---------- Firestore wiring ---------- */
+/* ---------- Realtime Database wiring ---------- */
 const dbStatus = document.getElementById('dbStatus');
 const boardBody = document.getElementById('boardBody');
-const q = query(profilesCol, orderBy('code'));
 
 (async function seedIfEmpty(){
   try{
-    const snap = await getDocs(profilesCol);
-    if(snap.empty){
-      for(const p of SEED_PROFILES) await addDoc(profilesCol, p);
+    const snap = await get(profilesRef);
+    if(!snap.exists()){
+      for(const p of SEED_PROFILES) await push(profilesRef, p);
     }
   }catch(e){
     console.error('seed failed', e);
@@ -334,8 +333,11 @@ const q = query(profilesCol, orderBy('code'));
   }
 })();
 
-onSnapshot(q, snap => {
-  PROFILES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+onValue(profilesRef, snap => {
+  const val = snap.val() || {};
+  PROFILES = Object.entries(val)
+    .map(([id, data]) => ({ id, ...data }))
+    .sort((a, b) => String(a.code).localeCompare(String(b.code)));
   render();
   dbStatus.textContent = '';
 }, err => {
@@ -384,9 +386,9 @@ profileForm.addEventListener('submit', async e => {
 
   try{
     if(editingId){
-      await updateDoc(doc(db, 'profiles', editingId), data);
+      await update(ref(db, 'profiles/' + editingId), data);
     }else{
-      await addDoc(profilesCol, data);
+      await push(profilesRef, data);
     }
     closeModal();
   }catch(err){
@@ -404,7 +406,7 @@ boardBody.addEventListener('click', async e => {
   if(deleteBtn){
     const profile = PROFILES.find(p => p.id === deleteBtn.dataset.id);
     if(profile && confirm(`确定删除「${profile.code}」这一行吗？`)){
-      try{ await deleteDoc(doc(db, 'profiles', deleteBtn.dataset.id)); }
+      try{ await remove(ref(db, 'profiles/' + deleteBtn.dataset.id)); }
       catch(err){ alert('删除失败：' + err.message); }
     }
   }
