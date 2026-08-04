@@ -13,6 +13,12 @@ import {
   remove,
   onValue,
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCibITp90Zw_Q6Cg6e6lXyZkVHHnt8RErE",
@@ -26,6 +32,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 const reportsRef = ref(db, "reports");
 const todosRef = ref(db, "todos");
@@ -62,6 +69,82 @@ function reportsArray() {
 function todosArray() {
   return Object.entries(todosCache).map(([id, t]) => ({ id, ...t }));
 }
+
+// ============================================================
+// 登录
+// ============================================================
+const loginOverlay = document.getElementById("login-overlay");
+const loginForm = document.getElementById("login-form");
+const loginEmailInput = document.getElementById("login-email");
+const loginPasswordInput = document.getElementById("login-password");
+const loginError = document.getElementById("login-error");
+const loginBtn = document.getElementById("login-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const appRoot = document.getElementById("app-root");
+
+const AUTH_ERROR_MESSAGES = {
+  "auth/invalid-email": "邮箱格式不对",
+  "auth/invalid-credential": "邮箱或密码不对",
+  "auth/wrong-password": "邮箱或密码不对",
+  "auth/user-not-found": "邮箱或密码不对",
+  "auth/too-many-requests": "尝试次数太多，请稍后再试",
+};
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginError.textContent = "";
+  loginBtn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      loginEmailInput.value.trim(),
+      loginPasswordInput.value
+    );
+    loginPasswordInput.value = "";
+  } catch (err) {
+    loginError.textContent = AUTH_ERROR_MESSAGES[err.code] || "登录失败，请重试";
+  } finally {
+    loginBtn.disabled = false;
+  }
+});
+
+logoutBtn.addEventListener("click", () => signOut(auth));
+
+let unsubscribeReports = null;
+let unsubscribeTodos = null;
+
+function startListening() {
+  unsubscribeReports = onValue(reportsRef, (snapshot) => {
+    reportsCache = snapshot.val() || {};
+    renderReports();
+  });
+  unsubscribeTodos = onValue(todosRef, (snapshot) => {
+    todosCache = snapshot.val() || {};
+    renderTodos();
+  });
+}
+
+function stopListening() {
+  if (unsubscribeReports) unsubscribeReports();
+  if (unsubscribeTodos) unsubscribeTodos();
+  unsubscribeReports = null;
+  unsubscribeTodos = null;
+  reportsCache = {};
+  todosCache = {};
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loginOverlay.classList.remove("active");
+    appRoot.classList.add("authed");
+    startListening();
+  } else {
+    stopListening();
+    closeDetail();
+    appRoot.classList.remove("authed");
+    loginOverlay.classList.add("active");
+  }
+});
 
 // ---------- tabs ----------
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -303,13 +386,3 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---------- realtime subscriptions ----------
-onValue(reportsRef, (snapshot) => {
-  reportsCache = snapshot.val() || {};
-  renderReports();
-});
-
-onValue(todosRef, (snapshot) => {
-  todosCache = snapshot.val() || {};
-  renderTodos();
-});

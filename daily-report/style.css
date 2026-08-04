@@ -28,10 +28,80 @@ body {
   padding: 32px 20px 80px;
 }
 
+#app-root {
+  display: none;
+}
+
+#app-root.authed {
+  display: block;
+}
+
+.app-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
 .app-header h1 {
   font-size: 22px;
   font-weight: 600;
-  margin: 0 0 18px;
+  margin: 0;
+}
+
+/* ---- login page ---- */
+.login-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg);
+  z-index: 200;
+}
+
+.login-overlay.active {
+  display: flex;
+}
+
+.login-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-card h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.login-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.login-card input {
+  width: 100%;
+}
+
+.login-error {
+  font-size: 13px;
+  color: var(--danger);
+  min-height: 16px;
+  text-align: center;
 }
 
 .tabs {
@@ -87,7 +157,9 @@ body {
 }
 
 input[type="date"],
-input[type="text"] {
+input[type="text"],
+input[type="email"],
+input[type="password"] {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 10px;
