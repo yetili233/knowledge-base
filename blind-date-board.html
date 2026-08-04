@@ -68,7 +68,7 @@
   }
   .nickname{font-size:12px; color:var(--muted); margin-top:6px;}
 
-  .stat-line{display:flex; gap:14px; margin-bottom:8px; flex-wrap:wrap;}
+  .stat-line{display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;}
   .stat{font-size:13px;}
   .stat b{font-family:'JetBrains Mono'; font-size:15px; color:var(--coral);}
   .mbti-badge{
@@ -329,13 +329,14 @@ function renderRow(p){
     </td>
     <td data-label="基本信息">
       <div class="stat-line">
-        <span class="stat">${age(p.birthYear)?`<b>${age(p.birthYear)}</b>岁`:''} ${p.birthYear?`(${esc(p.birthYear)})`:''}</span>
-        <span class="stat"><b>${esc(p.height)}</b>cm</span>
+        ${age(p.birthYear)?`<span class="stat"><b>${age(p.birthYear)}</b>岁 (${esc(p.birthYear)})</span>`:''}
+        ${p.height?`<span class="stat"><b>${esc(p.height)}</b>cm</span>`:''}
+        ${p.mbti?`<span class="mbti-badge" style="background:${color}">${esc(p.mbti)}</span>`:''}
       </div>
-      <span class="mbti-badge" style="background:${color}">${esc(p.mbti)}</span>
-      ${p.zodiac?`<div class="nickname" style="margin-top:6px;">${esc(p.zodiac)}</div>`:''}
-      ${p.city?`<div class="nickname">📍 ${esc(p.city)}</div>`:''}
-      ${p.job?`<div class="nickname">💼 ${esc(p.job)}</div>`:''}
+      ${(() => {
+        const meta = [p.zodiac && esc(p.zodiac), p.city && `📍${esc(p.city)}`, p.job && `💼${esc(p.job)}`].filter(Boolean);
+        return meta.length ? `<div class="nickname">${meta.join(' · ')}</div>` : '';
+      })()}
     </td>
     <td data-label="人设/标签">
       <div class="tag-row">${tagHTML || '<span class="empty">暂无</span>'}</div>
