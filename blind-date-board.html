@@ -84,11 +84,6 @@
   .bonus-tag{color:var(--nf); font-weight:600;}
   .dealbreaker-tag{color:var(--coral); font-weight:600;}
 
-  .slogan{
-    font-family:'Noto Serif SC'; font-size:14px; font-style:italic; color:var(--coral);
-    border-left:2px solid var(--gold); padding-left:10px; margin-top:6px;
-  }
-
   /* ---------- Mobile card fallback ---------- */
   @media (max-width: 760px){
     .board thead{display:none;}
@@ -148,6 +143,21 @@
   .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--panel-line);}
   .hint{font-size:11px; color:var(--muted); margin:-6px 0 12px;}
   .db-status{position:fixed; left:20px; bottom:20px; font-size:11px; color:var(--muted); z-index:50;}
+
+  .fab-secondary{
+    position:fixed; right:28px; bottom:96px; width:44px; height:44px; border-radius:50%;
+    background:var(--panel); color:var(--ink); border:1px solid var(--panel-line);
+    font-size:18px; cursor:pointer; z-index:50; box-shadow:0 8px 20px rgba(58,33,69,0.2);
+  }
+
+  .field-manage-list{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .field-manage-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:rgba(58,33,69,0.04); border:1px solid var(--panel-line); border-radius:8px; padding:8px 12px;
+  }
+  .field-manage-row span{font-size:13px;}
+  .add-field-row{display:flex; gap:8px;}
+  .add-field-row input{flex:1;}
 </style>
 </head>
 <body>
@@ -164,9 +174,9 @@
       <tr>
         <th style="width:8%">编号</th>
         <th style="width:20%">基本信息</th>
-        <th style="width:22%">人设 / 标签</th>
-        <th style="width:30%">择偶要求</th>
-        <th style="width:20%">一句话</th>
+        <th style="width:20%">人设 / 标签</th>
+        <th style="width:26%">择偶要求</th>
+        <th style="width:26%">更多信息</th>
       </tr>
     </thead>
     <tbody id="boardBody"></tbody>
@@ -176,7 +186,22 @@
 <footer>数据已接入数据库，点右下角「+」新增，每行「编号」下方可编辑 / 删除</footer>
 
 <button class="fab" id="addBtn" title="新增一位">+</button>
+<button class="fab-secondary" id="manageFieldsBtn" title="管理字段">⚙</button>
 <div class="db-status" id="dbStatus">连接数据库中…</div>
+
+<div class="modal-overlay" id="fieldsModalOverlay">
+  <div class="modal">
+    <h2>管理字段</h2>
+    <div class="field-manage-list" id="fieldManageList"></div>
+    <div class="add-field-row">
+      <input type="text" id="newFieldLabel" placeholder="新字段名称，例如：恋爱经历">
+      <button type="button" class="btn btn-primary" id="addFieldBtn">添加</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="closeFieldsBtn">关闭</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -184,7 +209,7 @@
     <form id="profileForm">
       <div class="field-grid">
         <div class="field"><label>编号 *</label><input name="code" required maxlength="4"></div>
-        <div class="field"><label>花名/昵称</label><input name="nickname"></div>
+        <div class="field"><label>昵称</label><input name="nickname"></div>
         <div class="field"><label>出生年份</label><input name="birthYear"></div>
         <div class="field"><label>身高 (cm)</label><input name="height"></div>
         <div class="field"><label>MBTI</label><input name="mbti" maxlength="4"></div>
@@ -198,8 +223,8 @@
         <div class="field full"><label>气质要求</label><input name="reqVibe"></div>
         <div class="field full"><label>加分项（逗号分隔）</label><input name="bonus"></div>
         <div class="field full"><label>雷区（逗号分隔）</label><input name="dealbreaker"></div>
-        <div class="field full"><label>一句话</label><textarea name="slogan"></textarea></div>
       </div>
+      <div class="field-grid" id="customFieldsContainer"></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="cancelBtn">取消</button>
         <button type="submit" class="btn btn-primary">保存</button>
@@ -227,17 +252,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const profilesRef = ref(db, 'profiles');
+const customFieldsRef = ref(db, 'customFields');
 
 /* 首次运行时，如果 profiles 集合还是空的，把下面这几条种子数据写进去，
    之后所有增删改都直接发生在数据库里，这个数组不会再被使用 */
 const SEED_PROFILES = [
   { code:'A', nickname:'', birthYear:'1999', height:155, mbti:'ENFP', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'06-95', reqHeightMin:178, reqVibe:'乖萌', bonus:['闷骚'], dealbreaker:[], slogan:'' },
+    tags:[], interests:[], reqAgeRange:'06-95', reqHeightMin:178, reqVibe:'乖萌', bonus:['闷骚'], dealbreaker:[] },
   { code:'B', nickname:'', birthYear:'1999', height:160, mbti:'ENTJ', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'06-97', reqHeightMin:180, reqVibe:'帅', bonus:[], dealbreaker:[], slogan:'' },
+    tags:[], interests:[], reqAgeRange:'06-97', reqHeightMin:180, reqVibe:'帅', bonus:[], dealbreaker:[] },
   { code:'C', nickname:'', birthYear:'2000', height:165, mbti:'ESFP', zodiac:'', city:'', job:'',
-    tags:[], interests:[], reqAgeRange:'', reqHeightMin:'', reqVibe:'', bonus:[], dealbreaker:[], slogan:'' }
+    tags:[], interests:[], reqAgeRange:'', reqHeightMin:'', reqVibe:'', bonus:[], dealbreaker:[] }
 ];
+
+/* 首次运行时的默认自定义字段，之后所有增删字段都直接发生在数据库里 */
+const SEED_CUSTOM_FIELDS = ['恋爱经历'];
 
 const MBTI_COLOR = {
   NT:'var(--nt)', NF:'var(--nf)', SJ:'var(--sj)', SP:'var(--sp)'
@@ -254,6 +283,7 @@ function mbtiGroup(m){
 }
 
 let PROFILES = [];
+let CUSTOM_FIELDS = [];
 
 function age(birthYear){
   if(!birthYear) return '';
@@ -266,6 +296,13 @@ function listOrEmpty(arr, cls){
 }
 function lineOrEmpty(text){
   return text ? esc(text) : '<span class="empty">未填写</span>';
+}
+
+function customFieldsHTML(p){
+  const parts = CUSTOM_FIELDS
+    .filter(f => p.custom && p.custom[f.id])
+    .map(f => `<div><span class="label">${esc(f.label)}</span>${esc(p.custom[f.id])}</div>`);
+  return parts.length ? parts.join('') : '<span class="empty">暂无</span>';
 }
 
 function renderRow(p){
@@ -307,8 +344,8 @@ function renderRow(p){
     <td data-label="择偶要求">
       <div class="req-block">${reqHTML}</div>
     </td>
-    <td data-label="一句话">
-      ${p.slogan ? `<div class="slogan">"${esc(p.slogan)}"</div>` : '<span class="empty">留白，等你来写</span>'}
+    <td data-label="更多信息">
+      <div class="req-block">${customFieldsHTML(p)}</div>
     </td>
   </tr>`;
 }
@@ -326,6 +363,10 @@ const boardBody = document.getElementById('boardBody');
     const snap = await get(profilesRef);
     if(!snap.exists()){
       for(const p of SEED_PROFILES) await push(profilesRef, p);
+    }
+    const fieldsSnap = await get(customFieldsRef);
+    if(!fieldsSnap.exists()){
+      for(const label of SEED_CUSTOM_FIELDS) await push(customFieldsRef, label);
     }
   }catch(e){
     console.error('seed failed', e);
@@ -345,6 +386,17 @@ onValue(profilesRef, snap => {
   dbStatus.textContent = '数据库连接失败：' + err.message;
 });
 
+onValue(customFieldsRef, snap => {
+  const val = snap.val() || {};
+  CUSTOM_FIELDS = Object.entries(val)
+    .map(([id, label]) => ({ id, label }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  render();
+  renderFieldManageList();
+}, err => {
+  console.error(err);
+});
+
 /* ---------- Add / edit / delete UI ---------- */
 const modalOverlay = document.getElementById('modalOverlay');
 const modalTitle = document.getElementById('modalTitle');
@@ -352,6 +404,7 @@ const profileForm = document.getElementById('profileForm');
 let editingId = null;
 
 const LIST_FIELDS = ['tags','interests','bonus','dealbreaker'];
+const customFieldsContainer = document.getElementById('customFieldsContainer');
 
 function openModal(profile){
   editingId = profile ? profile.id : null;
@@ -364,6 +417,11 @@ function openModal(profile){
       input.value = LIST_FIELDS.includes(key) && Array.isArray(val) ? val.join(', ') : (val ?? '');
     }
   }
+  customFieldsContainer.innerHTML = CUSTOM_FIELDS.map(f => `
+    <div class="field full">
+      <label>${esc(f.label)}</label>
+      <input name="custom__${f.id}" value="${esc(profile && profile.custom ? profile.custom[f.id] : '')}">
+    </div>`).join('');
   modalOverlay.classList.add('open');
 }
 function closeModal(){
@@ -377,7 +435,14 @@ modalOverlay.addEventListener('click', e => { if(e.target === modalOverlay) clos
 
 profileForm.addEventListener('submit', async e => {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(profileForm).entries());
+  const raw = Object.fromEntries(new FormData(profileForm).entries());
+  const data = {};
+  const custom = {};
+  for(const [key, val] of Object.entries(raw)){
+    if(key.startsWith('custom__')) custom[key.slice(8)] = val;
+    else data[key] = val;
+  }
+  data.custom = custom;
   for(const key of LIST_FIELDS){
     data[key] = data[key] ? data[key].split(',').map(s => s.trim()).filter(Boolean) : [];
   }
@@ -409,6 +474,56 @@ boardBody.addEventListener('click', async e => {
       try{ await remove(ref(db, 'profiles/' + deleteBtn.dataset.id)); }
       catch(err){ alert('删除失败：' + err.message); }
     }
+  }
+});
+
+/* ---------- Field management UI ---------- */
+const fieldsModalOverlay = document.getElementById('fieldsModalOverlay');
+const fieldManageList = document.getElementById('fieldManageList');
+const newFieldLabelInput = document.getElementById('newFieldLabel');
+
+function renderFieldManageList(){
+  fieldManageList.innerHTML = CUSTOM_FIELDS.length
+    ? CUSTOM_FIELDS.map(f => `
+        <div class="field-manage-row">
+          <span>${esc(f.label)}</span>
+          <button type="button" class="icon-btn danger remove-field-btn" data-id="${f.id}" title="删除字段">✕</button>
+        </div>`).join('')
+    : '<span class="empty">暂无自定义字段</span>';
+}
+
+document.getElementById('manageFieldsBtn').addEventListener('click', () => {
+  renderFieldManageList();
+  fieldsModalOverlay.classList.add('open');
+});
+document.getElementById('closeFieldsBtn').addEventListener('click', () => fieldsModalOverlay.classList.remove('open'));
+fieldsModalOverlay.addEventListener('click', e => { if(e.target === fieldsModalOverlay) fieldsModalOverlay.classList.remove('open'); });
+
+document.getElementById('addFieldBtn').addEventListener('click', async () => {
+  const label = newFieldLabelInput.value.trim();
+  if(!label) return;
+  try{
+    await push(customFieldsRef, label);
+    newFieldLabelInput.value = '';
+  }catch(err){
+    alert('添加字段失败：' + err.message);
+  }
+});
+
+fieldManageList.addEventListener('click', async e => {
+  const btn = e.target.closest('.remove-field-btn');
+  if(!btn) return;
+  const field = CUSTOM_FIELDS.find(f => f.id === btn.dataset.id);
+  if(!field || !confirm(`确定删除字段「${field.label}」吗？所有人在这个字段下填写的内容也会一起删掉。`)) return;
+  try{
+    await remove(ref(db, 'customFields/' + field.id));
+    for(const p of PROFILES){
+      if(p.custom && field.id in p.custom){
+        await remove(ref(db, 'profiles/' + p.id + '/custom/' + field.id));
+      }
+    }
+  }catch(err){
+    alert('删除字段失败：' + err.message);
   }
 });
 </script>
