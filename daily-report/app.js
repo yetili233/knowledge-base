@@ -15,13 +15,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOxzjsKxBR7Y3x1CcUO470nCttsDj_gF4",
-  authDomain: "calendar-33a5a.firebaseapp.com",
-  databaseURL: "https://calendar-33a5a-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "calendar-33a5a",
-  storageBucket: "calendar-33a5a.firebasestorage.app",
-  messagingSenderId: "108518441596",
-  appId: "1:108518441596:web:0d9f10203e41d9a14e7ff9",
+  apiKey: "AIzaSyCibITp90Zw_Q6Cg6e6lXyZkVHHnt8RErE",
+  authDomain: "todolist-4a97d.firebaseapp.com",
+  databaseURL: "https://todolist-4a97d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "todolist-4a97d",
+  storageBucket: "todolist-4a97d.firebasestorage.app",
+  messagingSenderId: "964848935831",
+  appId: "1:964848935831:web:41bf8fc23a1adf26c75ad2",
 };
 
 const app = initializeApp(firebaseConfig);
