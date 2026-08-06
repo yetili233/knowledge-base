@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信息收集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3A2145;
+    --muted:#8B6B96;
+    --bg:#FFF3E9;
+    --panel:#FFFFFF;
+    --panel-line: rgba(58,33,69,0.10);
+    --gold:#FFA53D;
+    --coral:#FF4E80;
+    --nt:#8C52FF;   /* 分析家 紫 */
+    --nf:#12B76A;   /* 外交家 绿 */
+    --sj:#2E90FA;   /* 守护者 蓝 */
+    --sp:#FF8A3D;   /* 探险家 橙 */
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,165,61,0.22), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(255,78,128,0.18), transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(140,82,255,0.14), transparent 50%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans SC', sans-serif;
+    padding:0 0 60px;
+  }
+  .display{font-family:'Noto Serif SC', serif; font-weight:900;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  header{
+    text-align:center; padding:48px 20px 30px;
+  }
+  header h1{
+    font-size:34px; margin:0 0 8px; letter-spacing:2px;
+    background:linear-gradient(90deg, var(--coral), var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header p{color:var(--muted); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin:0;}
+  .divider{width:80px; height:3px; background:linear-gradient(90deg, var(--coral), var(--gold)); margin:18px auto 0; border-radius:2px;}
+
+  main{max-width:1100px; margin:0 auto; padding:0 20px;}
+
+  /* ---------- Comparison table ---------- */
+  .tablewrap{
+    overflow-x:auto; background:var(--panel); border:1px solid var(--panel-line); border-radius:16px;
+    box-shadow:0 10px 26px rgba(58,33,69,0.14);
+    max-width:680px; margin:0 auto;
+  }
+  .board{width:100%; border-collapse:collapse;}
+  .board thead th{
+    padding:20px 12px 14px; border-bottom:1px solid var(--panel-line); text-align:center; vertical-align:top;
+  }
+  .board thead th:first-child{width:100px;}
+  .board tbody th{
+    text-align:left; padding:9px 12px; font-size:12px; color:var(--muted); font-weight:500;
+    border-bottom:1px solid var(--panel-line); white-space:nowrap;
+  }
+  .board tbody td{
+    text-align:center; padding:9px 14px; font-size:13px; border-bottom:1px solid var(--panel-line); vertical-align:middle;
+  }
+  .board tbody tr:last-child th, .board tbody tr:last-child td{border-bottom:none;}
+  .section-row th, .section-row td{
+    background:rgba(58,33,69,0.035); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--muted); font-weight:700; padding:8px 16px;
+  }
+
+  .code-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:44px; height:44px; border-radius:50%;
+    font-family:'Noto Serif SC'; font-weight:900; font-size:20px;
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#FFFFFF;
+    box-shadow:0 6px 14px rgba(255,78,128,0.35);
+  }
+  .nickname{font-size:12px; color:var(--muted); margin-top:6px;}
+
+  .mbti-badge{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono';
+    font-weight:700; font-size:12px; color:#FFFFFF;
+  }
+
+  .empty{color:#C4AFCB; font-style:italic;}
+  .dealbreaker-tag{color:var(--coral); font-weight:600;}
+
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:40px;}
+
+  /* ---------- Add / edit / delete controls ---------- */
+  .row-actions{display:flex; justify-content:center; gap:8px; margin-top:10px;}
+  .icon-btn{
+    width:28px; height:28px; border-radius:50%; border:1px solid var(--panel-line);
+    background:rgba(58,33,69,0.05); color:var(--ink); cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px;
+    transition:background .15s;
+  }
+  .icon-btn:hover{background:rgba(58,33,69,0.12);}
+  .icon-btn.danger:hover{background:rgba(255,78,128,0.16); color:var(--coral);}
+
+  .toolbar{
+    display:flex; justify-content:flex-end; gap:10px; max-width:680px; margin:0 auto 14px;
+  }
+  .toolbar .icon-btn{width:36px; height:36px; font-size:15px;}
+  .toolbar .icon-btn.primary{
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#FFFFFF; border:none;
+    font-size:19px; font-weight:900; box-shadow:0 6px 14px rgba(255,78,128,0.35);
+  }
+  .toolbar .icon-btn.primary:hover{filter:brightness(1.05);}
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(58,33,69,0.5);
+    z-index:100; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:16px;
+    width:100%; max-width:520px; padding:26px; box-shadow:0 20px 50px rgba(58,33,69,0.3);
+  }
+  .modal h2{margin:0 0 18px; font-size:18px; font-family:'Noto Serif SC';}
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .field-grid .full{grid-column:1 / -1;}
+  .field{display:flex; flex-direction:column; gap:5px; margin-bottom:12px;}
+  .field label{font-size:11px; letter-spacing:0.5px; color:var(--muted); text-transform:uppercase;}
+  .field input, .field textarea{
+    background:rgba(58,33,69,0.04); border:1px solid var(--panel-line); border-radius:8px;
+    color:var(--ink); padding:8px 10px; font-family:inherit; font-size:13px;
+  }
+  .field textarea{resize:vertical; min-height:38px;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:8px;}
+  .btn{
+    padding:9px 18px; border-radius:999px; border:none; cursor:pointer; font-size:13px; font-weight:600;
+  }
+  .btn-primary{background:linear-gradient(90deg, var(--coral), var(--gold)); color:#FFFFFF;}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--panel-line);}
+  .hint{font-size:11px; color:var(--muted); margin:-6px 0 12px;}
+  .db-status{position:fixed; left:20px; bottom:20px; font-size:11px; color:var(--muted); z-index:50;}
+
+  .field-manage-list{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .field-manage-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:rgba(58,33,69,0.04); border:1px solid var(--panel-line); border-radius:8px; padding:8px 12px;
+  }
+  .field-manage-row span{font-size:13px;}
+  .add-field-row{display:flex; gap:8px;}
+  .add-field-row input{flex:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="display">信息收集</h1>
+  <p>Information Collection</p>
+  <div class="divider"></div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="icon-btn" id="manageFieldsBtn" title="管理字段">⚙</button>
+    <button class="icon-btn primary" id="addBtn" title="新增一位">+</button>
+  </div>
+  <div class="tablewrap">
+    <table class="board" id="board">
+      <thead id="boardHead"></thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>数据已接入数据库，点上方「+」新增，每人头像下方可编辑 / 删除</footer>
+
+<div class="db-status" id="dbStatus">连接数据库中…</div>
+
+<div class="modal-overlay" id="fieldsModalOverlay">
+  <div class="modal">
+    <h2>管理字段</h2>
+    <div class="field-manage-list" id="fieldManageList"></div>
+    <div class="add-field-row">
+      <input type="text" id="newFieldLabel" placeholder="新字段名称，例如：恋爱经历">
+      <button type="button" class="btn btn-primary" id="addFieldBtn">添加</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="closeFieldsBtn">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">新增一位</h2>
+    <form id="profileForm">
+      <div class="field-grid">
+        <div class="field"><label>编号 *</label><input name="code" required maxlength="4"></div>
+        <div class="field"><label>昵称</label><input name="nickname"></div>
+        <div class="field"><label>出生年份</label><input name="birthYear"></div>
+        <div class="field"><label>身高 (cm)</label><input name="height"></div>
+        <div class="field"><label>MBTI</label><input name="mbti" maxlength="4"></div>
+        <div class="field"><label>星座</label><input name="zodiac"></div>
+        <div class="field"><label>坐标城市</label><input name="city"></div>
+        <div class="field"><label>职业方向</label><input name="job"></div>
+        <div class="field full"><label>兴趣关键词（逗号分隔）</label><input name="interests"></div>
+        <div class="field"><label>期望年龄段</label><input name="reqAgeRange" placeholder="例如 90-97"></div>
+        <div class="field"><label>期望身高下限</label><input name="reqHeightMin"></div>
+        <div class="field full"><label>气质要求</label><input name="reqVibe"></div>
+        <div class="field full"><label>加分项（逗号分隔）</label><input name="bonus"></div>
+        <div class="field full"><label>雷区（逗号分隔）</label><input name="dealbreaker"></div>
+      </div>
+      <div class="field-grid" id="customFieldsContainer"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelBtn">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+import {
+  getDatabase, ref, push, update, remove, onValue, get
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCU2RWRACUiDTBduSYgG9meF75hecuwFyk",
+  authDomain: "date-a7ab3.firebaseapp.com",
+  databaseURL: "https://date-a7ab3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "date-a7ab3",
+  storageBucket: "date-a7ab3.firebasestorage.app",
+  messagingSenderId: "1079366372169",
+  appId: "1:1079366372169:web:4356a283804ed1fb366898"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const profilesRef = ref(db, 'profiles');
+const customFieldsRef = ref(db, 'customFields');
+
+/* 首次运行时，如果 profiles 集合还是空的，把下面这几条种子数据写进去，
+   之后所有增删改都直接发生在数据库里，这个数组不会再被使用 */
+const SEED_PROFILES = [
+  { code:'A', nickname:'', birthYear:'1999', height:155, mbti:'ENFP', zodiac:'', city:'', job:'',
+    interests:[], reqAgeRange:'06-95', reqHeightMin:178, reqVibe:'乖萌', bonus:['闷骚'], dealbreaker:[] },
+  { code:'B', nickname:'', birthYear:'1999', height:160, mbti:'ENTJ', zodiac:'', city:'', job:'',
+    interests:[], reqAgeRange:'06-97', reqHeightMin:180, reqVibe:'帅', bonus:[], dealbreaker:[] },
+  { code:'C', nickname:'', birthYear:'2000', height:165, mbti:'ESFP', zodiac:'', city:'', job:'',
+    interests:[], reqAgeRange:'', reqHeightMin:'', reqVibe:'', bonus:[], dealbreaker:[] }
+];
+
+/* 首次运行时的默认自定义字段，之后所有增删字段都直接发生在数据库里 */
+const SEED_CUSTOM_FIELDS = ['恋爱经历'];
+
+const MBTI_COLOR = {
+  NT:'var(--nt)', NF:'var(--nf)', SJ:'var(--sj)', SP:'var(--sp)'
+};
+function mbtiGroup(m){
+  if(!m) return 'SP';
+  const t = m.toUpperCase();
+  if(t.includes('NT')) return 'NT';
+  if(t.includes('NF')) return 'NF';
+  if(/[SJ].*[JP]/.test(t) && (t.includes('SJ')||t[2]==='S'&&t[3]==='J')) return 'SJ';
+  if(t[2]==='S' && t[3]==='J') return 'SJ';
+  if(t[2]==='S' && t[3]==='P') return 'SP';
+  return 'SP';
+}
+
+let PROFILES = [];
+let CUSTOM_FIELDS = [];
+
+function age(birthYear){
+  if(!birthYear) return '';
+  return new Date().getFullYear() - parseInt(birthYear);
+}
+function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function mbtiPill(p){
+  const color = MBTI_COLOR[mbtiGroup(p.mbti)];
+  return `<span class="mbti-badge" style="background:${color}">${esc(p.mbti)}</span>`;
+}
+
+/* 属性做行、每个人做一列的对比表：每一项是一行，section 是分组小标题 */
+const ROWS = [
+  { section: '基本信息' },
+  { label:'年龄', get:p => age(p.birthYear) ? `${age(p.birthYear)}岁 (${esc(p.birthYear)})` : '' },
+  { label:'身高', get:p => p.height ? `${esc(p.height)}cm` : '' },
+  { label:'MBTI', get:p => p.mbti ? mbtiPill(p) : '' },
+  { label:'星座', get:p => p.zodiac ? esc(p.zodiac) : '' },
+  { label:'城市', get:p => p.city ? esc(p.city) : '' },
+  { label:'职业', get:p => p.job ? esc(p.job) : '' },
+  { label:'兴趣', get:p => (p.interests && p.interests.length) ? p.interests.map(esc).join(' / ') : '' },
+  { section:'择偶要求' },
+  { label:'年龄段', get:p => p.reqAgeRange ? esc(p.reqAgeRange) : '' },
+  { label:'身高下限', get:p => p.reqHeightMin ? `${esc(p.reqHeightMin)}+` : '' },
+  { label:'气质', get:p => p.reqVibe ? esc(p.reqVibe) : '' },
+  { label:'加分', get:p => (p.bonus && p.bonus.length) ? p.bonus.map(esc).join(' / ') : '' },
+  { label:'雷区', get:p => (p.dealbreaker && p.dealbreaker.length) ? `<span class="dealbreaker-tag">${p.dealbreaker.map(esc).join(' / ')}</span>` : '' },
+];
+
+function sectionRow(label){
+  return `<tr class="section-row"><th>${label}</th>${PROFILES.map(()=>'<td></td>').join('')}</tr>`;
+}
+function dataRow(label, getValue){
+  const cells = PROFILES.map(p => {
+    const v = getValue(p);
+    return `<td>${v || '<span class="empty">—</span>'}</td>`;
+  }).join('');
+  return `<tr><th>${label}</th>${cells}</tr>`;
+}
+
+function buildHead(){
+  document.getElementById('boardHead').innerHTML = `<tr>
+    <th></th>
+    ${PROFILES.map(p => `
+      <th>
+        <span class="code-badge">${esc(p.code)}</span>
+        ${p.nickname ? `<div class="nickname">${esc(p.nickname)}</div>` : ''}
+        <div class="row-actions">
+          <button class="icon-btn edit-btn" data-id="${p.id}" title="编辑">✎</button>
+          <button class="icon-btn danger delete-btn" data-id="${p.id}" title="删除">✕</button>
+        </div>
+      </th>`).join('')}
+  </tr>`;
+}
+
+function buildBody(){
+  const rows = ROWS.map(r => r.section ? sectionRow(r.section) : dataRow(r.label, r.get));
+  if(CUSTOM_FIELDS.length){
+    rows.push(sectionRow('更多信息'));
+    for(const f of CUSTOM_FIELDS){
+      rows.push(dataRow(esc(f.label), p => p.custom && p.custom[f.id] ? esc(p.custom[f.id]) : ''));
+    }
+  }
+  document.getElementById('boardBody').innerHTML = rows.join('');
+}
+
+function render(){
+  buildHead();
+  buildBody();
+}
+
+/* ---------- Realtime Database wiring ---------- */
+const dbStatus = document.getElementById('dbStatus');
+const boardTable = document.getElementById('board');
+
+(async function seedIfEmpty(){
+  try{
+    const snap = await get(profilesRef);
+    if(!snap.exists()){
+      for(const p of SEED_PROFILES) await push(profilesRef, p);
+    }
+    const fieldsSnap = await get(customFieldsRef);
+    if(!fieldsSnap.exists()){
+      for(const label of SEED_CUSTOM_FIELDS) await push(customFieldsRef, label);
+    }
+  }catch(e){
+    console.error('seed failed', e);
+    dbStatus.textContent = '数据库初始化失败：' + e.message;
+  }
+})();
+
+onValue(profilesRef, snap => {
+  const val = snap.val() || {};
+  PROFILES = Object.entries(val)
+    .map(([id, data]) => ({ id, ...data }))
+    .sort((a, b) => String(a.code).localeCompare(String(b.code)));
+  render();
+  dbStatus.textContent = '';
+}, err => {
+  console.error(err);
+  dbStatus.textContent = '数据库连接失败：' + err.message;
+});
+
+onValue(customFieldsRef, snap => {
+  const val = snap.val() || {};
+  CUSTOM_FIELDS = Object.entries(val)
+    .map(([id, label]) => ({ id, label }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  render();
+  renderFieldManageList();
+}, err => {
+  console.error(err);
+});
+
+/* ---------- Add / edit / delete UI ---------- */
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const profileForm = document.getElementById('profileForm');
+let editingId = null;
+
+const LIST_FIELDS = ['interests','bonus','dealbreaker'];
+const customFieldsContainer = document.getElementById('customFieldsContainer');
+
+function openModal(profile){
+  editingId = profile ? profile.id : null;
+  modalTitle.textContent = profile ? `编辑 ${profile.code}` : '新增一位';
+  profileForm.reset();
+  if(profile){
+    for(const [key, val] of Object.entries(profile)){
+      const input = profileForm.elements[key];
+      if(!input) continue;
+      input.value = LIST_FIELDS.includes(key) && Array.isArray(val) ? val.join(', ') : (val ?? '');
+    }
+  }
+  customFieldsContainer.innerHTML = CUSTOM_FIELDS.map(f => `
+    <div class="field full">
+      <label>${esc(f.label)}</label>
+      <input name="custom__${f.id}" value="${esc(profile && profile.custom ? profile.custom[f.id] : '')}">
+    </div>`).join('');
+  modalOverlay.classList.add('open');
+}
+function closeModal(){
+  modalOverlay.classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if(e.target === modalOverlay) closeModal(); });
+
+profileForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const raw = Object.fromEntries(new FormData(profileForm).entries());
+  const data = {};
+  const custom = {};
+  for(const [key, val] of Object.entries(raw)){
+    if(key.startsWith('custom__')) custom[key.slice(8)] = val;
+    else data[key] = val;
+  }
+  data.custom = custom;
+  for(const key of LIST_FIELDS){
+    data[key] = data[key] ? data[key].split(',').map(s => s.trim()).filter(Boolean) : [];
+  }
+  if(data.height) data.height = isNaN(Number(data.height)) ? data.height : Number(data.height);
+  if(data.reqHeightMin) data.reqHeightMin = isNaN(Number(data.reqHeightMin)) ? data.reqHeightMin : Number(data.reqHeightMin);
+
+  try{
+    if(editingId){
+      await update(ref(db, 'profiles/' + editingId), data);
+    }else{
+      await push(profilesRef, data);
+    }
+    closeModal();
+  }catch(err){
+    alert('保存失败：' + err.message);
+  }
+});
+
+boardTable.addEventListener('click', async e => {
+  const editBtn = e.target.closest('.edit-btn');
+  const deleteBtn = e.target.closest('.delete-btn');
+  if(editBtn){
+    const profile = PROFILES.find(p => p.id === editBtn.dataset.id);
+    if(profile) openModal(profile);
+  }
+  if(deleteBtn){
+    const profile = PROFILES.find(p => p.id === deleteBtn.dataset.id);
+    if(profile && confirm(`确定删除「${profile.code}」这一行吗？`)){
+      try{ await remove(ref(db, 'profiles/' + deleteBtn.dataset.id)); }
+      catch(err){ alert('删除失败：' + err.message); }
+    }
+  }
+});
+
+/* ---------- Field management UI ---------- */
+const fieldsModalOverlay = document.getElementById('fieldsModalOverlay');
+const fieldManageList = document.getElementById('fieldManageList');
+const newFieldLabelInput = document.getElementById('newFieldLabel');
+
+function renderFieldManageList(){
+  fieldManageList.innerHTML = CUSTOM_FIELDS.length
+    ? CUSTOM_FIELDS.map(f => `
+        <div class="field-manage-row">
+          <span>${esc(f.label)}</span>
+          <button type="button" class="icon-btn danger remove-field-btn" data-id="${f.id}" title="删除字段">✕</button>
+        </div>`).join('')
+    : '<span class="empty">暂无自定义字段</span>';
+}
+
+document.getElementById('manageFieldsBtn').addEventListener('click', () => {
+  renderFieldManageList();
+  fieldsModalOverlay.classList.add('open');
+});
+document.getElementById('closeFieldsBtn').addEventListener('click', () => fieldsModalOverlay.classList.remove('open'));
+fieldsModalOverlay.addEventListener('click', e => { if(e.target === fieldsModalOverlay) fieldsModalOverlay.classList.remove('open'); });
+
+document.getElementById('addFieldBtn').addEventListener('click', async () => {
+  const label = newFieldLabelInput.value.trim();
+  if(!label) return;
+  try{
+    await push(customFieldsRef, label);
+    newFieldLabelInput.value = '';
+  }catch(err){
+    alert('添加字段失败：' + err.message);
+  }
+});
+
+fieldManageList.addEventListener('click', async e => {
+  const btn = e.target.closest('.remove-field-btn');
+  if(!btn) return;
+  const field = CUSTOM_FIELDS.find(f => f.id === btn.dataset.id);
+  if(!field || !confirm(`确定删除字段「${field.label}」吗？所有人在这个字段下填写的内容也会一起删掉。`)) return;
+  try{
+    await remove(ref(db, 'customFields/' + field.id));
+    for(const p of PROFILES){
+      if(p.custom && field.id in p.custom){
+        await remove(ref(db, 'profiles/' + p.id + '/custom/' + field.id));
+      }
+    }
+  }catch(err){
+    alert('删除字段失败：' + err.message);
+  }
+});
+</script>
+</body>
+</html>

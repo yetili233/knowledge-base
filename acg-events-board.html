@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二次元活动情报站</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3FA;
+    --panel:#FFFFFF;
+    --ink:#2D2A4A;
+    --ink-soft:#6B6690;
+    --purple:#8B7FD6;
+    --pink:#E893C4;
+    --blue:#7FC4E8;
+    --mint:#7FD6B8;
+    --line: rgba(45,42,74,0.10);
+    --shadow: 0 6px 18px rgba(139,127,214,0.14);
+    --unverified:#E0A64E;
+    --confirmed:#E8617C;
+    --ended:#7FA88B;
+  }
+  *{box-sizing:border-box;}
+  html{overflow-y:scroll; scrollbar-gutter:stable;}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:'Noto Sans SC', sans-serif;
+    color:var(--ink);
+  }
+  .display{font-family:'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  header{
+    background:linear-gradient(120deg, var(--purple), var(--pink) 55%, var(--blue));
+    color:#fff; padding:26px 24px 22px; position:sticky; top:0; z-index:20;
+    box-shadow:0 6px 20px rgba(139,127,214,0.3);
+  }
+  .header-row{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand h1{font-size:28px; margin:0; letter-spacing:1px; text-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .brand span{font-size:12px; opacity:0.9; letter-spacing:1px;}
+  .header-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+
+  .view-toggle{display:flex; background:rgba(255,255,255,0.2); border-radius:999px; padding:3px;}
+  .view-toggle button{border:none; background:transparent; color:#fff; padding:7px 14px; border-radius:999px; font-size:13px; cursor:pointer; font-weight:600; opacity:0.85;}
+  .view-toggle button.active{background:#fff; color:var(--purple); opacity:1;}
+
+  .btn-add{background:#fff; color:var(--purple); border:none; padding:10px 18px; border-radius:999px; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+
+  .filters{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center;}
+  .search-box{background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:7px 14px; color:#fff; font-size:13px; min-width:160px;}
+  .search-box::placeholder{color:rgba(255,255,255,0.75);}
+  .tag-chip{padding:6px 13px; border-radius:999px; font-size:12px; cursor:pointer; border:1px solid rgba(255,255,255,0.35); color:#fff; background:transparent; white-space:nowrap;}
+  .tag-chip.active{background:#fff; color:var(--purple); font-weight:700;}
+
+  .filter-mode-toggle{display:flex; gap:6px; align-items:center; padding-right:6px; margin-right:2px; border-right:1px solid rgba(255,255,255,0.3);}
+  .mode-btn{padding:6px 13px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.45); color:#fff; background:rgba(255,255,255,0.12); white-space:nowrap;}
+  .mode-btn.active{background:#fff; color:var(--purple); font-weight:700; border-color:#fff;}
+
+  main{max-width:1180px; margin:0 auto; padding:26px 20px 60px;}
+
+  .kanban{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media (max-width:900px){.kanban{grid-template-columns:1fr;}}
+  .column{background:rgba(255,255,255,0.5); border-radius:16px; padding:14px; min-height:120px;}
+  .column-head{display:flex; align-items:center; gap:8px; margin-bottom:12px; padding:0 4px;}
+  .column-head .dot{width:10px; height:10px; border-radius:50%;}
+  .column-head h2{font-size:16px; margin:0; font-weight:700;}
+  .column-head .count{margin-left:auto; font-size:12px; font-family:'JetBrains Mono'; background:var(--ink); color:#fff; padding:2px 9px; border-radius:999px;}
+  .col-unverified .dot{background:var(--unverified);}
+  .col-confirmed .dot{background:var(--confirmed);}
+  .col-ended .dot{background:var(--ended);}
+  .empty-hint{color:var(--ink-soft); font-size:13px; text-align:center; padding:28px 10px; opacity:0.7;}
+
+  /* holographic card */
+  .card{
+    background:var(--panel); border-radius:14px; margin-bottom:12px; position:relative; cursor:pointer; overflow:hidden;
+    box-shadow:var(--shadow); border:1px solid var(--line); padding:2px; transition:transform .12s ease;
+  }
+  .card:hover{transform:translateY(-2px);}
+  .card::before{
+    content:''; position:absolute; inset:0; padding:2px; border-radius:14px;
+    background:linear-gradient(120deg, var(--purple), var(--pink), var(--blue), var(--purple));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; opacity:0.55; pointer-events:none;
+  }
+  .card-inner{padding:14px 16px; position:relative;}
+  .card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px;}
+  .card-title{font-size:15px; font-weight:700; margin:0; flex:1;}
+  .status-pill{font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px; color:#fff; white-space:nowrap; flex:none;}
+  .status-pill.unverified{background:var(--unverified);}
+  .status-pill.confirmed{background:var(--confirmed);}
+  .status-pill.ended{background:var(--ended);}
+  .card-meta{display:flex; flex-wrap:wrap; gap:7px; font-size:12px; color:var(--ink-soft); margin-bottom:8px;}
+  .card-meta span{display:flex; align-items:center; gap:3px;}
+  .type-pill{background:#F0EDFB; color:var(--purple); padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600;}
+  .ip-pill{background:#FDEBF3; color:#B85A87; padding:2px 9px; border-radius:999px; font-size:11px;}
+  .goods-flag{color:var(--pink); font-weight:700;}
+  .countdown{color:var(--confirmed); font-weight:700;}
+  .card-foot{display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-soft); flex-wrap:wrap;}
+  .quick-vote{background:#F0EDFB; color:var(--purple); border:none; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; cursor:pointer;}
+  .avatars{display:flex; gap:4px; flex-wrap:wrap;}
+  .avatar-chip{background:#EAF6F0; color:#3D7A5C; padding:1px 8px; border-radius:999px; font-size:11px;}
+  .comment-count{margin-left:auto;}
+
+  /* calendar */
+  .cal-wrap{background:rgba(255,255,255,0.5); border-radius:16px; padding:18px;}
+  .cal-nav{display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:16px;}
+  .cal-nav button{background:var(--purple); color:#fff; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:15px;}
+  .cal-nav h2{margin:0; font-size:18px; min-width:120px; text-align:center;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal-dow{text-align:center; font-size:12px; color:var(--ink-soft); font-weight:700; padding-bottom:4px;}
+  .cal-cell{background:var(--panel); border-radius:10px; min-height:74px; padding:6px; font-size:12px; position:relative; border:1px solid var(--line);}
+  .cal-cell.empty{background:transparent; border:none;}
+  .cal-cell.today{outline:2px solid var(--pink);}
+  .cal-daynum{font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:var(--ink-soft);}
+  .cal-dots{display:flex; flex-wrap:wrap; gap:3px; margin-top:6px;}
+  .cal-dot{width:7px; height:7px; border-radius:50%;}
+  .cal-cell-list{cursor:pointer;}
+  .cal-cell-list:hover{box-shadow:var(--shadow);}
+
+  .stats{text-align:center; color:var(--ink-soft); font-size:13px; margin-top:24px; font-family:'JetBrains Mono';}
+
+  /* modal */
+  .overlay{position:fixed; inset:0; background:rgba(45,42,74,0.5); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:40px 16px; overflow-y:auto;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--panel); border-radius:18px; width:100%; max-width:580px; padding:26px; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+  .modal h2{margin:0 0 18px; font-size:20px;}
+  .modal-close{position:absolute; top:16px; right:18px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft);}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:5px;}
+  .field input, .field select, .field textarea{width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--line); font-family:'Noto Sans SC'; font-size:14px; background:#fff;}
+  .field textarea{resize:vertical; min-height:56px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  .checkbox-row{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); margin-bottom:14px;}
+  .form-actions{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  .btn-primary{background:var(--purple); color:#fff; border:none; padding:10px 22px; border-radius:999px; font-weight:700; cursor:pointer; font-size:14px;}
+  .btn-secondary{background:transparent; color:var(--ink-soft); border:1px solid var(--line); padding:10px 18px; border-radius:999px; cursor:pointer; font-size:14px;}
+  .btn-danger{color:var(--confirmed); background:none; border:none; cursor:pointer; font-size:13px; text-decoration:underline;}
+  .status-btns{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .status-btn{flex:1; padding:8px; border-radius:9px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-size:12px; font-weight:700; text-align:center; color:var(--ink-soft);}
+  .status-btn.sel-unverified{border-color:var(--unverified); background:#FBF0DD; color:#8A5A15;}
+  .status-btn.sel-confirmed{border-color:var(--confirmed); background:#FBDCE4; color:#A8305A;}
+  .status-btn.sel-ended{border-color:var(--ended); background:#DFEEE5; color:#2E5C42;}
+  .section-title{font-size:13px; font-weight:700; color:var(--ink-soft); margin:18px 0 8px; border-top:1px dashed var(--line); padding-top:16px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;}
+  .name-chip{background:#F0EDFB; color:var(--purple); padding:3px 10px; border-radius:999px; font-size:12px; display:flex; align-items:center; gap:5px;}
+  .name-chip button{background:none; border:none; cursor:pointer; color:var(--purple); font-size:12px; padding:0;}
+  .add-inline{display:flex; gap:8px;}
+  .add-inline input{flex:1;}
+  .add-inline button{background:var(--purple); color:#fff; border:none; padding:0 16px; border-radius:9px; font-size:13px; cursor:pointer;}
+  .comment{background:#F7F5FC; border-radius:10px; padding:8px 12px; margin-bottom:8px; font-size:13px;}
+  .comment b{color:var(--ink);}
+  .comment .time{font-size:11px; color:var(--ink-soft); float:right;}
+  .stars{display:flex; gap:4px; margin-bottom:10px;}
+  .star{font-size:22px; cursor:pointer; color:#E4DFF2;}
+  .star.on{color:var(--pink);}
+  .link-preview{font-size:12px; color:var(--purple); word-break:break-all;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <h1 class="display">二次元活动情报站</h1>
+      <span>大家一起囤情报，别再错过谷子/展会/见面会</span>
+    </div>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button id="tabKanban" class="active">看板</button>
+        <button id="tabCalendar">日历</button>
+      </div>
+      <button class="btn-add" id="btnAdd">＋ 提交情报</button>
+    </div>
+  </div>
+  <div class="filters">
+    <input class="search-box" id="searchInput" placeholder="搜索活动名 / IP / 地点...">
+    <div class="filter-mode-toggle" id="filterModeToggle">
+      <button class="mode-btn" data-mode="type">按活动筛选</button>
+      <button class="mode-btn" data-mode="venue">按地点筛选</button>
+    </div>
+    <div id="typeFilterRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  </div>
+</header>
+
+<main>
+  <div id="kanbanView" class="kanban"></div>
+  <div id="calendarView" class="cal-wrap" style="display:none;"></div>
+  <div class="stats" id="statsLine"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+const TYPES = ['展会/漫展','演唱会/音乐会','见面会/签售','快闪店/主题店','联名咖啡厅','画展/艺术展','发售会','观影会','其他'];
+const TYPE_EMOJI = {'展会/漫展':'🎪','演唱会/音乐会':'🎤','见面会/签售':'🤝','快闪店/主题店':'🏪','联名咖啡厅':'☕','画展/艺术展':'🖼️','发售会':'🛍️','观影会':'🎬','其他':'✨'};
+const VENUES = ['静安大悦城','百联ZX创趣场','LuOne凯德晶萃','美罗城','环球港','第一百货'];
+const STATUS_META = {
+  unverified:{label:'待核实', color:'#E0A64E'},
+  confirmed:{label:'已确认', color:'#E8617C'},
+  ended:{label:'已结束', color:'#7FA88B'}
+};
+let events = [];
+let currentView = 'kanban';
+let filterMode = 'type';
+let activeTypes = new Set();
+let activeVenues = new Set();
+let searchQuery = '';
+let calCursor = new Date();
+let myName = '';
+
+async function loadMyName(){
+  try{ myName = localStorage.getItem('acg-my-name') || ''; }
+  catch(e){ myName = ''; }
+}
+async function saveMyName(name){ myName = name; try{ localStorage.setItem('acg-my-name', name); }catch(e){} }
+async function loadEvents(){
+  try{ const r = localStorage.getItem('acg-events-list'); events = r ? JSON.parse(r) : []; }
+  catch(e){ events = []; }
+}
+async function saveEvents(){
+  try{ localStorage.setItem('acg-events-list', JSON.stringify(events)); }
+  catch(e){ console.error('保存失败', e); }
+}
+
+function uid(){ return 'e_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function fmtDateRange(start, end){
+  if(!start) return '日期待核实';
+  if(!end || end===start) return start;
+  return `${start} ~ ${end}`;
+}
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return Math.round((d-today)/86400000);
+}
+function countdownLabel(dateStr){
+  const days = daysUntil(dateStr);
+  if(days===null) return '';
+  if(days>1) return `还有${days}天`;
+  if(days===1) return '明天开始';
+  if(days===0) return '今天开始';
+  return `已开始${-days}天`;
+}
+function matchesFilter(e){
+  if(activeTypes.size>0 && !activeTypes.has(e.type)) return false;
+  if(activeVenues.size>0 && !(e.venue && [...activeVenues].some(v=>e.venue.includes(v)))) return false;
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    const hay = (e.title+' '+(e.ip||[]).join(' ')+' '+e.city+' '+e.venue).toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+function sortEvents(list){
+  return list.slice().sort((a,b)=>{
+    if(!a.startDate && !b.startDate) return 0;
+    if(!a.startDate) return 1;
+    if(!b.startDate) return -1;
+    return a.startDate.localeCompare(b.startDate);
+  });
+}
+
+function renderFilterModeToggle(){
+  document.querySelectorAll('#filterModeToggle .mode-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.mode===filterMode);
+  });
+}
+
+function renderTypeFilters(){
+  renderFilterModeToggle();
+  const row = document.getElementById('typeFilterRow');
+  if(filterMode==='venue'){
+    row.innerHTML = VENUES.map(v=>`<button class="tag-chip ${activeVenues.has(v)?'active':''}" data-v="${esc(v)}">📍 ${v}</button>`).join('');
+    row.querySelectorAll('.tag-chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const v = btn.dataset.v;
+        if(activeVenues.has(v)) activeVenues.delete(v); else activeVenues.add(v);
+        renderAll();
+      });
+    });
+  } else {
+    row.innerHTML = TYPES.map(t=>`<button class="tag-chip ${activeTypes.has(t)?'active':''}" data-t="${esc(t)}">${TYPE_EMOJI[t]} ${t}</button>`).join('');
+    row.querySelectorAll('.tag-chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const t = btn.dataset.t;
+        if(activeTypes.has(t)) activeTypes.delete(t); else activeTypes.add(t);
+        renderAll();
+      });
+    });
+  }
+}
+
+function cardHTML(e){
+  const meta = STATUS_META[e.status];
+  const participants = (e.participants||[]);
+  return `
+  <div class="card" data-id="${e.id}">
+    <div class="card-inner">
+      <div class="card-top">
+        <p class="card-title">${esc(e.title)}</p>
+        <span class="status-pill ${e.status}">${meta.label}</span>
+      </div>
+      <div class="card-meta">
+        <span class="type-pill">${TYPE_EMOJI[e.type]||''} ${esc(e.type)}</span>
+        ${(e.ip&&e.ip.length)? e.ip.slice(0,2).map(i=>`<span class="ip-pill">${esc(i)}</span>`).join('') : ''}
+        ${e.hasLimitedGoods? `<span class="goods-flag">🛍️ 有限定周边</span>` : ''}
+      </div>
+      <div class="card-meta">
+        <span>📅 ${fmtDateRange(e.startDate, e.endDate)}</span>
+        ${e.city? `<span>📍 ${esc(e.city)}${e.venue?('·'+esc(e.venue)):''}</span>`:''}
+        ${(e.status==='confirmed' && e.startDate) ? `<span class="countdown">⏳ ${countdownLabel(e.startDate)}</span>` : ''}
+      </div>
+      <div class="card-meta">
+        ${e.price? `<span>💰 ${esc(e.price)}</span>`:''}
+        ${e.submitter? `<span>👤 ${esc(e.submitter)} 提交</span>`:''}
+      </div>
+      <div class="card-foot">
+        <div class="avatars">${participants.slice(0,3).map(n=>`<span class="avatar-chip">${esc(n)}</span>`).join('')}${participants.length>3?`<span class="avatar-chip">+${participants.length-3}</span>`:''}</div>
+        <button class="quick-vote" data-id="${e.id}">🙋 ${(e.interested||[]).length}人感兴趣</button>
+        <span class="comment-count">💭 ${(e.comments||[]).length}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function quickVote(id){
+  let name = myName;
+  if(!name){
+    name = prompt('你的名字是？（下次会记住）') || '';
+    if(!name) return;
+    await saveMyName(name);
+  }
+  const e = events.find(x=>x.id===id);
+  if(!e) return;
+  e.interested = e.interested || [];
+  const idx = e.interested.indexOf(name);
+  if(idx>=0) e.interested.splice(idx,1); else e.interested.push(name);
+  await saveEvents();
+  renderAll();
+}
+
+function renderKanban(){
+  const cols = [
+    {key:'unverified', cls:'col-unverified', title:'待核实'},
+    {key:'confirmed', cls:'col-confirmed', title:'已确认'},
+    {key:'ended', cls:'col-ended', title:'已结束'}
+  ];
+  const el = document.getElementById('kanbanView');
+  el.innerHTML = cols.map(c=>{
+    const list = sortEvents(events.filter(e=>e.status===c.key && matchesFilter(e)));
+    return `
+    <div class="column ${c.cls}">
+      <div class="column-head"><span class="dot"></span><h2>${c.title}</h2><span class="count">${list.length}</span></div>
+      ${list.length? list.map(cardHTML).join('') : `<div class="empty-hint">还没有情报～</div>`}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.card').forEach(card=> card.addEventListener('click', ()=> openDetailModal(card.dataset.id)));
+  el.querySelectorAll('.quick-vote').forEach(btn=> btn.addEventListener('click', (ev)=>{ ev.stopPropagation(); quickVote(btn.dataset.id); }));
+}
+
+function eventsOnDate(dateStr){
+  return events.filter(e=>{
+    if(!e.startDate) return false;
+    const end = e.endDate || e.startDate;
+    return dateStr >= e.startDate && dateStr <= end;
+  });
+}
+
+function renderCalendar(){
+  const el = document.getElementById('calendarView');
+  const y = calCursor.getFullYear(), m = calCursor.getMonth();
+  const first = new Date(y,m,1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const todayStr = new Date().toISOString().slice(0,10);
+
+  let cells = '';
+  for(let i=0;i<startDow;i++) cells += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvents = eventsOnDate(dateStr).filter(matchesFilter);
+    const dots = dayEvents.slice(0,4).map(e=>`<span class="cal-dot" style="background:${STATUS_META[e.status].color}"></span>`).join('');
+    cells += `<div class="cal-cell cal-cell-list ${dateStr===todayStr?'today':''}" data-date="${dateStr}">
+      <div class="cal-daynum">${d}</div>
+      <div class="cal-dots">${dots}</div>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="cal-nav">
+      <button id="calPrev">‹</button>
+      <h2 class="display">${y} 年 ${m+1} 月</h2>
+      <button id="calNext">›</button>
+    </div>
+    <div class="cal-grid">
+      ${['日','一','二','三','四','五','六'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+      ${cells}
+    </div>`;
+
+  document.getElementById('calPrev').addEventListener('click', ()=>{ calCursor.setMonth(calCursor.getMonth()-1); renderCalendar(); });
+  document.getElementById('calNext').addEventListener('click', ()=>{ calCursor.setMonth(calCursor.getMonth()+1); renderCalendar(); });
+  el.querySelectorAll('.cal-cell-list').forEach(cell=> cell.addEventListener('click', ()=> openDayList(cell.dataset.date)));
+}
+
+function openDayList(dateStr){
+  const dayEvents = eventsOnDate(dateStr);
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="display">${dateStr} 的活动</h2>
+    ${dayEvents.map(e=>`<div class="card" style="margin-bottom:10px;" data-id="${e.id}"><div class="card-inner">
+      <p class="card-title">${esc(e.title)}</p>
+      <div class="card-meta"><span class="type-pill">${TYPE_EMOJI[e.type]||''} ${esc(e.type)}</span></div>
+      <div class="card-meta">${e.city?`<span>📍 ${esc(e.city)}</span>`:''}</div>
+    </div></div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">这天没有活动</p>'}
+    <div class="form-actions">
+      <button class="btn-primary" id="addOnDateBtn">＋ 在这天添加活动</button>
+      <button class="btn-secondary" onclick="closeModal()">关闭</button>
+    </div>
+  `;
+  modal.querySelectorAll('.card').forEach(c=> c.addEventListener('click', ()=> openDetailModal(c.dataset.id)));
+  document.getElementById('addOnDateBtn').addEventListener('click', ()=> openAddModal(dateStr));
+  document.getElementById('overlay').classList.add('show');
+}
+
+function renderStats(){
+  const ended = events.filter(e=>e.status==='ended').length;
+  const confirmed = events.filter(e=>e.status==='confirmed').length;
+  const unverified = events.filter(e=>e.status==='unverified').length;
+  document.getElementById('statsLine').textContent = `共收录 ${events.length} 条情报 · 已确认 ${confirmed} 个 · 待核实 ${unverified} 个 · 已结束 ${ended} 个`;
+}
+
+function renderAll(){
+  renderTypeFilters();
+  if(currentView==='kanban') renderKanban(); else renderCalendar();
+  renderStats();
+}
+
+/* ---------- Add Modal ---------- */
+function openAddModal(prefillDate){
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="display">提交新情报</h2>
+    <div class="field"><label>活动名称</label><input id="f_title" placeholder="例如：xxx主题快闪店"></div>
+    <div class="row2">
+      <div class="field"><label>活动类型</label>
+        <select id="f_type">${TYPES.map(t=>`<option value="${esc(t)}">${TYPE_EMOJI[t]} ${t}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>关联IP/作品（可填多个，逗号分隔）</label><input id="f_ip" placeholder="例如：原神,明日方舟"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>城市</label><input id="f_city" placeholder="例如：上海"></div>
+      <div class="field"><label>具体地点/场馆</label><input id="f_venue" placeholder="例如：静安大悦城"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>开始日期</label><input type="date" id="f_start" value="${prefillDate||''}"></div>
+      <div class="field"><label>结束日期（单日活动可不填）</label><input type="date" id="f_end"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>票价/费用</label><input id="f_price" placeholder="免费 / 具体金额"></div>
+      <div class="field"><label>购票/报名入口</label><input id="f_ticket" placeholder="链接或说明，比如“大麦搜索xxx”"></div>
+    </div>
+    <div class="field"><label>信息来源链接（方便大家核实）</label><input id="f_source" placeholder="公众号/微博原文链接"></div>
+    <div class="checkbox-row"><input type="checkbox" id="f_goods"> <label for="f_goods" style="margin:0;">有限定周边 🛍️</label></div>
+    <div class="row2">
+      <div class="field"><label>提交人</label><input id="f_submitter" value="${esc(myName)}" placeholder="你的名字"></div>
+      <div class="field"><label>状态</label>
+        <select id="f_status">
+          <option value="unverified">待核实（小道消息）</option>
+          <option value="confirmed" selected>已确认（官方发布）</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>备注</label><textarea id="f_notes" placeholder="其他想说的"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-primary" id="submitAdd">保存情报</button>
+      <button class="btn-secondary" onclick="closeModal()">取消</button>
+    </div>
+  `;
+  document.getElementById('submitAdd').addEventListener('click', submitAddEvent);
+  document.getElementById('overlay').classList.add('show');
+}
+
+async function submitAddEvent(){
+  const title = document.getElementById('f_title').value.trim();
+  if(!title){ alert('先填一下活动名称吧'); return; }
+  const submitter = document.getElementById('f_submitter').value.trim();
+  if(submitter) saveMyName(submitter);
+  const ipRaw = document.getElementById('f_ip').value.trim();
+  const ev = {
+    id: uid(),
+    title,
+    type: document.getElementById('f_type').value,
+    ip: ipRaw ? ipRaw.split(/[,，]/).map(s=>s.trim()).filter(Boolean) : [],
+    city: document.getElementById('f_city').value.trim(),
+    venue: document.getElementById('f_venue').value.trim(),
+    startDate: document.getElementById('f_start').value,
+    endDate: document.getElementById('f_end').value,
+    price: document.getElementById('f_price').value.trim(),
+    ticketLink: document.getElementById('f_ticket').value.trim(),
+    sourceLink: document.getElementById('f_source').value.trim(),
+    hasLimitedGoods: document.getElementById('f_goods').checked,
+    submitter,
+    status: document.getElementById('f_status').value,
+    notes: document.getElementById('f_notes').value.trim(),
+    participants: submitter ? [submitter] : [],
+    interested: [],
+    comments: [],
+    rating: 0,
+    memoryNote: '',
+    createdAt: Date.now()
+  };
+  events.push(ev);
+  await saveEvents();
+  closeModal();
+  renderAll();
+}
+
+/* ---------- Detail Modal ---------- */
+function openDetailModal(id){
+  const e = events.find(x=>x.id===id);
+  if(!e) return;
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="display">${esc(e.title)}</h2>
+
+    <div class="status-btns">
+      <button class="status-btn ${e.status==='unverified'?'sel-unverified':''}" data-s="unverified">待核实</button>
+      <button class="status-btn ${e.status==='confirmed'?'sel-confirmed':''}" data-s="confirmed">已确认</button>
+      <button class="status-btn ${e.status==='ended'?'sel-ended':''}" data-s="ended">已结束</button>
+    </div>
+
+    <div class="row2">
+      <div class="field"><label>活动类型</label>
+        <select id="d_type">${TYPES.map(t=>`<option value="${esc(t)}" ${t===e.type?'selected':''}>${TYPE_EMOJI[t]} ${t}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>关联IP/作品</label><input id="d_ip" value="${esc((e.ip||[]).join('、'))}" placeholder="逗号分隔"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>开始日期</label><input type="date" id="d_start" value="${e.startDate||''}"></div>
+      <div class="field"><label>结束日期</label><input type="date" id="d_end" value="${e.endDate||''}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>城市</label><input id="d_city" value="${esc(e.city||'')}"></div>
+      <div class="field"><label>具体地点/场馆</label><input id="d_venue" value="${esc(e.venue||'')}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>票价/费用</label><input id="d_price" value="${esc(e.price||'')}"></div>
+      <div class="field"><label>购票/报名入口</label><input id="d_ticket" value="${esc(e.ticketLink||'')}"></div>
+    </div>
+    <div class="field"><label>信息来源链接</label><input id="d_source" value="${esc(e.sourceLink||'')}"></div>
+    <div class="checkbox-row"><input type="checkbox" id="d_goods" ${e.hasLimitedGoods?'checked':''}> <label for="d_goods" style="margin:0;">有限定周边 🛍️</label></div>
+    <div class="field"><label>备注</label><textarea id="d_notes">${esc(e.notes||'')}</textarea></div>
+
+    <div class="section-title">想去 / 已确定去的人</div>
+    <div class="chip-row" id="participantChips">
+      ${(e.participants||[]).map(n=>`<span class="name-chip">${esc(n)} <button data-name="${esc(n)}" class="rmParticipant">✕</button></span>`).join('')}
+    </div>
+    <div class="add-inline">
+      <input id="newParticipant" placeholder="填个名字，比如 ${esc(myName)||'你的名字'}">
+      <button id="addParticipantBtn">算我一个！</button>
+    </div>
+
+    ${(e.interested&&e.interested.length) ? `
+    <div class="section-title">点过"感兴趣"的人</div>
+    <div class="chip-row">${e.interested.map(n=>`<span class="name-chip" style="background:#FDEBF3;color:#B85A87;">${esc(n)}</span>`).join('')}</div>
+    ` : ''}
+
+    <div id="memorySection" style="display:${e.status==='ended'?'block':'none'}">
+      <div class="section-title">好玩程度 / 战利品回忆</div>
+      <div class="stars" id="starsRow">
+        ${[1,2,3,4,5].map(n=>`<span class="star ${n<=(e.rating||0)?'on':''}" data-n="${n}">★</span>`).join('')}
+      </div>
+      <div class="field"><label>回忆一下（抢到了什么周边、现场怎么样）</label><textarea id="d_memory" placeholder="战利品记录">${esc(e.memoryNote||'')}</textarea></div>
+    </div>
+
+    <div class="section-title">留言 / 讨论</div>
+    <div id="commentsList">
+      ${(e.comments||[]).map(c=>`<div class="comment"><span class="time">${c.time}</span><b>${esc(c.name||'匿名')}：</b>${esc(c.text)}</div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft);">还没有留言，来问问细节吧</p>'}
+    </div>
+    <div class="add-inline" style="margin-top:8px;">
+      <input id="newCommentName" placeholder="你的名字" value="${esc(myName)}" style="max-width:100px;">
+      <input id="newCommentText" placeholder="说点什么...">
+      <button id="addCommentBtn">发送</button>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" id="saveDetail">保存修改</button>
+      <button class="btn-secondary" onclick="closeModal()">关闭</button>
+      <button class="btn-danger" id="deleteBtn" style="margin-left:auto;">删除这条情报</button>
+    </div>
+  `;
+
+  modal.querySelectorAll('.status-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ e.status = btn.dataset.s; openDetailModal(id); });
+  });
+  modal.querySelectorAll('.rmParticipant').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ e.participants = (e.participants||[]).filter(n=>n!==btn.dataset.name); openDetailModal(id); });
+  });
+  document.getElementById('addParticipantBtn').addEventListener('click', ()=>{
+    const inp = document.getElementById('newParticipant');
+    const name = inp.value.trim();
+    if(!name) return;
+    e.participants = e.participants || [];
+    if(!e.participants.includes(name)) e.participants.push(name);
+    saveMyName(name);
+    openDetailModal(id);
+  });
+  document.getElementById('addCommentBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('newCommentName').value.trim() || '匿名';
+    const text = document.getElementById('newCommentText').value.trim();
+    if(!text) return;
+    e.comments = e.comments || [];
+    const now = new Date();
+    e.comments.push({name, text, time:`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`});
+    saveMyName(name);
+    openDetailModal(id);
+  });
+  if(document.getElementById('starsRow')){
+    document.getElementById('starsRow').querySelectorAll('.star').forEach(s=>{
+      s.addEventListener('click', ()=>{ e.rating = parseInt(s.dataset.n); openDetailModal(id); });
+    });
+  }
+  document.getElementById('deleteBtn').addEventListener('click', async ()=>{
+    if(confirm('确定要删除这条情报吗？')){
+      events = events.filter(x=>x.id!==id);
+      await saveEvents();
+      closeModal();
+      renderAll();
+    }
+  });
+  document.getElementById('saveDetail').addEventListener('click', async ()=>{
+    e.type = document.getElementById('d_type').value;
+    const ipRaw = document.getElementById('d_ip').value.trim();
+    e.ip = ipRaw ? ipRaw.split(/[,，、]/).map(s=>s.trim()).filter(Boolean) : [];
+    e.startDate = document.getElementById('d_start').value;
+    e.endDate = document.getElementById('d_end').value;
+    e.city = document.getElementById('d_city').value.trim();
+    e.venue = document.getElementById('d_venue').value.trim();
+    e.price = document.getElementById('d_price').value.trim();
+    e.ticketLink = document.getElementById('d_ticket').value.trim();
+    e.sourceLink = document.getElementById('d_source').value.trim();
+    e.hasLimitedGoods = document.getElementById('d_goods').checked;
+    e.notes = document.getElementById('d_notes').value.trim();
+    if(document.getElementById('d_memory')) e.memoryNote = document.getElementById('d_memory').value.trim();
+    await saveEvents();
+    closeModal();
+    renderAll();
+  });
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+document.getElementById('btnAdd').addEventListener('click', openAddModal);
+document.getElementById('tabKanban').addEventListener('click', ()=>{
+  currentView='kanban';
+  document.getElementById('tabKanban').classList.add('active');
+  document.getElementById('tabCalendar').classList.remove('active');
+  document.getElementById('kanbanView').style.display='grid';
+  document.getElementById('calendarView').style.display='none';
+  renderAll();
+});
+document.getElementById('tabCalendar').addEventListener('click', ()=>{
+  currentView='calendar';
+  document.getElementById('tabCalendar').classList.add('active');
+  document.getElementById('tabKanban').classList.remove('active');
+  document.getElementById('kanbanView').style.display='none';
+  document.getElementById('calendarView').style.display='block';
+  renderAll();
+});
+document.getElementById('searchInput').addEventListener('input', (ev)=>{ searchQuery = ev.target.value; renderAll(); });
+document.querySelectorAll('#filterModeToggle .mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ filterMode = btn.dataset.mode; renderAll(); });
+});
+document.getElementById('overlay').addEventListener('click', (ev)=>{ if(ev.target.id==='overlay') closeModal(); });
+
+(async function init(){
+  await loadMyName();
+  await loadEvents();
+  renderAll();
+})();
+</script>
+</body>
+</html>
