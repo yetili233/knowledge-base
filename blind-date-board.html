@@ -102,12 +102,15 @@
   .icon-btn:hover{background:rgba(58,33,69,0.12);}
   .icon-btn.danger:hover{background:rgba(255,78,128,0.16); color:var(--coral);}
 
-  .fab{
-    position:fixed; right:28px; bottom:28px; width:56px; height:56px; border-radius:50%;
-    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#FFFFFF;
-    border:none; font-size:26px; font-weight:900; cursor:pointer; z-index:50;
-    box-shadow:0 10px 24px rgba(255,78,128,0.4);
+  .toolbar{
+    display:flex; justify-content:flex-end; gap:10px; max-width:680px; margin:0 auto 14px;
   }
+  .toolbar .icon-btn{width:36px; height:36px; font-size:15px;}
+  .toolbar .icon-btn.primary{
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#FFFFFF; border:none;
+    font-size:19px; font-weight:900; box-shadow:0 6px 14px rgba(255,78,128,0.35);
+  }
+  .toolbar .icon-btn.primary:hover{filter:brightness(1.05);}
 
   .modal-overlay{
     display:none; position:fixed; inset:0; background:rgba(58,33,69,0.5);
@@ -137,12 +140,6 @@
   .hint{font-size:11px; color:var(--muted); margin:-6px 0 12px;}
   .db-status{position:fixed; left:20px; bottom:20px; font-size:11px; color:var(--muted); z-index:50;}
 
-  .fab-secondary{
-    position:fixed; right:28px; bottom:96px; width:44px; height:44px; border-radius:50%;
-    background:var(--panel); color:var(--ink); border:1px solid var(--panel-line);
-    font-size:18px; cursor:pointer; z-index:50; box-shadow:0 8px 20px rgba(58,33,69,0.2);
-  }
-
   .field-manage-list{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
   .field-manage-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -162,6 +159,10 @@
 </header>
 
 <main>
+  <div class="toolbar">
+    <button class="icon-btn" id="manageFieldsBtn" title="管理字段">⚙</button>
+    <button class="icon-btn primary" id="addBtn" title="新增一位">+</button>
+  </div>
   <div class="tablewrap">
     <table class="board" id="board">
       <thead id="boardHead"></thead>
@@ -170,10 +171,8 @@
   </div>
 </main>
 
-<footer>数据已接入数据库，点右下角「+」新增，每人头像下方可编辑 / 删除</footer>
+<footer>数据已接入数据库，点上方「+」新增，每人头像下方可编辑 / 删除</footer>
 
-<button class="fab" id="addBtn" title="新增一位">+</button>
-<button class="fab-secondary" id="manageFieldsBtn" title="管理字段">⚙</button>
 <div class="db-status" id="dbStatus">连接数据库中…</div>
 
 <div class="modal-overlay" id="fieldsModalOverlay">
