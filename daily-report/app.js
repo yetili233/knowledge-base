@@ -52,6 +52,7 @@ const TEMPLATE = `今日主要任务：
 let editingReportId = null;
 let currentFilter = "all";
 let activeDetailId = null;
+let editingTodoId = null;
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -310,6 +311,7 @@ reportSearchInput.addEventListener("input", renderReports);
 // 待办
 // ============================================================
 const todoInput = document.getElementById("todo-input");
+const todoDueInput = document.getElementById("todo-due-input");
 
 document.getElementById("add-todo-btn").addEventListener("click", addTodo);
 todoInput.addEventListener("keydown", (e) => {
@@ -319,8 +321,14 @@ todoInput.addEventListener("keydown", (e) => {
 function addTodo() {
   const text = todoInput.value.trim();
   if (!text) return;
-  set(push(todosRef), { text, done: false, createdAt: Date.now() });
+  set(push(todosRef), {
+    text,
+    done: false,
+    dueDate: todoDueInput.value || null,
+    createdAt: Date.now(),
+  });
   todoInput.value = "";
+  todoDueInput.value = "";
 }
 
 function toggleTodo(id) {
@@ -331,6 +339,28 @@ function toggleTodo(id) {
 
 function deleteTodo(id) {
   remove(ref(db, `todos/${id}`));
+}
+
+function startEditTodo(id) {
+  editingTodoId = id;
+  renderTodos();
+}
+
+function cancelEditTodo() {
+  editingTodoId = null;
+  renderTodos();
+}
+
+function saveEditTodo(id) {
+  const row = document.querySelector(`.todo-item[data-id="${id}"]`);
+  const text = row.querySelector(".todo-edit-text").value.trim();
+  if (!text) {
+    alert("待办内容不能为空");
+    return;
+  }
+  const dueDate = row.querySelector(".todo-edit-due").value || null;
+  update(ref(db, `todos/${id}`), { text, dueDate });
+  editingTodoId = null;
 }
 
 document.querySelectorAll(".filter-btn").forEach((btn) => {
@@ -356,16 +386,35 @@ function renderTodos() {
   if (todos.length === 0) {
     listEl.innerHTML = `<div class="empty-state">这里空空如也</div>`;
   } else {
+    const todayD = todayStr();
     listEl.innerHTML = todos
-      .map(
-        (t) => `
-      <div class="todo-item ${t.done ? "done" : ""}">
+      .map((t) => {
+        if (t.id === editingTodoId) {
+          return `
+      <div class="todo-item editing" data-id="${t.id}">
+        <input type="text" class="todo-edit-text" value="${escapeHtml(t.text)}">
+        <input type="date" class="todo-edit-due" value="${t.dueDate || ""}">
+        <button class="todo-save" data-id="${t.id}">保存</button>
+        <button class="btn-ghost todo-cancel">取消</button>
+      </div>
+    `;
+        }
+        const overdue = t.dueDate && !t.done && t.dueDate < todayD;
+        const dueBadge = t.dueDate
+          ? `<span class="todo-due ${overdue ? "overdue" : ""}">截止 ${escapeHtml(t.dueDate)}</span>`
+          : "";
+        return `
+      <div class="todo-item ${t.done ? "done" : ""}" data-id="${t.id}">
         <input type="checkbox" ${t.done ? "checked" : ""} data-id="${t.id}" class="todo-checkbox">
-        <span class="todo-text">${escapeHtml(t.text)}</span>
+        <div class="todo-main">
+          <span class="todo-text">${escapeHtml(t.text)}</span>
+          ${dueBadge}
+        </div>
+        <button class="todo-edit" data-id="${t.id}">编辑</button>
         <button class="delete-btn todo-delete" data-id="${t.id}">删除</button>
       </div>
-    `
-      )
+    `;
+      })
       .join("");
 
     listEl.querySelectorAll(".todo-checkbox").forEach((el) => {
@@ -373,6 +422,15 @@ function renderTodos() {
     });
     listEl.querySelectorAll(".todo-delete").forEach((el) => {
       el.addEventListener("click", () => deleteTodo(el.dataset.id));
+    });
+    listEl.querySelectorAll(".todo-edit").forEach((el) => {
+      el.addEventListener("click", () => startEditTodo(el.dataset.id));
+    });
+    listEl.querySelectorAll(".todo-save").forEach((el) => {
+      el.addEventListener("click", () => saveEditTodo(el.dataset.id));
+    });
+    listEl.querySelectorAll(".todo-cancel").forEach((el) => {
+      el.addEventListener("click", cancelEditTodo);
     });
   }
 

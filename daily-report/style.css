@@ -393,8 +393,15 @@ textarea:focus, input:focus {
   flex: none;
 }
 
-.todo-text {
+.todo-main {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.todo-text {
   font-size: 14px;
   word-break: break-word;
 }
@@ -404,16 +411,63 @@ textarea:focus, input:focus {
   color: var(--text-muted);
 }
 
-.todo-item .delete-btn {
+.todo-due {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.todo-due.overdue {
+  color: var(--danger);
+}
+
+.todo-item .delete-btn,
+.todo-item .todo-edit {
   border: none;
   background: transparent;
   color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   padding: 4px 6px;
+  white-space: nowrap;
 }
 
 .todo-item .delete-btn:hover { color: var(--danger); }
+.todo-item .todo-edit:hover { color: var(--accent); }
+
+/* ---- todo edit mode ---- */
+.todo-item.editing {
+  flex-wrap: wrap;
+}
+
+.todo-item.editing .todo-edit-text {
+  flex: 1;
+  min-width: 120px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.todo-item.editing .todo-edit-due {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.todo-item.editing .todo-save {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.todo-item.editing .todo-save:hover { background: var(--accent-hover); }
 
 .stats {
   margin-top: 14px;
@@ -509,10 +563,29 @@ textarea:focus, input:focus {
 
   .todo-item {
     padding: 12px;
+    flex-wrap: wrap;
   }
 
-  .todo-item .delete-btn {
+  .todo-item .delete-btn,
+  .todo-item .todo-edit {
     padding: 8px;
+  }
+
+  .todo-main {
+    min-width: 0;
+    flex-basis: calc(100% - 34px);
+  }
+
+  #todo-due-input {
+    flex: 1;
+  }
+
+  #add-todo-btn {
+    width: 100%;
+  }
+
+  .todo-item.editing .todo-edit-text {
+    flex-basis: 100%;
   }
 
   .detail-overlay {
