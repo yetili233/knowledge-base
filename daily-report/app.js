@@ -198,7 +198,7 @@ function saveReport() {
       date,
       content,
       updatedAt: Date.now(),
-    });
+    }).catch((err) => alert("保存失败：" + err.message));
     editingReportId = null;
     reportEditHint.textContent = "";
   } else {
@@ -208,7 +208,7 @@ function saveReport() {
       content,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-    });
+    }).catch((err) => alert("保存失败：" + err.message));
   }
 
   reportContentInput.value = "";
@@ -229,7 +229,7 @@ function editReport(id) {
 
 function deleteReport(id) {
   if (!confirm("确定删除这条日报吗？")) return;
-  remove(ref(db, `reports/${id}`));
+  remove(ref(db, `reports/${id}`)).catch((err) => alert("删除失败：" + err.message));
   if (editingReportId === id) {
     editingReportId = null;
     reportContentInput.value = "";
@@ -326,7 +326,7 @@ function addTodo() {
     done: false,
     dueDate: todoDueInput.value || null,
     createdAt: Date.now(),
-  });
+  }).catch((err) => alert("添加失败：" + err.message));
   todoInput.value = "";
   todoDueInput.value = "";
 }
@@ -334,11 +334,13 @@ function addTodo() {
 function toggleTodo(id) {
   const t = todosArray().find((x) => x.id === id);
   if (!t) return;
-  update(ref(db, `todos/${id}`), { done: !t.done });
+  update(ref(db, `todos/${id}`), { done: !t.done }).catch((err) =>
+    alert("更新失败：" + err.message)
+  );
 }
 
 function deleteTodo(id) {
-  remove(ref(db, `todos/${id}`));
+  remove(ref(db, `todos/${id}`)).catch((err) => alert("删除失败：" + err.message));
 }
 
 function startEditTodo(id) {
@@ -359,7 +361,9 @@ function saveEditTodo(id) {
     return;
   }
   const dueDate = row.querySelector(".todo-edit-due").value || null;
-  update(ref(db, `todos/${id}`), { text, dueDate });
+  update(ref(db, `todos/${id}`), { text, dueDate }).catch((err) => {
+    alert("保存失败：" + err.message);
+  });
   editingTodoId = null;
 }
 
@@ -439,8 +443,11 @@ function renderTodos() {
 
 // ---------- utils ----------
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
